@@ -47,7 +47,7 @@ Collected 2026-09-24. The rule for this repo is simple: **a number appears here 
 
 ### Counting the runs
 
-**284 measured llama.cpp arms** on Qwen3.8-27B: 107 (DFlash2 bake-off) + 70 (two-card) + 58 (100k and three-card) + 38 (fork) + 9 (depth profile) + 2 (post-rebuild reference). That excludes the summary tables listed above, which select from runs already counted, and excludes the live-service journal series, which is one production request sampled repeatedly rather than a series of arms.
+**284 recorded runs** on Qwen3.8-27B: 107 (DFlash2 bake-off) + 70 (two-card) + 58 (100k and three-card) + 38 (fork) + 9 (depth profile) + 2 (post-rebuild reference). **277 produced a measurement; 7 failed at load** (3 in the two-card `-b`/`-ub` grid, 4 in the three-card sweeps: one tensor+DFlash2 arm and three `--spec-draft-device` pinning arms) and are marked in the data with an `error` field. That excludes the summary tables listed above, which select from runs already counted, and excludes the live-service journal series, which is one production request sampled repeatedly rather than a series of arms.
 
 ### The one derived column
 

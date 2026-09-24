@@ -1,6 +1,6 @@
 # Qwen3.8-27B on 2x / 3x RTX 3060 — every llama.cpp measurement we took
 
-**284 measured llama.cpp arms on Qwen3.8-27B between 2026-08-14 and 2026-09-23**, on one desktop-class box with 12 GB consumer cards. Every number here came off a real run on real hardware. Nothing is estimated from a datasheet, and nothing is extrapolated from someone else's rig.
+**284 recorded llama.cpp runs on Qwen3.8-27B between 2026-08-14 and 2026-09-23, 277 of which produced a measurement** (7 died at load: 3 in the two-card sweep, 4 in the three-card sweeps), on one desktop-class box with 12 GB consumer cards. Every number here came off a real run on real hardware. Nothing is estimated from a datasheet, and nothing is extrapolated from someone else's rig.
 
 The findings that matter:
 

@@ -43,6 +43,7 @@ Two GGUF quants (`Q4_K_XL` and `IQ3_S + MTP`), two and three RTX 3060s, 2026-08-
 | Best prefill, 150k | **717.4 tok/s** (no speculation) |
 | Best prefill, three cards | **599 tok/s** (layer split) |
 | Drafter verdict | The built-in MTP head beats every DFlash2 configuration at every temperature tested |
+| Runs recorded | 284 — 277 measured, 7 died at load |
 
 **What the sweeps cost people time not to re-learn:**
 

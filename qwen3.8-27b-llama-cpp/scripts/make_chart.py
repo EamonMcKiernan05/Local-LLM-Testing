@@ -172,7 +172,7 @@ for x, v in zip([x + w / 2 for x in xs], df2):
 fig.text(0.055, 0.965, "Qwen3.8-27B on two RTX 3060s", color=INK,
          fontsize=40, fontfamily=DISPLAY, va="top")
 fig.text(0.055, 0.888, "43 tok/s decode at 100k context, 1,097 tok/s prefill at 20k — "
-                       "after 284 measured llama.cpp runs on one desktop",
+                       "after 284 benchmark runs on one desktop",
          color=ACCENT, fontsize=19, fontfamily=SANS, va="top")
 fig.text(0.965, 0.968, "llama.cpp b11041  ·  CUDA 13.3  ·  sm_86", color=INK_DIM,
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
