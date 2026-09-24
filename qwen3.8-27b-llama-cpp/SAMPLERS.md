@@ -98,6 +98,8 @@ Source: `data/csv/two-card-mtp-nmax-20k.csv`, `-150k.csv`, and `two-card-20k-ver
 
 The mechanical reason: at shallow depth a decode round costs roughly the same no matter how many positions get verified, so proposing more draft tokens is nearly free and rejecting them costs little. At depth, every verification position attends over the whole KV cache, so a round's cost scales with the positions verified — and rejected draft tokens become pure waste rather than free.
 
+**A gap worth stating plainly: no gated arm was ever run at 100k depth.** All 58 arms recorded at that depth ran ungated, and the gate comparison exists only at 20k and 150k. So "the gate flips with depth" is established *between those two points*, not as a curve — the crossover could sit anywhere from just above 20k to just below 150k. Reading the two points we have, the gate earns its keep when the head is unsure over a long cache (at 150k the gate truncates every arm to AL 1.667, whatever window you ask for); at 100k the ungated arms show the head still landing 5.3 tokens per round at acceptance 0.62, which is closer to the 20k behaviour than the 150k one. **That is inference, not measurement.**
+
 **What we could not explain:** in the 20k pair, acceptance length is nearly the same in both arms (2.381 ungated vs 2.439 gated) and the ungated arm proposes *more* draft tokens per round, yet it finishes a 256-token generation in 5,752 ms against the gated arm's 9,891 ms. Roughly 1.8× the time per round for the same tokens per round. Some cost is attached to the gating path itself, not the draft window. A `p-min` curve at `n-max 2` (0.0 / 0.4 / 0.6 / 0.7 / 0.8 / 0.85 / 0.9 / 0.95) would show whether that cost is a cliff or a gradual slope. **Not run.**
 
 Only two `p-min` values were ever tested, 0.00 and 0.85. The live service ran `0.85` from August until 2026-09-23; **the adopted configuration has no `--spec-draft-p-min` at all**, i.e. it runs ungated.
@@ -140,6 +142,7 @@ The retuned ExLlamaV3 stack has a flag for exactly this idea: `--dds`, a draft w
 ## Open questions
 
 - `--spec-draft-p-min` curve at `n-max 2`: is the 20k penalty a cliff or a slope? (0.0 / 0.4 / 0.6 / 0.7 / 0.8 / 0.85 / 0.9 / 0.95)
+- **gated against ungated at 100k depth** — the one depth where the answer decides whether the shipped configuration is right, and the only depth where it was never tested. Two arms, about 8 minutes.
 - `--top-p` sweep: never touched.
 - `--temp` sweep on llama.cpp: never run. The service value was chosen, not measured.
 - `--spec-draft-n-min`: never run.

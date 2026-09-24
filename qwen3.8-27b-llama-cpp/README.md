@@ -107,6 +107,8 @@ Widening the pool makes the target pick less predictable tokens, so the draft he
 
 At shallow depth a decode round is flat-cost, so rejected draft tokens are nearly free. At depth every verification position reads the whole KV cache, so rejected drafts are pure waste. The 20k penalty is **not** explained by acceptance — the gated arm shows the *higher* acceptance rate (0.96 against 0.67) and is much slower. Acceptance rate is not a performance metric. The adopted configuration runs **ungated**.
 
+**And the gap in that table:** the comparison exists at 20k and 150k only. All 58 arms recorded at 100k depth ran ungated, so where the crossover actually sits — above or below 100k — is unmeasured.
+
 **`--spec-draft-n-max` peaks at 7 at 100k depth** (43.07; `n-max 8` is 35.60) and at **2 at 20k** (44.33). Wider is never better.
 
 **`--temp`** is the biggest threat to a diffusion-style drafter: DFlash2's acceptance falls from 90.7% greedy to ~55-66% at 0.6-0.8, while the MTP head holds 92-98% at every temperature. Temp 0.0 emits byte-identical greedy output whichever drafter is in use. **There is no temp sweep on llama.cpp** — the service value (0.5) was chosen, not measured. `--presence_penalty` was never varied either.

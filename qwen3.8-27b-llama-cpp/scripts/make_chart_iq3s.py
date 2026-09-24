@@ -141,6 +141,8 @@ ax2.annotate("1.72× faster", xy=(0, 53.5), ha="center", color=ACCENT,
              fontsize=12.5, fontfamily=SANS)
 ax2.annotate("18% slower", xy=(1, 17.0), ha="center", color=ACCENT,
              fontsize=12.5, fontfamily=SANS)
+ax2.annotate("100k depth: ungated only\n(never compared)", xy=(1.46, 31.0), ha="right",
+             va="top", color=INK_DIM, fontsize=11.5, fontfamily=SANS, linespacing=1.5)
 
 # ------------------------------------------------------ 3. the top_k trap ----
 ax3 = fig.add_subplot(gs[1, 1])
