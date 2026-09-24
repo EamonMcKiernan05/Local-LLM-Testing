@@ -51,6 +51,8 @@ Three-card story — the third card buys prefill and costs decode:
 | Peak seen live, two cards | **81 tok/s** decode on a short coding task (shallow context) — a burst, not a sweep figure |
 | Best three-card decode, 100k | 24.96 tok/s — and 2-card tensor split did 43.06 on the same depth |
 
+**The sampler flags (full detail: [`SAMPLERS.md`](qwen3.8-27b-llama-cpp/SAMPLERS.md)):** an unset flag is read from the model's own metadata, not from llama.cpp's defaults, so a bare command line is not the documented default. `--top-k 20` (the model's value) decodes 43 tok/s at 100k depth; `--top-k 40`, the value `--help` calls the default, costs 35%. `--min-p` does nothing once `top_k` is 20. `--spec-draft-p-min` is a 1.72x penalty at 20k depth and an 18% win at 150k, and the fast-looking acceptance number belongs to the *slower* arm.
+
 **What the sweeps cost people time not to re-learn:**
 
 - The draft window peaks at `n-max 7` at 100k depth and `n-max 2` at 20k. Wider is not better.
