@@ -24,7 +24,7 @@ Harness: Hermes Agent (on main Windows workstation in WSL)
 
 ## Tests
 
-### Qwen3.8-27B on llama.cpp — 284 measured runs
+### Qwen3.8-27B on llama.cpp — 284 recorded runs, 277 with measurements
 
 Everything we have on this model, in one place: **[`qwen3.8-27b-llama-cpp/`](qwen3.8-27b-llama-cpp/)**
 
