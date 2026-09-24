@@ -30,7 +30,13 @@ Everything we have on this model, in one place: **[`qwen3.8-27b-llama-cpp/`](qwe
 
 Two GGUF quants (`Q4_K_XL` and `IQ3_S + MTP`), two and three RTX 3060s, 2026-08-14 to 2026-09-23. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
 
-![Qwen3.8-27B benchmark summary](qwen3.8-27b-llama-cpp/charts/qwen38-27b-llama-cpp-2x3060.png)
+Two-card story — where the 43 tok/s live:
+
+![Qwen3.8-27B on two RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-llama-cpp-2x3060.png)
+
+Three-card story — the third card buys prefill and costs decode:
+
+![Qwen3.8-27B on three RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-llama-cpp-3x3060.png)
 
 **The findings:**
 
@@ -44,6 +50,7 @@ Two GGUF quants (`Q4_K_XL` and `IQ3_S + MTP`), two and three RTX 3060s, 2026-08-
 | Best prefill, three cards | **599 tok/s** (layer split) |
 | Drafter verdict | The built-in MTP head beats every DFlash2 configuration at every temperature tested |
 | Runs recorded | 284 — 277 measured, 7 died at load |
+| Best three-card decode, 100k | 24.96 tok/s — and 2-card tensor split did 43.06 on the same depth |
 
 **What the sweeps cost people time not to re-learn:**
 
