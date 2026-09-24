@@ -7,7 +7,7 @@ CPU: Xeon E5 2680 V4
 
 RAM: 32GB DDR4 2400mhz 
 
-GPUs: 2x Tesla V100 32GB
+GPUs: 2x Tesla V100 32GB (ordered waiting on delivery)
 
 Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.0 x16 + 1x PCIe 2.0 x4 (Electrically x16)
 
@@ -15,9 +15,9 @@ Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.
 
 +32GB DDR4 2400mhz - already purchased
 
-Dual Xeon Motherboard - waiting to see how far I can push 32GB RAM first
+Dual Xeon Motherboard - want to see how far i can push 32GB before ordering
 
-2x Xeon E5 2650 V4 - already purchased
+2x Xeon E5 2650 V4 - stored from previous builds/projects
 
 ## Current Daily-Driver Software Stack
 OS: Ubuntu 24.04
