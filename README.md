@@ -3,21 +3,19 @@ All configurations and tests done on my local ai server
 
 ## Current Hardware Setup
 CPU: Xeon E5 2680 V4
-RAM: 32GB DDR4 2400mhz (31 GB visible to the OS)
-GPUs: 3x RTX 3060 12GB — only 2 enumerated since 2026-09-23, when the third card (PCIe 2.0 x4 slot) stopped appearing on the bus
+RAM: 32GB DDR4 2400mhz 
+GPUs: 2x Tesla V100 32GB
 Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; GPU0/GPU1 on PCIe 3.0 x16
 
 ## Planned Upgrades:
 +32GB DDR4 2400mhz - already purchased
-+1 RTX 3060 12GB - already purchased
-Dual Xeon Motherboard - waiting on refund from AliExpress
+Dual Xeon Motherboard - waiting to see how far I can push 32GB RAM first
 2x Xeon E5 2650 V4 - already purchased
 
 ## Current Daily-Driver Software Stack
 OS: Ubuntu 24.04
-Cuda: 13.3
-Inference Engine: Llama.cpp (Mainline) — build `b11041` (`4fea119de`), sm_86-only CUDA build
-Serving: `llama-server.service` on `:8080`
+Cuda: 12.8
+Inference Engine: Llama.cpp (Mainline) Serving: `llama-server.service` on `:8080`
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
 ---
