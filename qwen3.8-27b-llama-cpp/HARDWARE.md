@@ -1,6 +1,6 @@
 # Hardware, models and flags
 
-> **Era note:** everything in this folder was measured on the RTX 3060 configuration, 2026-08-14 to 2026-09-23. The box has since been rebuilt around 2× Tesla V100 32GB (2026-09-24), which is a different CUDA generation (Volta, sm_70) and a different dataset.
+> **Era note:** everything in this folder was measured on the RTX 3060 configuration, 2026-08-14 to 2026-09-23. The box has 2× Tesla V100 32GB on order as of 2026-09-24 (not yet delivered), which will be a different CUDA generation (Volta, sm_70) and a different dataset.
 
 ## The box
 

@@ -15,7 +15,7 @@ The last of those is why the live service now runs what it runs: two cards, tens
 
 ## The hardware
 
-**This dataset is the RTX 3060 era: 2026-08-14 to 2026-09-23.** The box has since moved on to 2× Tesla V100 32GB, so nothing below describes the machine as it stands today — it describes the machine every number here was measured on.
+**This dataset is the RTX 3060 era: 2026-08-14 to 2026-09-23.** The box has 2× Tesla V100 32GB on order (2026-09-24, not yet delivered), so nothing below describes the machine as it stands today — it describes the machine every number here was measured on.
 
 One box, unchanged through every run except where noted:
 
