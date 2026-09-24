@@ -39,13 +39,13 @@ Everything we have on this model, in one place: **[`qwen3.8-27b-llama-cpp/`](qwe
 
 Two GGUF quants (`Q4_K_XL` and `IQ3_S + MTP`), two and three RTX 3060s, 2026-08-14 to 2026-09-23. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
 
-Two-card story — where the 43 tok/s live:
+One chart per quant, so nothing is mixed up. The smaller IQ3_S file on two cards is the one serving today:
 
-![Qwen3.8-27B on two RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-llama-cpp-2x3060.png)
+![Qwen3.8-27B IQ3_S on two RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-iq3-s-2x3060.png)
 
-Three-card story — the third card buys prefill and costs decode:
+The larger UD-Q4_K_XL file on three cards, where the DFlash2 bake-off was run:
 
-![Qwen3.8-27B on three RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-llama-cpp-3x3060.png)
+![Qwen3.8-27B UD-Q4_K_XL on three RTX 3060s](qwen3.8-27b-llama-cpp/charts/qwen38-27b-q4-k-xl-3x3060.png)
 
 **The findings:**
 
