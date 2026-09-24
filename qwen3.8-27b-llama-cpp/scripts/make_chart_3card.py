@@ -72,6 +72,13 @@ layouts = [
 pf = [(lbl, f(rep1[key]["prefill tok/s"]), col) for lbl, key, col in layouts]
 gd = [(lbl, f(rep1[key]["gen tok/s"]), col) for lbl, key, col in layouts]
 
+# MTP head: measured at 20k in the depth profile (UD-Q4_K_XL, n-max 4) and at
+# 100k in the three-card matrix (IQ3_S, n-max 7). Two quants, so the series is
+# drawn as discrete points with no connecting line.
+mtp20 = f(next(r for r in depth if r["speculation"].startswith("MTP head"))["prefill tok/s"])
+mtp100 = f(next(r for r in load("three-card-matrix.csv")
+                if r["arm"] == "g3-layer-ts353728-mtp7")["prefill tok/s"])
+
 df = load("three-card-dflash2-nmax.csv")
 df_nmax = [int(r["n-max"]) for r in df]
 df_gen = [f(r["gen tok/s"]) for r in df]
@@ -113,28 +120,58 @@ def bars(ax, data, ylim, fmt="{:.0f}", label_size=13.5):
 
 
 # ------------------------------------------- 1. three-card prefill vs depth --
+MTPSER = "#C9C0B2"
+DF2SER = "#948B7E"
+
 ax1 = fig.add_subplot(gs[0, :])
 dress(ax1, "On three cards, prefill degrades with depth but never falls off a cliff",
       "prompt processing rate, q8_0 KV, layer split 35,37,28, 3× RTX 3060 12 GB")
-ax1.plot(none_x, none_y, color=ACCENT, lw=2.4, marker="o", ms=7,
-         markerfacecolor=BG, markeredgecolor=ACCENT, markeredgewidth=2.2, zorder=4)
-ax1.plot(df_x, df_y, color=QUIET, lw=2.4, marker="o", ms=7,
-         markerfacecolor=BG, markeredgecolor=QUIET, markeredgewidth=2.2, zorder=3)
+ax1.plot(none_x, none_y, color=ACCENT, lw=2.6, marker="o", ms=8,
+         markerfacecolor=BG, markeredgecolor=ACCENT, markeredgewidth=2.4, zorder=5)
+ax1.plot(df_x, df_y, color=DF2SER, lw=2.6, marker="^", ms=8,
+         markerfacecolor=BG, markeredgecolor=DF2SER, markeredgewidth=2.4, zorder=4)
+ax1.plot([19.966, 99.589], [mtp20, mtp100], color=MTPSER, lw=0, linestyle="none",
+         marker="s", ms=9, markerfacecolor=BG, markeredgecolor=MTPSER,
+         markeredgewidth=2.4, zorder=6)
 for x, y in zip(none_x, none_y):
-    ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, 10), textcoords="offset points",
+    ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, 11), textcoords="offset points",
                  ha="center", color=ACCENT, fontsize=13.5, fontfamily=MONO)
-for x, y in [(df_x[0], df_y[0]), (df_x[-1], df_y[-1])]:
-    ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, -20), textcoords="offset points",
-                 ha="center", color=INK_DIM, fontsize=13.5, fontfamily=MONO)
-ax1.annotate("no speculation", xy=(24.5, 1096.8), xytext=(0, 11), textcoords="offset points",
-             color=ACCENT, fontsize=14, fontfamily=SANS, ha="left", va="center")
-ax1.annotate("DFlash2 drafter, n-max 4", xy=(24.5, 810.3), xytext=(0, 7), textcoords="offset points",
-             color=INK_DIM, fontsize=14, fontfamily=SANS, ha="left", va="center")
+for x, y in zip(df_x, df_y):
+    ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, -21), textcoords="offset points",
+                 ha="center", color=DF2SER, fontsize=13.5, fontfamily=MONO)
+ax1.annotate(f"{mtp20:.1f}", (19.966, mtp20), xytext=(12, 3), textcoords="offset points",
+             ha="left", va="center", color=MTPSER, fontsize=13.5, fontfamily=MONO)
+ax1.annotate(f"{mtp100:.1f}", (99.589, mtp100), xytext=(9, -4), textcoords="offset points",
+             ha="left", va="center", color=MTPSER, fontsize=13.5, fontfamily=MONO)
+ax1.annotate("IQ3_S", (99.589, mtp100), xytext=(9, -20), textcoords="offset points",
+             ha="left", va="center", color=MTPSER, fontsize=11.5, fontfamily=SANS)
 ax1.set_xlabel("prompt depth (thousand tokens)", color=INK_DIM, fontsize=12,
                fontfamily=SANS, labelpad=8)
-ax1.set_ylim(480, 1260)
+ax1.set_ylim(430, 1270)
 ax1.set_yticks([])
-ax1.set_xlim(14, 162)
+ax1.set_xlim(8, 168)
+handles = [
+    plt.Line2D([], [], color=ACCENT, lw=2.6, marker="o", ms=8, markerfacecolor=BG,
+               markeredgecolor=ACCENT, markeredgewidth=2.4, label="no speculation  ·  UD-Q4_K_XL"),
+    plt.Line2D([], [], color=MTPSER, lw=0, marker="s", ms=9, markerfacecolor=BG,
+               markeredgecolor=MTPSER, markeredgewidth=2.4,
+               label="MTP head  ·  two measured points, two quants"),
+    plt.Line2D([], [], color=DF2SER, lw=2.6, marker="^", ms=8, markerfacecolor=BG,
+               markeredgecolor=DF2SER, markeredgewidth=2.4, label="DFlash2 drafter n-max 4  ·  UD-Q4_K_XL"),
+]
+# hand-drawn key: matplotlib's legend text did not render against this background
+key = [
+    (ACCENT, "o", "no speculation  (UD-Q4_K_XL)"),
+    (MTPSER, "s", "MTP head  (2 points, 2 quants)"),
+    (DF2SER, "^", "DFlash2 n-max 4  (UD-Q4_K_XL)"),
+]
+for i, (col, mk, text) in enumerate(key):
+    y = 0.90 - i * 0.085
+    ax1.plot([0.575, 0.608], [y, y], transform=ax1.transAxes, color=col,
+             lw=2.6, marker=mk, ms=8, markerfacecolor=BG, markeredgecolor=col,
+             markeredgewidth=2.4, clip_on=False, zorder=7)
+    ax1.text(0.620, y, text, transform=ax1.transAxes, color=col, fontsize=12.5,
+             fontfamily=SANS, va="center", zorder=7)
 
 # ------------------------------------- 2. what the third card buys, at 100k --
 ax2 = fig.add_subplot(gs[1, 0])
@@ -166,7 +203,7 @@ ax4.set_xlim(0.4, 8.6)
 # ------------------------------------------------------------------- header --
 fig.text(0.055, 0.965, "Qwen3.8-27B on three RTX 3060s", color=INK,
          fontsize=40, fontfamily=DISPLAY, va="top")
-fig.text(0.055, 0.888, "1,096.8 tok/s prefill at 20k, 599 tok/s at 100k — "
+fig.text(0.055, 0.888, "1,096.8 tok/s prefill at 20k, 840 at 100k, 717 at 150k — "
                        "the third card is a prefill card, not a decode card",
          color=ACCENT, fontsize=19, fontfamily=SANS, va="top")
 fig.text(0.965, 0.968, "llama.cpp b11041  ·  CUDA 13.3  ·  sm_86", color=INK_DIM,
