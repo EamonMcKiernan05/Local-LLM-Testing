@@ -56,9 +56,10 @@ ny = [f(r["gen tok/s"]) for r in nmax]
 gate = {r["arm"]: r for r in load("two-card-20k-verification-3-repeats.csv")}
 g20_un = f(gate["n-max 2, p-min 0.00"]["mean"])
 g20_g = f(gate["n-max 2, p-min 0.85"]["mean"])
-n150 = load("two-card-mtp-nmax-150k.csv")
-g150_un = f(next(r["gen tok/s"] for r in n150 if r["p-min"] == "0.00" and r["n-max"] == "2"))
-g150_g = f(next(r["gen tok/s"] for r in n150 if r["p-min"] == "0.85" and r["n-max"] == "2"))
+# 100k ungated is the measured stage-A winner (43.07, n-max 7). The 100k gated
+# figure is a live /goal agent run reported by Eamon - not a harness arm.
+g100_un = f(next(r for r in nmax if r["arm"] == "mtp7-untrimmed")["gen tok/s"])
+g100_g = 12.0
 
 trims = load("100k-stageB-topk-minp.csv")
 topk_groups = {}
@@ -120,11 +121,11 @@ ax1.annotate("", xy=(6.72, 44.4), xytext=(5.5, 46.0),
 
 # ------------------------------------------- 2. the gate flips with depth ----
 ax2 = fig.add_subplot(gs[1, 0])
-dress(ax2, "The confidence gate flips with depth",
-      "MTP n-max 2  ·  gold: ungated  ·  grey: p-min 0.85")
+dress(ax2, "The confidence gate costs you speed",
+      "gold: ungated  ·  grey: gated p-min 0.85  ·  each at its own best window")
 xs, w = [0, 1], 0.34
-vals_un = [g20_un, g150_un]
-vals_g = [g20_g, g150_g]
+vals_un = [g20_un, g100_un]
+vals_g = [g20_g, g100_g]
 ax2.bar([x - w / 2 for x in xs], vals_un, width=w, color=ACCENT, zorder=3)
 ax2.bar([x + w / 2 for x in xs], vals_g, width=w, color=QUIET, zorder=3)
 for x, v in zip([x - w / 2 for x in xs], vals_un):
@@ -134,15 +135,16 @@ for x, v in zip([x + w / 2 for x in xs], vals_g):
     ax2.annotate(f"{v:.2f}", (x, v), xytext=(0, 4), textcoords="offset points",
                  ha="center", color=INK_DIM, fontsize=12, fontfamily=MONO)
 ax2.set_xticks(xs)
-ax2.set_xticklabels(["20k depth", "150k depth"])
+ax2.set_xticklabels(["20k depth", "100k depth"])
 ax2.set_yticks([])
-ax2.set_ylim(0, 62)
-ax2.annotate("1.72× faster", xy=(0, 53.5), ha="center", color=ACCENT,
+ax2.set_ylim(0, 68)
+ax2.annotate("1.72× faster", xy=(0, 57.0), ha="center", color=ACCENT,
              fontsize=12.5, fontfamily=SANS)
-ax2.annotate("18% slower", xy=(1, 17.0), ha="center", color=ACCENT,
+ax2.annotate("3.6× faster", xy=(1, 57.0), ha="center", color=ACCENT,
              fontsize=12.5, fontfamily=SANS)
-ax2.annotate("100k depth: ungated only\n(never compared)", xy=(1.46, 31.0), ha="right",
-             va="top", color=INK_DIM, fontsize=11.5, fontfamily=SANS, linespacing=1.5)
+ax2.annotate("100k gated = live /goal run (reported), not a harness arm",
+             xy=(0.5, -0.34), xycoords="axes fraction", ha="center", va="top",
+             color=INK_DIM, fontsize=11, fontfamily=SANS, clip_on=False)
 
 # ------------------------------------------------------ 3. the top_k trap ----
 ax3 = fig.add_subplot(gs[1, 1])

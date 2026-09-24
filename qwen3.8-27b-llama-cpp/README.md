@@ -103,11 +103,12 @@ Widening the pool makes the target pick less predictable tokens, so the draft he
 | depth | ungated (`0.00`) | gated (`0.85`) | winner |
 |---|---|---|---|
 | 20k | **44.33** | 25.76 | ungated, by 1.72x |
+| 100k | **43.07** | ~12 *(live `/goal` run, reported)* | ungated — not a like-for-like pair |
 | 150k | 7.78 | **9.15** | gated, by 18% |
 
 At shallow depth a decode round is flat-cost, so rejected draft tokens are nearly free. At depth every verification position reads the whole KV cache, so rejected drafts are pure waste. The 20k penalty is **not** explained by acceptance — the gated arm shows the *higher* acceptance rate (0.96 against 0.67) and is much slower. Acceptance rate is not a performance metric. The adopted configuration runs **ungated**.
 
-**And the gap in that table:** the comparison exists at 20k and 150k only. All 58 arms recorded at 100k depth ran ungated, so where the crossover actually sits — above or below 100k — is unmeasured.
+**And the gap in that table:** the controlled comparison exists at 20k and 150k only. All 58 arms recorded at 100k depth ran ungated; the 100k gated figure is a live `/goal` agent run, so it says the gate was slow in real use at that depth but is not the same measurement as the arm beside it. Where the crossover sits — above or below 100k — is still unmeasured.
 
 **`--spec-draft-n-max` peaks at 7 at 100k depth** (43.07; `n-max 8` is 35.60) and at **2 at 20k** (44.33). Wider is never better.
 

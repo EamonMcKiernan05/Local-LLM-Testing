@@ -88,6 +88,8 @@ This is the MTP threshold gate: draft tokens are only proposed while the head is
 | 150k | 2 | 0.00 | 7.78 | 1.667 | 0.353 |
 | 150k | 4 | 0.85 | 8.90 | 1.667 | 0.667 |
 | 150k | 4 | 0.00 | 6.48 | 2.143 | 0.286 |
+| 100k | 7 | **0.00 (ungated)** | **43.07** | 5.310 | 0.618 |
+| 100k | not recorded | 0.85 (gated) | **12 (live /goal run, reported)** | — | — |
 
 Source: `data/csv/two-card-mtp-nmax-20k.csv`, `-150k.csv`, and `two-card-20k-verification-3-repeats.csv` (three repeats per arm with `ignore_eos` forcing exactly 256 tokens: 44.38 / 44.33 / 44.29 against 25.81 / 25.68 / 25.78).
 
@@ -98,7 +100,11 @@ Source: `data/csv/two-card-mtp-nmax-20k.csv`, `-150k.csv`, and `two-card-20k-ver
 
 The mechanical reason: at shallow depth a decode round costs roughly the same no matter how many positions get verified, so proposing more draft tokens is nearly free and rejecting them costs little. At depth, every verification position attends over the whole KV cache, so a round's cost scales with the positions verified — and rejected draft tokens become pure waste rather than free.
 
-**A gap worth stating plainly: no gated arm was ever run at 100k depth.** All 58 arms recorded at that depth ran ungated, and the gate comparison exists only at 20k and 150k. So "the gate flips with depth" is established *between those two points*, not as a curve — the crossover could sit anywhere from just above 20k to just below 150k. Reading the two points we have, the gate earns its keep when the head is unsure over a long cache (at 150k the gate truncates every arm to AL 1.667, whatever window you ask for); at 100k the ungated arms show the head still landing 5.3 tokens per round at acceptance 0.62, which is closer to the 20k behaviour than the 150k one. **That is inference, not measurement.**
+**A gap worth stating plainly: no *harness* arm was ever run gated at 100k depth.** All 58 arms recorded at that depth ran ungated, and the controlled comparison exists only at 20k and 150k. So "the gate flips with depth" is established *between those two points*, not as a curve — the crossover could sit anywhere from just above 20k to just below 150k.
+
+The one gated figure at 100k is a live number: **about 12 tok/s during a `/goal` agent run**, reported by Eamon, with no recorded flags, window or n-max. It is in the table above for completeness and it is **not** a like-for-like comparison with the 43.07 tok/s ungated harness arm — different workload, different everything except the model and the card count. Read it as "the gate was visibly slow in real use at that depth", not as a 3.6x factor.
+
+Reading the two controlled points, the gate earns its keep when the head is unsure over a long cache (at 150k the gate truncates every arm to AL 1.667, whatever window you ask for); at 100k the ungated arms show the head still landing 5.3 tokens per round at acceptance 0.62, which is closer to the 20k behaviour than the 150k one. **That is inference, not measurement.**
 
 **What we could not explain:** in the 20k pair, acceptance length is nearly the same in both arms (2.381 ungated vs 2.439 gated) and the ungated arm proposes *more* draft tokens per round, yet it finishes a 256-token generation in 5,752 ms against the gated arm's 9,891 ms. Roughly 1.8× the time per round for the same tokens per round. Some cost is attached to the gating path itself, not the draft window. A `p-min` curve at `n-max 2` (0.0 / 0.4 / 0.6 / 0.7 / 0.8 / 0.85 / 0.9 / 0.95) would show whether that cost is a cliff or a gradual slope. **Not run.**
 
