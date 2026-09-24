@@ -115,7 +115,7 @@ ax1.plot(nx, ny, color=ACCENT, lw=2.6, marker="o", ms=8, markerfacecolor=BG,
          markeredgecolor=ACCENT, markeredgewidth=2.4, zorder=5)
 ax1.plot(mx, my, color=SER2, lw=0, marker="s", ms=9, markerfacecolor=BG,
          markeredgecolor=SER2, markeredgewidth=2.4, zorder=6)
-ax1.plot(dx, dy, color=SER3, lw=2.6, marker="^", ms=8, markerfacecolor=BG,
+ax1.plot(dx, dy, color=SER3, lw=2.6, marker="s", ms=8, markerfacecolor=BG,
          markeredgecolor=SER3, markeredgewidth=2.4, zorder=4)
 for x, y in zip(nx, ny):
     ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, 11), textcoords="offset points",
@@ -129,7 +129,7 @@ for x, y in zip(dx, dy):
 keyrows(ax1, [
     (ACCENT, "o", "no speculation"),
     (SER2, "s", "MTP head n-max 4  (20k only)"),
-    (SER3, "^", "DFlash2 Q4_K_M n-max 4"),
+    (SER3, "s", "DFlash2 Q4_K_M n-max 4"),
 ])
 ax1.set_xlabel("prompt depth (thousand tokens)", color=INK_DIM, fontsize=12,
                fontfamily=SANS, labelpad=8)
@@ -139,7 +139,7 @@ ax1.set_xlim(8, 168)
 
 # --------------------------------------------- 2. MTP vs DFlash2 by temp ----
 ax2 = fig.add_subplot(gs[1, 0])
-dress(ax2, "The built-in head beats DFlash2", "gold: MTP  ·  grey: DFlash2  ·  best row per temperature")
+dress(ax2, "The built-in head beats DFlash2", "gold: MTP  ·  grey: DFlash2")
 xs = list(range(4))
 w = 0.34
 ax2.bar([x - w / 2 for x in xs], mtp_temp, width=w, color=ACCENT, zorder=3)
@@ -157,7 +157,7 @@ ax2.set_ylim(0, 58)
 
 # --------------------------------------------------- 3. decode against depth -
 ax3 = fig.add_subplot(gs[1, 1])
-dress(ax3, "Decode runs the other way", "same runs, generation rate instead of prefill")
+dress(ax3, "Decode runs the other way", "")
 ax3.plot(ndx, ndy, color=ACCENT, lw=2.6, marker="o", ms=8, markerfacecolor=BG,
          markeredgecolor=ACCENT, markeredgewidth=2.4, zorder=5)
 ax3.plot(ddx, ddy, color=SER3, lw=2.6, marker="^", ms=8, markerfacecolor=BG,
@@ -186,8 +186,6 @@ ax4.set_xticks([0, 1])
 ax4.set_xticklabels(["no MTP", "MTP n-max 8\np-min 0.85"], fontsize=11.5, linespacing=1.7)
 ax4.set_yticks([])
 ax4.set_ylim(0, 31)
-ax4.annotate("+42%   acceptance 0.87", xy=(0.5, 27.4), ha="center", color=ACCENT,
-             fontsize=13.5, fontfamily=SANS)
 
 
 # ------------------------------------------------------------------- header --
@@ -198,7 +196,7 @@ fig.text(0.055, 0.888, "17.56 GB, 4.5 bpw, three RTX 3060s — 1,096.8 tok/s pre
          color=ACCENT, fontsize=19, fontfamily=SANS, va="top")
 fig.text(0.965, 0.968, "llama.cpp b10068 / b11041  ·  CUDA 13.3  ·  sm_86", color=INK_DIM,
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
-fig.text(0.965, 0.939, "Aug-Sep 2026  ·  q4_K_M and q8_0 KV", color=INK_DIM,
+fig.text(0.965, 0.939, "q4_K_XL weights  ·  q8_0 KV cache", color=INK_DIM,
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
 
 # ------------------------------------------------------------------- footer --
@@ -206,7 +204,7 @@ fig.add_artist(plt.Line2D([0.055, 0.965], [0.112, 0.112], color=RULE, lw=1))
 fig.text(0.055, 0.085, "107-run speculative-decoding bake-off, three DFlash2 quants, n-max 1-8, four temperatures: "
                        "the built-in MTP head won at every one.",
          color=INK_DIM, fontsize=12.5, fontfamily=SANS, va="bottom")
-fig.text(0.055, 0.055, "Peak seen live on the three-card setup: 35 tok/s decode (Eamon's own measurement) — a burst, not a steady-state rate.",
+fig.text(0.055, 0.055, "Peak seen live on the three-card setup: 35 tok/s decode — a burst, not a steady-state rate.",
          color=ACCENT, fontsize=12.5, fontfamily=SANS, va="bottom")
 fig.text(0.965, 0.025, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
          color=INK_DIM, fontsize=12.5, fontfamily=MONO, ha="right", va="bottom")
