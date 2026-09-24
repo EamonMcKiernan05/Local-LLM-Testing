@@ -122,7 +122,7 @@ ax1.annotate("", xy=(6.72, 44.4), xytext=(5.5, 46.0),
 # ------------------------------------------- 2. the gate flips with depth ----
 ax2 = fig.add_subplot(gs[1, 0])
 dress(ax2, "The confidence gate costs you speed",
-      "gold: ungated  ·  grey: gated p-min 0.85  ·  each at its own best window")
+      "gold: ungated  ·  grey: gated p-min 0.85")
 xs, w = [0, 1], 0.34
 vals_un = [g20_un, g100_un]
 vals_g = [g20_g, g100_g]
@@ -148,7 +148,7 @@ ax2.annotate("100k gated = live /goal run (reported), not a harness arm",
 
 # ------------------------------------------------------ 3. the top_k trap ----
 ax3 = fig.add_subplot(gs[1, 1])
-dress(ax3, "top_k runs backwards", "decode at 100k depth  ·  bar: best min_p arm  ·  line: its spread")
+dress(ax3, "top_k runs backwards", "")
 xs = list(range(len(topks)))
 ax3.bar(xs, tk_max, width=0.5, color=[ACCENT if k == 20 else QUIET for k in topks], zorder=3)
 for x, hi, lo in zip(xs, tk_max, tk_min):
@@ -187,16 +187,14 @@ fig.text(0.055, 0.888, "12.12 GB, 3.5 bpw, two RTX 3060s — 43.07 tok/s decode 
          color=ACCENT, fontsize=19, fontfamily=SANS, va="top")
 fig.text(0.965, 0.968, "llama.cpp b11041  ·  CUDA 13.3  ·  sm_86", color=INK_DIM,
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
-fig.text(0.965, 0.939, "this is the file serving today  ·  Sep 2026", color=INK_DIM,
-         fontsize=13.5, fontfamily=MONO, ha="right", va="top")
 
 # ------------------------------------------------------------------- footer --
 fig.add_artist(plt.Line2D([0.055, 0.965], [0.112, 0.112], color=RULE, lw=1))
 fig.text(0.055, 0.085, "The DFlash2 drafter also loses here — 23.27 tok/s at 100k depth on three cards against MTP's 24.99 — "
                        "so the quant ships with the built-in head.",
          color=INK_DIM, fontsize=12.5, fontfamily=SANS, va="bottom")
-fig.text(0.055, 0.055, "Peak seen live: 81 tok/s decode on a short coding task (Eamon's own measurement) — a burst. "
-                       "Production: 511 tok/s cold prefill of a 103,726-token prompt, 27.7 tok/s sustained.",
+fig.text(0.055, 0.055, "Peak seen live: 81 tok/s decode on a short coding task — a burst. "
+                       "Production: 511 tok/s cold prefill of a 103,726-token prompt.",
          color=ACCENT, fontsize=12.5, fontfamily=SANS, va="bottom")
 fig.text(0.965, 0.025, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
          color=INK_DIM, fontsize=12.5, fontfamily=MONO, ha="right", va="bottom")
