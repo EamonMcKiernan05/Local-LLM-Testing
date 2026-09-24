@@ -9,7 +9,7 @@ RAM: 32GB DDR4 2400mhz
 
 GPUs: 2x Tesla V100 32GB
 
-Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; GPU0/GPU1 on PCIe 3.0 x16
+Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.0 x16 + 1x PCIe 2.0 x4 (Electrically x16)
 
 ## Planned Upgrades:
 
