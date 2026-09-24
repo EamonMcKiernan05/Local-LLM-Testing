@@ -50,6 +50,7 @@ Three-card story — the third card buys prefill and costs decode:
 | Best prefill, three cards | **599 tok/s** (layer split) |
 | Drafter verdict | The built-in MTP head beats every DFlash2 configuration at every temperature tested |
 | Runs recorded | 284 — 277 measured, 7 died at load |
+| Peak seen live, two cards | **81 tok/s** decode on a short coding task (shallow context) — a burst, not a sweep figure |
 | Best three-card decode, 100k | 24.96 tok/s — and 2-card tensor split did 43.06 on the same depth |
 
 **What the sweeps cost people time not to re-learn:**
@@ -62,5 +63,7 @@ Three-card story — the third card buys prefill and costs decode:
 - `-ub 256` is the prefill sweet spot at every `-b`.
 
 **What's in the folder:** seven experiment write-ups in the order they were run, plus a separate pass over the `buun-llama-cpp` fork; every table as a CSV; the raw per-arm JSONL records we still hold; the harnesses and drivers; and the chart above with the script that draws it.
+
+**Live peaks vs measured rates:** the 81 tok/s above is a burst Eamon measured himself on a loose task, not a harness run — llama-server's own 3-second window sits 1.5x above its sustained rate on a deep request. Both are recorded with their source in `qwen3.8-27b-llama-cpp/data/csv/live-peak-observations.csv` and are never mixed into the sweep tables.
 
 **Honest limits:** the raw per-arm files for two of the experiments (the 107-run DFlash2 bake-off and the 70-arm two-card sweep) stayed on the box and could not be copied — those tables are transcribed from the reports written from them on the day. Full detail in [`PROVENANCE.md`](qwen3.8-27b-llama-cpp/PROVENANCE.md).

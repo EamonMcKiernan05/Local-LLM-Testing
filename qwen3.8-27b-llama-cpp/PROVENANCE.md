@@ -43,6 +43,7 @@ Collected 2026-09-24. The rule for this repo is simple: **a number appears here 
 | `live-traffic-draft-acceptance-aug14-15.csv` | 28 | per-request journal lines from real fleet traffic |
 | `live-service-2026-09-23-prefill-progress.csv` | 10 | the production cold prefill, sample by sample |
 | `live-service-2026-09-23-decode-series.csv` | 21 | the production decode rate, sample by sample |
+| `live-peak-observations.csv` | 3 | live peak/burst figures, each row carrying its own source: two measured by Eamon live on the box, one captured from llama-server's 3-second window |
 | `buun-fork-sweep-tok_s.csv` etc. | 25 / 6 / 3 / 4 | the fork: main sweep, harness comparison, long context, drafter quants |
 
 ### Counting the runs
@@ -52,6 +53,15 @@ Collected 2026-09-24. The rule for this repo is simple: **a number appears here 
 ### The one derived column
 
 `ms/step` in the DFlash2 bake-off tables is computed: `gen_ms / (gen_tokens / mean_len)`. It is the only figure anywhere in this repo that is not read straight off a run. Its formula is stated in the tables' source report.
+
+### User-reported figures are labelled as such
+
+`live-peak-observations.csv` mixes two kinds of evidence and says which is which in its `source` column:
+
+- **captured** — a `tg_3s` line from the llama-server journal, timestamped and quoted.
+- **reported** — a figure Eamon measured himself on the box, with no harness, no fixed prompt and no recorded window. Two rows are in this category (81 tok/s on two cards, 35 tok/s on three cards). They are in the repo because they happened and he wants them recorded, and they are labelled because a burst on a loose task is not comparable with a fixed-prompt sweep arm.
+
+No reported figure is used in any chart panel, any table in `experiments/`, or any headline. Where a chart mentions one it says so in the footer.
 
 ### Counter sources
 

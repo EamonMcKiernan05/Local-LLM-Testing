@@ -180,12 +180,15 @@ fig.text(0.965, 0.939, "Q4_K_XL and IQ3_S quants  ·  Aug-Sep 2026", color=INK_D
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
 
 # ------------------------------------------------------------------- footer --
-fig.add_artist(plt.Line2D([0.055, 0.965], [0.098, 0.098], color=RULE, lw=1))
-fig.text(0.055, 0.068, "Every figure came off a real run on this one box: Xeon E5-2680 v4, "
+fig.add_artist(plt.Line2D([0.055, 0.965], [0.112, 0.112], color=RULE, lw=1))
+fig.text(0.055, 0.085, "Every figure came off a real run on this one box: Xeon E5-2680 v4, "
                        "31 GB RAM, 2× RTX 3060 12 GB, no NVLink.",
-         color=INK_DIM, fontsize=13, fontfamily=SANS, va="bottom")
-fig.text(0.965, 0.028, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
-         color=INK_DIM, fontsize=13, fontfamily=MONO, ha="right", va="bottom")
+         color=INK_DIM, fontsize=12.5, fontfamily=SANS, va="bottom")
+fig.text(0.055, 0.055, "Peak seen live on this configuration: 81 tok/s decode on a basic pong coding task at shallow context "
+                       "(Eamon's own measurement) — a burst, not a steady-state rate.",
+         color=ACCENT, fontsize=12.5, fontfamily=SANS, va="bottom")
+fig.text(0.965, 0.025, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
+         color=INK_DIM, fontsize=12.5, fontfamily=MONO, ha="right", va="bottom")
 
 fig.savefig(OUT, facecolor=BG)
 print("wrote", OUT)

@@ -90,6 +90,20 @@ Two traps worth knowing before you copy any of it:
 1. **Do not pass a single sampler flag unless you pass them all.** llama.cpp reads unset sampler parameters from the GGUF's own metadata. This model's metadata says `top_k 20`, `min_p` off. Passing `--top-k 40` thinking you are restating the default costs 35% of generation speed.
 2. **`-ub 256` is the prefill sweet spot at every `-b`.** `-ub 128` costs about 4%; `-ub 512` and above cost 1.5-3% and add VRAM, and at 160k context `-ub 2048` kills the server during a long prompt.
 
+## Peaks observed live (not harness runs)
+
+Three figures in this project's history are **not** sweep measurements and are kept out of every table above. They are recorded in `data/csv/live-peak-observations.csv` with their source on each row.
+
+| date | config | workload | figure |
+|---|---|---|---|
+| 2026-09-23 | two cards, tensor split, MTP `n-max 7` | basic pong coding task, shallow context | **81 tok/s peak decode** — Eamon's own live measurement |
+| 2026-09-23 | same config | the production request below | **41.77 tok/s** in llama-server's 3-second window, against 27.73-27.80 sustained |
+| 2026-09-24 | three cards, layer split | not recorded | **35 tok/s peak decode** — reported by Eamon |
+
+Read them as bursts, not rates. The distinction matters: llama-server reports both a cumulative `tg` and a `tg_3s` three-second window, and the short window spikes well above the real rate — the second row is proof, at 1.5x its own sustained figure. The controlled two-card arms top out at 44.33 tok/s (20k depth, ungated `n-max 2`) and 43.10 (100k depth, `n-max 7`); a shallow-context coding task has far less KV cache to re-read per step, so a peak above those numbers is mechanically expected, not surprising.
+
+**Rule for using them:** quote a live peak only with its context and only as a peak. Never put one in the same column as a fixed-prompt harness run.
+
 ## What we still cannot answer
 
 Stated honestly, because someone will ask:

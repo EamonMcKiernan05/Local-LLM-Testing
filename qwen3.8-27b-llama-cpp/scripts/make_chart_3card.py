@@ -126,7 +126,7 @@ for x, y in zip(none_x, none_y):
 for x, y in [(df_x[0], df_y[0]), (df_x[-1], df_y[-1])]:
     ax1.annotate(f"{y:.1f}", (x, y), xytext=(0, -20), textcoords="offset points",
                  ha="center", color=INK_DIM, fontsize=13.5, fontfamily=MONO)
-ax1.annotate("no speculation", xy=(24.5, 1096.8), xytext=(0, 7), textcoords="offset points",
+ax1.annotate("no speculation", xy=(24.5, 1096.8), xytext=(0, 11), textcoords="offset points",
              color=ACCENT, fontsize=14, fontfamily=SANS, ha="left", va="center")
 ax1.annotate("DFlash2 drafter, n-max 4", xy=(24.5, 810.3), xytext=(0, 7), textcoords="offset points",
              color=INK_DIM, fontsize=14, fontfamily=SANS, ha="left", va="center")
@@ -149,11 +149,11 @@ bars(ax3, gd, 56, fmt="{:.1f}")
 # ---------------------------------------- 4. DFlash2 on three cards --------
 ax4 = fig.add_subplot(gs[1, 2])
 dress(ax4, "DFlash2 has no sweet spot on three cards",
-      "grey: DFlash2 drafter  ·  gold line: MTP head on the same split")
+      "grey: drafter  ·  gold: MTP head")
 ax4.bar(df_nmax, df_gen, width=0.62, color=QUIET, zorder=3)
 ax4.axhline(mtp_ref, color=ACCENT, lw=2, zorder=4)
-ax4.annotate(f"MTP head {mtp_ref:.2f}", xy=(0.95, mtp_ref), xytext=(0, 7),
-             textcoords="offset points", ha="left", color=ACCENT,
+ax4.annotate(f"MTP head {mtp_ref:.2f}", xy=(0.95, mtp_ref), xytext=(0, -7),
+             textcoords="offset points", ha="left", va="top", color=ACCENT,
              fontsize=13, fontfamily=MONO)
 ax4.set_xticks(df_nmax)
 ax4.set_xticklabels([str(n) for n in df_nmax])
@@ -175,12 +175,15 @@ fig.text(0.965, 0.939, "third card on PCIe 2.0 x4  ·  Aug-Sep 2026", color=INK_
          fontsize=13.5, fontfamily=MONO, ha="right", va="top")
 
 # ------------------------------------------------------------------- footer --
-fig.add_artist(plt.Line2D([0.055, 0.965], [0.098, 0.098], color=RULE, lw=1))
-fig.text(0.055, 0.068, "Three-card era: the third card left the bus on 2026-09-23, "
-                       "and two-card tensor split + MTP decoded 1.7× faster than any three-card layout.",
-         color=INK_DIM, fontsize=13, fontfamily=SANS, va="bottom")
-fig.text(0.965, 0.028, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
-         color=INK_DIM, fontsize=13, fontfamily=MONO, ha="right", va="bottom")
+fig.add_artist(plt.Line2D([0.055, 0.965], [0.112, 0.112], color=RULE, lw=1))
+fig.text(0.055, 0.085, "Three-card era: the third card left the bus on 2026-09-23, and two-card tensor "
+                       "split + MTP decoded 1.7× faster than any three-card layout.",
+         color=INK_DIM, fontsize=12.5, fontfamily=SANS, va="bottom")
+fig.text(0.055, 0.055, "Peak seen live on the three-card setup: 35 tok/s decode (Eamon's own measurement) — a burst. "
+                       "Fastest controlled three-card arm here: 47.3 tok/s at 20k greedy.",
+         color=ACCENT, fontsize=12.5, fontfamily=SANS, va="bottom")
+fig.text(0.965, 0.025, "raw data and full write-ups: github.com/EamonMcKiernan05/Local-LLM-Testing",
+         color=INK_DIM, fontsize=12.5, fontfamily=MONO, ha="right", va="bottom")
 
 fig.savefig(OUT, facecolor=BG)
 print("wrote", OUT)
