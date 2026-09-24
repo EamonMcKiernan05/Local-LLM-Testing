@@ -2,14 +2,21 @@
 All configurations and tests done on my local ai server
 
 ## Current Hardware Setup
+
 CPU: Xeon E5 2680 V4
+
 RAM: 32GB DDR4 2400mhz 
+
 GPUs: 2x Tesla V100 32GB
+
 Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; GPU0/GPU1 on PCIe 3.0 x16
 
 ## Planned Upgrades:
+
 +32GB DDR4 2400mhz - already purchased
+
 Dual Xeon Motherboard - waiting to see how far I can push 32GB RAM first
+
 2x Xeon E5 2650 V4 - already purchased
 
 ## Current Daily-Driver Software Stack
