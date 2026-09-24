@@ -20,9 +20,13 @@ Dual Xeon Motherboard - want to see how far i can push 32GB before ordering
 2x Xeon E5 2650 V4 - stored from previous builds/projects
 
 ## Current Daily-Driver Software Stack
+
 OS: Ubuntu 24.04
+
 Cuda: 12.8
+
 Inference Engine: Llama.cpp (Mainline) Serving: `llama-server.service` on `:8080`
+
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
 ---
