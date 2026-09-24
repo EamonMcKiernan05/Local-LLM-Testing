@@ -1,0 +1,8 @@
+arm,split,-ts,prefill tok/s,gen tok/s,AL (in-run),accept (in-run),VRAM after load G0/G1/G2 (MiB)
+g3-layer-ts111-mtp7,layer,"1,1,1",602.76,24.96,5.20,0.604,5795 / 6607 / 8113
+g3-layer-ts353728-mtp7,layer,"35,37,28",611.29,24.93,5.20,0.604,6397 / 7021 / 7095
+g3-layer-ts13-13-04-mtp7,layer,"1.3,1.3,0.4",514.31,24.78,5.20,0.604,7585 / 8349 / 4577
+g3-layer-ts111-dflash4,layer,"1,1,1",606.56,23.06,3.31,0.578,5941 / 6761 / 7261
+g3-layer-ts111-dflash8,layer,"1,1,1",598.12,19.47,3.63,0.376,6153 / 6961 / 7449
+g2-layer-ts11-dflash4,layer (2 cards),"1,1",494.55,23.56,3.31,0.578,8695 / 10179 / 4
+g3-tensor-ts111-dflash4,tensor,"1,1,1",—,—,—,—,— aborted at load (§9.3)

@@ -1,0 +1,7 @@
+harness / setting,stock,buun fork
+"llama-bench pp2048, -ub 256",1046,1056
+"llama-bench pp2048, -ub 2048",not run,637
+"llama-server, -ub 256",866,488
+"llama-server, -b 256 -ub 256",-,488
+"llama-server, -b 512 -ub 512",-,539
+"llama-server, -b 2048 -ub 256",-,489

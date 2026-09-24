@@ -1,0 +1,33 @@
+CONFIRM RUN (3 repeats each, 100k depth, temp 0.5, seed 12345, tensor 2-card, q8_0)
+n  gen_mean  min    max    range  sd_s   pre_mean  pre_range  earlier20arm  delta
+5    31.35   31.30  31.41  0.11  0.056    508.32      4.03        31.36  -0.01
+6    33.83   33.81  33.86  0.05  0.025    505.19      4.18        33.85  -0.02
+7    43.04   43.02  43.05  0.03  0.015    507.39      4.81        43.07  -0.03
+8    35.59   35.57  35.62  0.05  0.025    505.81      2.28        35.60  -0.01
+
+n7 vs n5: 1.373x  (+37.3%)
+n7 vs n6: 1.272x  (+27.2%)
+n7 vs n8: 1.209x  (+20.9%)
+
+within-arm spread as % of that arm's mean:
+  n5: 0.11 tok/s = 0.351%
+  n6: 0.05 tok/s = 0.148%
+  n7: 0.03 tok/s = 0.070%
+  n8: 0.05 tok/s = 0.140%
+
+prefill all 12 arms: 502.45 - 510.52 tok/s (8.07 = 1.6% spread)
+
+every n-max 7 measurement at 100k (4 runs, incl. earlier sweep + mode matrix rep1): ['43.05', '43.02', '43.04', '43.07', '43.10'] -> mean 43.06, range 0.08, sd 0.030
+
+in-run vs cumulative (JSONL /metrics incl. warm-up), n-max 7:
+  in-run  (log line, measured request): AL 5.31  accept 0.61791  (207/335)  prop/round 6.759
+  cumul.  (JSONL acceptance_length)   : AL 5.000 accept 0.5918  (216/365)  prop/round 6.759
+  warm-up contribution: 9 accepted / 30 generated, AL 2.50  ->  207+9=216, 335+30=365
+
+AL identity check (AL = accepted/rounds + 1):
+  cumul n5: 187/83+1 = 3.253 (JSONL 3.253)
+  cumul n6: 197/72+1 = 3.736 (JSONL 3.736)
+  cumul n7: 216/54+1 = 5.000 (JSONL 5.0)
+  cumul n8: 206/64+1 = 4.219 (JSONL 4.219)
+  in-run n7: 207/48+1 = 5.312 (log line 5.31)
+  in-run warm-up: 9/6+1 = 2.500 (log line 2.50)

@@ -1,0 +1,5 @@
+config,prefill tok/s,decode tok/s
+stock + DFlash2 Q8_0,822.5,29.44
+buun + DFlash2 Q8_0,442.4,32.42
+stock + DFlash2 BF16,810.7,27.92
+buun + DFlash2 BF16,436.8,10.69

@@ -1,0 +1,3 @@
+Run,prompt_n,prefill ms,prefill tok/s,gen_n,gen ms,gen tok/s
+"build 11041, temp 0.6, ctx 262144, MTP n-max 8 - run 1",19966,23483,850.22,256,7739,32.95
+"build 11041, temp 0.6, ctx 262144, MTP n-max 8 - run 2",19966,23389,853.63,256,9012,28.30

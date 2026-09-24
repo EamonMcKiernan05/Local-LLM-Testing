@@ -1,0 +1,9 @@
+arm,top_k,min_p,prefill tok/s,gen tok/s,AL,accept rate,proposals/round,VRAM after load (G0/G1 MiB),peak VRAM (G0/G1 MiB)
+mtp1-untrimmed,unset,unset,516.51,26.92,1.850,0.848,1.003,9161 / 9153,9325 / 9317
+mtp2-untrimmed,unset,unset,512.42,32.98,2.550,0.775,2.000,9237 / 9229,9405 / 9397
+mtp3-untrimmed,unset,unset,518.27,35.04,3.060,0.687,3.000,9311 / 9303,9479 / 9471
+mtp4-untrimmed,unset,unset,513.94,33.40,3.190,0.552,3.967,9387 / 9379,9553 / 9545
+mtp5-untrimmed,unset,unset,512.60,31.36,3.310,0.465,4.970,9461 / 9453,9627 / 9619
+mtp6-untrimmed,unset,unset,515.78,33.85,3.850,0.475,6.003,9535 / 9527,9705 / 9697
+mtp7-untrimmed,unset,unset,513.55,43.07,5.310,0.618,6.975,9611 / 9603,9783 / 9775
+mtp8-untrimmed,unset,unset,510.16,35.60,4.400,0.428,7.939,9685 / 9677,9855 / 9847

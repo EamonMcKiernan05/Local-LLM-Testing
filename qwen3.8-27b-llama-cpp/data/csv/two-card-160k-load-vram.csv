@@ -1,0 +1,6 @@
+split,spec,GPU0 MiB,GPU1 MiB,GPU2,free on GPU1,notes
+"layer 1,1",none,"8,729","10,049",4,"2,239",clean
+"layer 1,1",MTP n8,"9,343","11,703",4,585,"cudaMalloc failed for a 421 MiB compute buffer, then retrying without pipeline parallelism — fitted only via a fallback"
+"layer 1,1",DFlash2 n4,"9,525","10,821",4,"1,467",clean
+"tensor 1,1",none,"9,241","9,233",4,"3,055","clean, balanced to 8 MiB"
+"tensor 1,1",MTP n8,"10,453","10,445",4,"1,843","clean, no OOM, no fallback"

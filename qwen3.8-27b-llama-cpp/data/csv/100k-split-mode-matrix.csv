@@ -1,0 +1,9 @@
+arm,devices,split,ts,prefill tok/s,gen tok/s,AL,sampler on GPU,VRAM after load (MiB)
+mode-tensor2-nmax7 rep1,"CUDA0,1",tensor,"1,1",507.92,43.10,5.000,no,9611 / 9603 / 4
+mode-tensor2-nmax7 rep2,"CUDA0,1",tensor,"1,1",506.12,43.06,5.000,no,9611 / 9603 / 4
+mode-layer2-nmax7 rep1,"CUDA0,1",layer,"1,1",489.83,26.26,4.909,yes,8529 / 11009 / 4
+mode-layer2-nmax7 rep2,"CUDA0,1",layer,"1,1",489.99,26.26,4.909,yes,8529 / 11009 / 4
+mode-layer3-nmax7 rep1,"CUDA0,1,2",layer,"1,1,1",599.19,24.99,4.909,yes,5795 / 6607 / 8113
+mode-layer3-nmax7 rep2,"CUDA0,1,2",layer,"1,1,1",599.12,24.97,4.909,yes,5795 / 6607 / 8113
+mode-tensor3-nmax7 rep1,"CUDA0,1,2",tensor,"1,1,1",302.38,24.14,3.333,no,6819 / 6667 / 6749
+mode-tensor3-nmax7 rep2,"CUDA0,1,2",tensor,"1,1,1",302.09,24.17,3.333,no,6819 / 6667 / 6749

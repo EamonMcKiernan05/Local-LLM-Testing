@@ -1,0 +1,16 @@
+Temperature,Drafter,best gen tok/s (measured),at n-max,draft acceptance %,mean len
+0.0,DFlash2 Q4_K_M,43.28,6,90.7,6.38
+0.0,DFlash2 Q8_0,43.13,7,87.6,7.08
+0.0,DFlash2 BF16,42.28,6,90.7,6.38
+0.0,MTP (built-in draft-mtp),47.29,8,97.8,7.29
+0.6,DFlash2 Q4_K_M,35.21,5,65.9,4.25
+0.6,DFlash2 Q8_0,34.42,6,61.0,4.64
+0.6,MTP (built-in draft-mtp),35.75,6,94.7,4.50
+0.8,DFlash2 Q4_K_M,31.32,4,60.8,3.43
+0.8,DFlash2 Q8_0,29.36,4,55.7,3.23
+0.8,DFlash2 BF16,27.88,4,54.7,3.19
+0.8,MTP (built-in draft-mtp),32.63,8,91.9,3.59
+0.9,DFlash2 Q4_K_M,28.08,2,71.8,2.43
+0.9,DFlash2 Q8_0,27.39,2,71.8,2.43
+0.9,DFlash2 BF16,26.07,2,71.8,2.43
+0.9,MTP (built-in draft-mtp),30.82,5,97.2,3.54

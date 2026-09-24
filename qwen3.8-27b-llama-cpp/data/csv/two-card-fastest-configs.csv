@@ -1,0 +1,8 @@
+requirement,config,result
+"Fastest generation, 20k depth","MTP n-max 2, p-min 0.00, -b 2048 -ub 256","44.33 tok/s gen (mean of 3, spread 0.09), ~650 tok/s prefill"
+"Runner-up, 20k","MTP n-max 4, p-min 0.00","42.73 tok/s gen, 646.4 tok/s prefill"
+"Best gated (live-style), 20k","MTP n-max 4, p-min 0.85","32.18 tok/s gen, 648.1 tok/s prefill"
+"Fastest generation, 150k depth","MTP n-max 2, p-min 0.85, -b 2048 -ub 256","9.15 tok/s gen, 452.8 tok/s prefill"
+"Best prefill, 150k depth","same, -b 4096 -ub 256","455.46 tok/s prefill, 9.04 tok/s gen"
+"Best prefill, 20k depth","same, -b 2048 -ub 256",652.77 tok/s prefill
+"160k load, cleanest split","tensor 1,1, MTP n-max 8","10,453 / 10,445 MiB, no OOM, no fallback"

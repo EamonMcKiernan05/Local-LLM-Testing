@@ -1,0 +1,6 @@
+measure,stage A mtp7-untrimmed,stage B mtp7-topk40-minp005,stage B mtp7-topk20-minp005
+effective sampler,"top_k 20, top_p 0.95, min_p off (from GGUF metadata)","top_k 40, top_p 0.95, min_p 0.05","top_k 20, top_p 0.95, min_p 0.05"
+generation,43.07 tok/s,27.97 tok/s (−35.1%),43.01 tok/s (−0.14%)
+acceptance length (in-run),5.31,3.45 (−35.0%),5.31
+accepted / proposed (in-run),207 / 335 (0.618),181 / 508 (0.356),207 / 336 (0.616)
+output sha256,450af7a0d4fe094d,706bdd30027b962c,34fd0b3a3fcbd528

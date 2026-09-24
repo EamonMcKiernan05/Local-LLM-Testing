@@ -1,0 +1,4 @@
+config,prefill tok/s,decode tok/s at 100k depth
+"stock llama.cpp, q8_0 KV",840.0,10.41
+"buun fork, q8_0 KV",337.0,7.50
+"buun fork, turbo4 KV",314.6,13.05

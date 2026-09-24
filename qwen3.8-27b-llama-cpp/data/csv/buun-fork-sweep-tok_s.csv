@@ -1,0 +1,26 @@
+config,prefill,decode,note
+A1 stock + MTP n4,868.3,27.49,control
+A2 stock + DFlash2 Q4_K_M n4,810.3,31.36,control
+"A3 stock, no speculation",1096.8,15.72,control
+B1 buun + MTP n4,439.6,25.33,same flags as A1
+B2 buun + DFlash2 n4,435.1,27.88,same flags as A2
+"B3 buun, no speculation",463.8,14.08,same flags as A3
+C1 buun VBR default + MTP,446.3,28.53,
+C2 buun VBR default + DFlash2,438.5,28.35,
+C3 buun VBR entry t8 + DFlash2,421.7,25.12,
+D1 buun turbo4 + DFlash2,431.4,25.34,
+D2 buun turbo3_tcq + DFlash2,326.6,23.45,"TCQ costs prefill, as documented"
+D3 buun turbo2_tcq + DFlash2,414.1,25.55,
+D4 buun turbo4 + MTP,434.4,26.22,
+E1 buun turbo4 + DFlash2 n2,432.2,25.85,
+E2 buun turbo4 + DFlash2 n6,431.8,25.70,
+"F1 buun EXL3, no speculation",320.9,15.84,EXL3 safetensors dir
+F2 buun EXL3 + MTP n4,308.8,29.82,
+F3 buun EXL3 + DFlash2 (GGUF draft) n4,307.4,28.12,
+F4 buun EXL3 + DFlash2 (EXL3 draft dir) n4,307.3,31.55,EXL3 draft works too
+F5 buun EXL3 + VBR + DFlash2 n4,308.8,31.63,
+F6 buun EXL3 + turbo4 + DFlash2 n4,302.5,28.54,
+F7 buun EXL3 + turbo3_tcq + DFlash2 n4,247.0,26.54,
+F8 buun EXL3 + VBR + MTP n4,312.9,32.58,
+G1 buun EXL3 + turbo4 + MTP n2,306.8,32.88,
+G2 buun EXL3 + turbo4 + MTP n6,306.4,35.12,best decode of the whole sweep
