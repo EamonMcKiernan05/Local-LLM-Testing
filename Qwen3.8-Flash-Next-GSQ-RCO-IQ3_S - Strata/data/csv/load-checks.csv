@@ -1,0 +1,14 @@
+group,label,ptok,gen,prefill_tps,decode_tps,wall_s,note
+two cards (pre-NVMe),8k,9281,62,184.6,68.4,51,warm-up contaminated (HDD cold-load)
+two cards (pre-NVMe),100k,101901,64,1679.9,60.7,63,
+two cards (pre-NVMe),8k,9281,62,845.1,80.0,12,
+two cards (pre-NVMe),100k,101901,68,1689.5,60.1,62,
+two cards (pre-NVMe),8k,9281,62,848.4,80.8,12,
+two cards (pre-NVMe),100k,101901,68,1690.8,64.4,62,
+single card (pre-NVMe),8k,9280,61,25.7,19.4,364,"cold server, HDD-streamed"
+single card (pre-NVMe),100k,101900,67,701.6,32.6,148,"cold server, HDD-streamed"
+two cards (post-NVMe),8k,9280,65,842.9,65.6,12,
+two cards (post-NVMe),100k,101900,67,1677.0,65.5,62,
+single card (post-NVMe),8k,9281,62,590.9,37.3,17,
+single card (post-NVMe),100k,101901,69,834.2,41.4,125,
+256K context check,"250,592-token prompt",250592,62,1488.2,51.9,,ctx 262144 on both cards; engine log line (extracts in raw/)

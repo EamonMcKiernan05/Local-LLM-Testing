@@ -1,0 +1,6 @@
+=== dual4 start 16:42:12 model=qwen3.8-flash-next-iq3_s
+warmup running...
+dual4 warmup: wall 5s prefill 555.9 tok/s (discarded)
+dual4 8k: wall 12s | ptok 9280 | prefill 842.9 tok/s | gen 65 at 65.6 tok/s
+dual4 100k: wall 62s | ptok 101900 | prefill 1677.0 tok/s | gen 67 at 65.5 tok/s
+=== dual4 end 16:43:31

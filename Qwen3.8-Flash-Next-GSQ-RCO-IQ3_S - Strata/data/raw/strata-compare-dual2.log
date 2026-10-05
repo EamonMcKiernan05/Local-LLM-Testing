@@ -1,0 +1,8 @@
+=== dual2 start 16:01:13 model=qwen3.8-flash-next-iq3_s
+dual2 8k: wall 12s | ptok 9281 | prefill 845.1 tok/s | gen 62 at 80.0 tok/s
+dual2 8k temps: 0, 36, 43.15 W
+dual2 8k temps: 1, 36, 43.16 W
+dual2 100k: wall 62s | ptok 101901 | prefill 1689.5 tok/s | gen 68 at 60.1 tok/s
+dual2 100k temps: 0, 47, 47.32 W
+dual2 100k temps: 1, 50, 48.76 W
+=== dual2 end 16:02:27

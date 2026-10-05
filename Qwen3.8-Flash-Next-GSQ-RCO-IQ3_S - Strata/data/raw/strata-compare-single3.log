@@ -1,0 +1,6 @@
+=== single3 start 16:47:33 model=qwen3.8-flash-next-iq3_s
+warmup running...
+single3 warmup: wall 9s prefill 291.0 tok/s (discarded)
+single3 8k: wall 17s | ptok 9281 | prefill 590.9 tok/s | gen 62 at 37.3 tok/s
+single3 100k: wall 125s | ptok 101901 | prefill 834.2 tok/s | gen 69 at 41.4 tok/s
+=== single3 end 16:50:04

@@ -1,0 +1,21 @@
+metric,key,value,value2,unit
+gate_mean_decode_derived,0.00,50.3,,tok/s
+gate_mean_decode_derived,0.50,56.8,,tok/s
+gate_mean_decode_derived,0.60,53.7,,tok/s
+gate_mean_decode_derived,0.85,53.3,,tok/s
+suffix_mean_decode_derived,0 (off),52.1,,tok/s
+suffix_mean_decode_derived,"3 (default, = gate-0.50 stage A data)",56.8,,tok/s
+suffix_mean_decode_derived,8 (aggressive),53.0,,tok/s
+coupled_mean_decode_derived,on,53.3,,tok/s
+coupled_mean_decode_derived,off (= gate-0.50 stage A data),56.8,,tok/s
+stage_b_decode_band_derived,20k,55.1,66.6,tok/s
+stage_b_decode_band_derived,60k,54.0,66.4,tok/s
+stage_b_decode_band_derived,100k,52.7,59.2,tok/s
+stage_b_decode_band_derived,150k,47.9,57.1,tok/s
+stage_b_decode_band_derived,200k,46.2,55.2,tok/s
+stage_b_decode_band_derived,250k,45.5,55.3,tok/s
+stage_b_prefill_band_derived,250k,1493.6,1498.2,tok/s
+stage_a_prefill_250k_range_derived,250k,1494.2,1498.3,tok/s
+stage_c_prefill_250k_range_derived,250k,1497.4,,tok/s
+stage_s_prefill_250k_range_derived,250k,1495.1,1496.8,tok/s
+winner_gate,driver arbiter,0.50,,spec_min_p

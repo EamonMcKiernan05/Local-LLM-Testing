@@ -1,0 +1,4 @@
+=== single2 start 16:10:23 model=qwen3.8-flash-next-iq3_s
+single2 8k: wall 364s | ptok 9280 | prefill 25.7 tok/s | gen 61 at 19.4 tok/s
+single2 100k: wall 148s | ptok 101900 | prefill 701.6 tok/s | gen 67 at 32.6 tok/s
+=== single2 end 16:18:55 (server stopped)

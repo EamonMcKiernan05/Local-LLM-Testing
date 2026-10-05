@@ -1,0 +1,7 @@
+kind,depth_label,ptok,gen,prefill_tps,decode_tps,wall_s,ingest_s,decode_s,stream_events
+depth,8k,8070,16,786.3,53.1,10.7,,,
+depth,20k,20070,16,1262.4,58.4,16.3,,,
+depth,50k,50058,16,1549.9,56.1,32.9,,,
+depth,100k,100050,16,1641.3,55.6,61.7,,,
+depth,150k,150032,16,1610.3,57.6,94.2,,,
+hero,250k (hero run),250592,5899,,,,168.88,122.83,5899

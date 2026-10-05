@@ -1,0 +1,6 @@
+# chart build environment (matplotlib lives here, not in the repo)
+charts/.venv/
+
+# python
+__pycache__/
+*.pyc
