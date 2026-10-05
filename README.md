@@ -7,7 +7,7 @@ CPU: Xeon E5 2680 V4
 
 RAM: 32GB DDR4 2400mhz 
 
-GPUs: 2x Tesla V100 32GB (ordered waiting on delivery)
+GPUs: 2x Tesla V100 32GB (installed 2026-09-30)
 
 Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.0 x16 + 1x PCIe 2.0 x4 (Electrically x16)
 
@@ -23,9 +23,9 @@ Dual Xeon Motherboard - want to see how far i can push 32GB before ordering
 
 OS: Ubuntu 24.04
 
-Cuda: 12.8
+Cuda: 12.9
 
-Inference Engine: Llama.cpp (Mainline) Serving: `llama-server.service` on `:8080`
+Inference Engine: Strata v0.1.39 — Qwen3.8-Flash-Next IQ3_S on 2x V100, serving on `:8080`
 
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
@@ -78,3 +78,42 @@ The larger UD-Q4_K_XL file on three cards, where the DFlash2 bake-off was run:
 **Live peaks vs measured rates:** the 81 tok/s above is a burst Eamon measured himself on a loose task, not a harness run — llama-server's own 3-second window sits 1.5x above its sustained rate on a deep request. Both are recorded with their source in `qwen3.8-27b-llama-cpp/data/csv/live-peak-observations.csv` and are never mixed into the sweep tables.
 
 **Honest limits:** the raw per-arm files for two of the experiments (the 107-run DFlash2 bake-off and the 70-arm two-card sweep) stayed on the box and could not be copied — those tables are transcribed from the reports written from them on the day. Full detail in [`PROVENANCE.md`](qwen3.8-27b-llama-cpp/PROVENANCE.md).
+
+### Qwen3.8-Flash-Next IQ3_S on Strata — 183 recorded runs, all with measurements
+
+Everything we have on this model, in one place: **[`Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S - Strata/`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/)**
+
+The 125B MoE Qwen3.8-Flash-Next (base IQ3_S) served by Strata on **2x Tesla V100 32GB**, measured 2026-10-03 to 2026-10-04 — six-depth batteries, a 126-run drafting sweep, a before/after on the v0.1.39 release, a 250K-token hero run, and vision. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+
+**The findings:**
+
+| | |
+|---|---|
+| Decode at 20K prompt depth | **73.9 tok/s** (v0.1.39; 56.6 on 0.1.32) — the fastest config measured |
+| Decode at 250K prompt depth | **65.0 tok/s** (v0.1.39; 50.3 on 0.1.32) |
+| Best prefill | **1,973 tok/s** at 100K depth; 1,823 at 250K (v0.1.39) |
+| The v0.1.39 release, same battery, same day | **+26.9% decode / +21.5% prefill** — only the engine differs |
+| Longest single run | a 250,632-token prompt read at 1,495 tok/s, then 6,000 tokens generated at 48.8 tok/s (the engine's own line) |
+| Context | the full 256K window on both cards; ~29.3 / 31.5 GB VRAM in use at 250K depth |
+| Drafter sweep verdict (126 runs) | drafter gate **0.50** confirmed on the mean; suffix-draft default 3 and coupled-draft off both confirmed; sampler trims flat |
+| Storage rule | Strata's n-gram table must live on NVMe — the biggest lever this box has (never a spinning disk) |
+| Vision | on, GPU: an image read back exactly in 4.0 s; text prefill pays ~4.5% |
+| Runs recorded | 183 — all 183 measured, 0 failed |
+
+Two charts for the current numbers — speed at depth, and the release gain:
+
+![Qwen3.8-Flash-Next IQ3_S on 2x Tesla V100 — decode and prefill by depth (v0.1.39)](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-decode-depth-v0139.png)
+
+![Strata 0.1.39 vs 0.1.32 — depth benchmark](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-0132-vs-0139.png)
+
+**What the sweeps cost people time not to re-learn:**
+
+- The drafter gate (`--spec-min-p`) is the knob that moves decode — and it needs a full sweep to pin down. Single cells are noise: the "0.85 is best" reading from one run did not survive 126 runs (0.50 won the mean).
+- On Strata the sampler trims are **flat** — no llama.cpp-style trap. The same `top_k 40` that costs 35% there is indistinguishable from the rest here.
+- Suffix-draft default 3 and coupled-draft off: both alternatives measurably lose. Don't turn them on.
+- The n-gram table never goes on a spinning disk. The engine waits on ~80 ms random reads per token; on NVMe that's ~0.1 ms.
+- Unique prefix per request and a discarded warm-up, or you are measuring the cache, not the model.
+
+**What's in the folder:** seven experiment write-ups in the order they were run; the per-arm JSONL and the drivers; every table as a CSV; four figures (three regenerate from the data); and the flag rules in `TUNING.md`.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): one measured run per arm — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The hero card's plotting script was not retained.
