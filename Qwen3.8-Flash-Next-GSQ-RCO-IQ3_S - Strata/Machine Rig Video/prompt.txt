@@ -1,0 +1,48 @@
+You are Qwen3.8-Flash-Next, served by Strata on the machine described in the fact sheet below. Create a complete, working Remotion v4 project (React + TypeScript) that renders a 60-second infographic video about this exact machine and the inference stack you are running on: two Tesla V100 GPUs serving you locally, no cloud involved.
+
+Output format — follow exactly:
+- For each project file, write a heading `### FILE: <path>` followed by one fenced code block containing the full file contents.
+- No prose between files, no TODOs, no placeholders. Every file must be complete and the project must build and render as-is.
+- Keep the total under ~900 lines. End with a `### RUN` section: the exact shell commands to install and render, and two sentences describing the video.
+
+FACT SHEET — the only facts and numbers you may use. Do not invent, round or alter anything; if a number is not here, don't show a number.
+
+MACHINE ("eamon-ai", Ubuntu 24.04 LTS)
+- CPU: Intel Xeon E5-2680 v4 — 14 cores / 28 threads
+- RAM: 31 GiB
+- GPUs: 2× NVIDIA Tesla V100-PCIE-32GB — 32,768 MiB each (64 GB VRAM total) over PCIe Gen3 x16, driver 580.178.04
+- Compute: CUDA 12.9, locally compiled sm_70 build
+- Storage: 238 GB NVMe SSD (hot files), 1.8 TB HDD (cold storage)
+
+MODEL ("Qwen3.8-Flash-Next")
+- 125B-parameter mixture-of-experts, ~6B active per token
+- Quantization: IQ3_S GSQ-RCO (ISTA-DASLab)
+- Context: 262,144 tokens, int8 KV cache; vision (image input) enabled
+
+ENGINE ("Strata v0.1.39")
+- Splits the model across both GPUs; hot-expert cache in VRAM, expert arena memory-mapped from disk, n-gram table served from NVMe
+- Speculative decoding: MTP draft, spec depth 4, confidence gate 0.50
+
+MEASURED PERFORMANCE (bench, 2026-10-04; six prompt depths, 20K → 250K tokens)
+- Decode: 60.3–73.9 tokens/sec (73.9 at 20K, 65.0 at 250K)
+- Prefill: 1,286–1,973 tokens/sec
+- Storage fix: moving the n-gram table from HDD to NVMe took decode from 12.8 → ~65 tokens/sec
+
+TECHNICAL REQUIREMENTS
+- Remotion 4.x, React 18.3.1, TypeScript. Dependencies ONLY: remotion, @remotion/cli (same ^4.x version), react 18.3.1, react-dom 18.3.1, typescript, @types/react, @types/react-dom.
+- Files: package.json, tsconfig.json, remotion.config.ts, src/index.ts (registerRoot), src/theme.ts, scene files of your choice (e.g. src/scenes.tsx), src/Root.tsx. Max 10 files.
+- One Composition `MachineRig`: 1920×1080, 30 fps, exactly 1800 frames (60 s).
+- No audio, no images, no external assets, no network fetches (no Google Fonts, no URLs). Everything is CSS / SVG / text. System font stacks only — monospace (ui-monospace, Menlo, monospace) for numbers, system-ui for the rest.
+- Use Remotion APIs only: useCurrentFrame(), useVideoConfig(), interpolate(), spring(), Easing, <Sequence>, <AbsoluteFill>, <Composition>, registerRoot(). Animate every scene entrance with springs; deliberate, smooth motion — no hard-cut static screens.
+- TypeScript must compile under strict settings. The render command `npx remotion render src/index.ts MachineRig out/machine-rig.mp4` must work.
+
+DESIGN
+- Dark, technical, restrained: near-black background (#0b0e13), one accent colour (V100-era NVIDIA green #76B900), white/grey type, oversized numerals for stats. No clutter.
+- Scenes (you control the timeline; total exactly 1800 frames):
+  1. Cold open — a 2017-era GPU running a 2026 model, fully local. Title card.
+  2. The machine — specs grid: CPU, RAM, 2× V100, 64 GB VRAM total, NVMe + HDD.
+  3. The model — Qwen3.8-Flash-Next: 125B MoE, ~6B active, IQ3_S GSQ-RCO, 262,144-token context, vision enabled.
+  4. The engine — Strata v0.1.39: layer split across both GPUs, VRAM expert cache, memory-mapped expert arena, MTP speculative decoding.
+  5. The numbers — measured decode 60.3–73.9 tok/s and prefill 1,286–1,973 tok/s across 20K→250K depths; the NVMe fix (12.8 → ~65 tok/s).
+  6. Close — "everything runs locally; nothing leaves the box." Outro with hostname eamon-ai.
+- Exact on-screen labels where they appear: "Qwen3.8-Flash-Next", "IQ3_S GSQ-RCO", "Strata v0.1.39", "262,144", "2× Tesla V100", "64 GB VRAM".
