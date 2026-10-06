@@ -1,0 +1,23 @@
+Build one complete, self-contained web demo: a living procedural city — generated fresh in code, full of traffic, lit through a day/night cycle. It must feel like a real place you could fly through, not a grid of grey boxes.
+
+DELIVERABLE
+A single HTML file, self-contained: all HTML, CSS and JavaScript inline. Three.js r160 via importmap from unpkg — "three": https://unpkg.com/three@0.160.0/build/three.module.js and "three/addons/": https://unpkg.com/three@0.160.0/examples/jsm/ — ES modules. Nothing else external: no images, textures, models or fonts — everything generated in code (canvas-generated textures are fine). No build step, no TypeScript, no npm, no frameworks. Zero console errors when opened.
+
+THE CITY (all of the following)
+1. Procedural layout, one generator run at load: a central downtown of tall towers (up to ~40 floors), a mid-rise ring, low-rise outskirts; a park block with trees and a pond; at least two diagonal avenues cutting across the grid; a river along one edge with two or more bridges. Seeded (mulberry32, seed 1337) — the SAME city every load.
+2. Roads: asphalt with lane markings and sidewalks, streetlights along the avenues, traffic lights at major intersections that actually change state.
+3. Buildings: window bands, rooftop details (AC units, antennae, water towers), varied palettes, an occasional construction crane; billboards with animated procedural content (draw them with canvas-generated textures).
+4. Traffic: cars driving in lanes and stopping at red lights; at night, headlights and tail lights; buses with lit windows; a helicopter circling downtown with a blinking light. Vehicles recycled/instanced — a few hundred max.
+5. Day/night cycle (~90 seconds): sky gradient with sun and moon, buildings' windows light up progressively at dusk (vary both per building and per floor), streetlights and billboards come on, light fog, stars at night.
+
+CAMERA
+- Damped OrbitControls for free look, plus a "Fly-through" mode button: the camera follows a smooth closed Catmull-Rom spline at street/rooftop level through the city with subtle banking, then toggles back. Minimise clipping through buildings — raise the path above obstacles or nudge points; brief grazes only.
+
+HUD
+Small dark translucent overlay: FPS, building count, vehicle count, a day/night pause button, a camera mode button. Small type, tidy.
+
+PERFORMANCE
+- Stable 60fps at 1080p on a mid-range laptop: InstancedMesh for buildings, windows, cars and streetlights; distance fog to shorten draw distance; pixel ratio capped at 2; resize handled.
+
+OUTPUT
+Return the complete file as one HTML code block. No explanations, no commentary.
