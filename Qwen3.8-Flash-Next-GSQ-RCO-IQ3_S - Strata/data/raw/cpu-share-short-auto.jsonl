@@ -1,0 +1,12 @@
+{"arm": "auto", "size": 512, "rep": 1, "ts": "2026-10-07 13:19:38", "wall_s": 2.37, "ptok": 574, "prompt_ms": 1757.2, "prompt_tps": 326.7, "gen": 32, "decode_tps": 76.3}
+{"arm": "auto", "size": 512, "rep": 2, "ts": "2026-10-07 13:19:40", "wall_s": 1.95, "ptok": 574, "prompt_ms": 1443.8, "prompt_tps": 397.6, "gen": 32, "decode_tps": 64.3}
+{"arm": "auto", "size": 512, "rep": 3, "ts": "2026-10-07 13:19:42", "wall_s": 1.81, "ptok": 574, "prompt_ms": 1436.2, "prompt_tps": 399.7, "gen": 32, "decode_tps": 88.7}
+{"arm": "auto", "size": 1000, "rep": 1, "ts": "2026-10-07 13:19:44", "wall_s": 2.67, "ptok": 1063, "prompt_ms": 2140.5, "prompt_tps": 496.6, "gen": 32, "decode_tps": 74.1}
+{"arm": "auto", "size": 1000, "rep": 2, "ts": "2026-10-07 13:19:47", "wall_s": 2.43, "ptok": 1063, "prompt_ms": 1980.3, "prompt_tps": 536.8, "gen": 32, "decode_tps": 73.5}
+{"arm": "auto", "size": 1000, "rep": 3, "ts": "2026-10-07 13:19:49", "wall_s": 2.39, "ptok": 1063, "prompt_ms": 1964.4, "prompt_tps": 541.1, "gen": 32, "decode_tps": 78.8}
+{"arm": "auto", "size": 2000, "rep": 1, "ts": "2026-10-07 13:19:53", "wall_s": 3.66, "ptok": 2063, "prompt_ms": 3062.0, "prompt_tps": 673.7, "gen": 32, "decode_tps": 67.2}
+{"arm": "auto", "size": 2000, "rep": 2, "ts": "2026-10-07 13:19:56", "wall_s": 3.26, "ptok": 2063, "prompt_ms": 2789.6, "prompt_tps": 739.5, "gen": 32, "decode_tps": 71.6}
+{"arm": "auto", "size": 2000, "rep": 3, "ts": "2026-10-07 13:19:59", "wall_s": 3.28, "ptok": 2063, "prompt_ms": 2789.6, "prompt_tps": 739.5, "gen": 32, "decode_tps": 69.3}
+{"arm": "auto", "size": 4000, "rep": 1, "ts": "2026-10-07 13:20:04", "wall_s": 5.07, "ptok": 4063, "prompt_ms": 4503.9, "prompt_tps": 902.1, "gen": 32, "decode_tps": 79.7}
+{"arm": "auto", "size": 4000, "rep": 2, "ts": "2026-10-07 13:20:09", "wall_s": 4.66, "ptok": 4063, "prompt_ms": 4226.3, "prompt_tps": 961.4, "gen": 32, "decode_tps": 82.3}
+{"arm": "auto", "size": 4000, "rep": 3, "ts": "2026-10-07 13:20:14", "wall_s": 4.67, "ptok": 4063, "prompt_ms": 4219.7, "prompt_tps": 962.9, "gen": 32, "decode_tps": 77.9}

@@ -1,0 +1,12 @@
+{"arm": "off", "size": 512, "rep": 1, "ts": "2026-10-07 13:17:26", "wall_s": 1.93, "ptok": 574, "prompt_ms": 1474.3, "prompt_tps": 389.3, "gen": 32, "decode_tps": 72.8}
+{"arm": "off", "size": 512, "rep": 2, "ts": "2026-10-07 13:17:28", "wall_s": 1.86, "ptok": 574, "prompt_ms": 1424.9, "prompt_tps": 402.8, "gen": 32, "decode_tps": 74.8}
+{"arm": "off", "size": 512, "rep": 3, "ts": "2026-10-07 13:17:30", "wall_s": 1.9, "ptok": 574, "prompt_ms": 1426.2, "prompt_tps": 402.5, "gen": 32, "decode_tps": 70.0}
+{"arm": "off", "size": 1000, "rep": 1, "ts": "2026-10-07 13:17:32", "wall_s": 2.45, "ptok": 1063, "prompt_ms": 2004.3, "prompt_tps": 530.4, "gen": 32, "decode_tps": 74.7}
+{"arm": "off", "size": 1000, "rep": 2, "ts": "2026-10-07 13:17:35", "wall_s": 2.4, "ptok": 1063, "prompt_ms": 1970.2, "prompt_tps": 539.5, "gen": 32, "decode_tps": 76.4}
+{"arm": "off", "size": 1000, "rep": 3, "ts": "2026-10-07 13:17:37", "wall_s": 2.39, "ptok": 1063, "prompt_ms": 1942.4, "prompt_tps": 547.3, "gen": 32, "decode_tps": 74.1}
+{"arm": "off", "size": 2000, "rep": 1, "ts": "2026-10-07 13:17:41", "wall_s": 3.33, "ptok": 2063, "prompt_ms": 2878.7, "prompt_tps": 716.6, "gen": 32, "decode_tps": 76.0}
+{"arm": "off", "size": 2000, "rep": 2, "ts": "2026-10-07 13:17:44", "wall_s": 3.21, "ptok": 2063, "prompt_ms": 2777.8, "prompt_tps": 742.7, "gen": 32, "decode_tps": 78.9}
+{"arm": "off", "size": 2000, "rep": 3, "ts": "2026-10-07 13:17:47", "wall_s": 3.26, "ptok": 2063, "prompt_ms": 2784.7, "prompt_tps": 740.8, "gen": 32, "decode_tps": 70.8}
+{"arm": "off", "size": 4000, "rep": 1, "ts": "2026-10-07 13:17:52", "wall_s": 4.84, "ptok": 4063, "prompt_ms": 4407.1, "prompt_tps": 921.9, "gen": 32, "decode_tps": 81.0}
+{"arm": "off", "size": 4000, "rep": 2, "ts": "2026-10-07 13:17:56", "wall_s": 4.63, "ptok": 4063, "prompt_ms": 4196.1, "prompt_tps": 968.3, "gen": 32, "decode_tps": 81.1}
+{"arm": "off", "size": 4000, "rep": 3, "ts": "2026-10-07 13:18:01", "wall_s": 4.69, "ptok": 4063, "prompt_ms": 4199.4, "prompt_tps": 967.5, "gen": 32, "decode_tps": 70.7}

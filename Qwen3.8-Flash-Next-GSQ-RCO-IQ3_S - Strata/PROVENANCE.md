@@ -1,6 +1,6 @@
 # Provenance: where every file here came from
 
-Collected 2026-10-05; extended 2026-10-07 (the 0.1.40.1 and 0.1.40.2 comparisons). The rule for this folder: **a number appears here only if it came off a
+Collected 2026-10-05; extended 2026-10-07 (the 0.1.40.1 / 0.1.40.2 comparisons and the CPU-share test). The rule for this folder: **a number appears here only if it came off a
 real run, and every table says which run.** All measurements are on the base IQ3_S.
 
 ## Sources, in order of reliability
@@ -17,6 +17,9 @@ real run, and every table says which run.** All measurements are on the base IQ3
    | `model-bench-0-1-39-base-rerun-results.jsonl` | 7 | 0.1.39 re-run for the day-matched pair (warm-up + 6 arms) |
    | `model-bench-0-1-40-1-base-results.jsonl` | 7 | 0.1.40.1 battery (same shape) |
    | `model-bench-0-1-40-2-base-results.jsonl` | 7 | 0.1.40.2 battery (same shape) |
+   | `model-bench-0-1-40-2-cpu-share-results.jsonl` | 7 | 0.1.40.2 + CPU-share battery (same shape) |
+   | `cpu-share-short-off.jsonl` | 12 | CPU-share short-prompt test, default arm (4 sizes × 3 reps) |
+   | `cpu-share-short-auto.jsonl` | 12 | CPU-share short-prompt test, auto arm (same prompts) |
    | `depth-decode3.jsonl` | 6 | the six-document depth series |
    | `strata-hero.jsonl` | 6 | five depth points + the hero run |
 
@@ -25,17 +28,19 @@ real run, and every table says which run.** All measurements are on the base IQ3
    engine's own per-request lines for the two 250K runs (`engine-log-extracts.txt`). Captured
    verbatim; not retyped.
 3. **The model-bench run directories on the box** (`~/model-bench/runs/2026-10-04T1320Z-…` and
-   `T1335Z-…` for the first pair; `…2026-10-07T0926Z-…`/`T0954Z-…` for the 0.1.40.1 pair and
-   `T1247Z-…` for the 0.1.40.2 run) — every `results.jsonl` here is a byte-identical copy
-   (sha256 checked against the box).
+   `T1335Z-…` for the first pair; `…2026-10-07T0926Z-…`/`T0954Z-…` for the 0.1.40.1 pair;
+   `T1247Z-…` for the 0.1.40.2 run; `T1320Z-…` for the CPU-share battery) — every `results.jsonl`
+   here is a byte-identical copy (sha256 checked against the box). The `cpu-share-short-*.jsonl`
+   records were written by the test driver on the box and moved here verbatim.
 
 ## Counting the runs
 
-**201 recorded runs, every one with measurements; no failures:**
+**231 recorded runs, every one with measurements; no failures:**
 
 126 (MTP sweep) + 20 (sampler sweep) + 30 (release batteries: 0.1.32, 0.1.39, the 0.1.39 re-run,
 0.1.40.1 and 0.1.40.2 — 6 each) + 6 (depth series) + 6 (hero series) + 13 (load checks: 12
-single/dual iterations + the 256K check).
+single/dual iterations + the 256K check) + 24 (CPU-share short-prompt test: 4 sizes × 3 reps ×
+2 arms) + 6 (CPU-share battery control).
 
 - **Warm-up requests were discarded by design** — one per battery and per final compare run.
   They stay visible in their raw files, and they are not counted. (The batteries' warm-ups are
@@ -54,6 +59,7 @@ single/dual iterations + the 256K check).
 | `release-deltas.csv` | `*_delta_pct_derived` | 100 × (0.1.39 value / 0.1.32 value − 1); the `mean` row averages the six **unrounded** deltas, then rounds |
 | `release-deltas-01401.csv` | `*_delta_pct_derived` | 100 × (0.1.40.1 value / 0.1.39 value − 1); same mean rule |
 | `release-deltas-01402.csv` | `*_delta_pct_derived` | 100 × (0.1.40.2 value / 0.1.40.1 value − 1); same mean rule |
+| `cpu-share-*` tables | medians, deltas | chart shows the median of the 3 reps per size per arm; battery deltas = 100 × (cpu_share / default − 1) |
 | `mtp-sweep-summary.csv` | means and bands | per-arm mean over the six depths; bands are min/max across that stage's arms |
 
 Everything else is copied cell-for-cell from the raw records or the logs.
@@ -63,7 +69,7 @@ Everything else is copied cell-for-cell from the raw records or the logs.
 - **One single-card attempt is missing from the logs.** An 8k run before `single2` (recorded in
   the set-up session at 26.8 tok/s) was not captured to a log file; its repeat is `single2` and
   that is what the tables use.
-- **The hero card was a one-off render.** Its plotting script was not retained; the other five
+- **The hero card was a one-off render.** Its plotting script was not retained; the other six
   figures regenerate from `data/csv/` via `scripts/`.
 - **The full engine log stays on the box.** Only the per-request lines for the two 250K runs and
   sampled cache-hit lines are extracted, in `engine-log-extracts.txt`, with the grep documented
