@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strata 0.1.40.2 vs 0.1.40.1 comparison — same model, same battery, one day, one box.
+"""Strata 0.1.40.2 vs 0.1.40.1 comparison — same model, same tests, one day, one box.
 Decode + prefill curves, two series each (grey: 0.1.40.1, gold: 0.1.40.2), per-depth delta sidebar.
 Both as served (same config, same start flags) — only the engine differs.
 Every value parsed from data/csv/release-0-1-40-1-vs-0-1-40-2.csv.
@@ -84,7 +84,7 @@ fig = plt.figure(figsize=(16, 10), dpi=150, facecolor=BG)
 fig.text(0.055, 0.965, "Strata 0.1.40.2 vs 0.1.40.1 \u00b7 Depth Benchmark", color=INK,
          fontsize=38, fontfamily=DISPLAY, va="top")
 fig.text(0.055, 0.902, "Qwen 3.8 Flash base IQ3_S (GSQ-RCO) \u00b7 2\u00d7 Tesla V100 32 GB \u00b7 same six documents, "
-                       "same battery, same day \u00b7 grey: 0.1.40.1, gold: 0.1.40.2",
+                       "same day \u00b7 grey: 0.1.40.1, gold: 0.1.40.2",
          color=INK_DIM, fontsize=16.5, fontfamily=SANS, va="top")
 fig.text(0.965, 0.965, "model-bench  \u00b7  CUDA 12.9  \u00b7  sm_70  \u00b7  2026-10-07",
          color=INK_DIM, fontsize=13, fontfamily=MONO, ha="right", va="top")
@@ -99,7 +99,7 @@ tiles = [
     ("Decode mean gain", pct(dec_mean), "20K \u2013 250K across six depths", False),
     ("Prefill @ 250K", "{:,.0f} \u2192 {:,.0f}".format(pre_b[-1], pre_a[-1]), "tok/s \u00b7 " + pct(pre_pct[-1]), False),
     ("Prefill mean gain", pct(pre_mean), "20K \u2013 250K across six depths", True),
-    ("Battery", "6 \u00d7 400", "unique docs \u00b7 gate 0.50", False),
+    ("Test scope", "6 depths", "400 generated tokens each", False),
 ]
 gap = 0.018
 tw = (1.0 - 4 * gap) / 5.0
@@ -197,7 +197,7 @@ axs.text(0.055, y, "prefill  {:,.0f} \u2192 {:,.0f}".format(pre_b[-1], pre_a[-1]
 # ----------------------------------------------------------------- footer ----
 fig.add_artist(plt.Line2D([0.055, 0.965], [0.098, 0.098], color=RULE, lw=1))
 fig.text(0.055, 0.068, "Only the engine differs: same config (drafter gate 0.50), "
-                       "same six documents, same battery, same day, one run each.",
+                       "same six documents, same day, one run each.",
          color=INK_DIM, fontsize=11.5, fontfamily=SANS, va="bottom")
 fig.text(0.055, 0.040, "raw: model-bench runs 2026-10-07T0926Z (0.1.40.1) and 2026-10-07T1247Z (0.1.40.2) \u00b7 box .5.",
          color=INK_DIM, fontsize=11.5, fontfamily=SANS, va="bottom")
