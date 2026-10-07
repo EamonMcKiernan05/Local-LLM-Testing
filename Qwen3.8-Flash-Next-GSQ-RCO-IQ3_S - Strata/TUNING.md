@@ -24,6 +24,10 @@ copying a command line. **The short version:**
    prompt is a cache hit, not a measurement), discard the first request after any load, and rank
    on **decode tok/s** — draft acceptance % is a diagnostic, not the goal (the fast-looking
    acceptance number has belonged to the slower arm more than once). (Method notes in 02–05.)
+7. **Retire forced workarounds once upstream fixes them — on sm_70 that was ~6 % prefill.** This
+   box forced the old prompt-attention kernel (`STRATA_PROMPT_ATTN_OLD=1`, upstream #371) from
+   v0.1.32 until v0.1.40.1; the engine's own sm_70 kernel (the fix landed in 0.1.33) is ~6 %
+   faster prefill than the forced path, day-matched (experiment 08).
 
 ## How to set the gate
 

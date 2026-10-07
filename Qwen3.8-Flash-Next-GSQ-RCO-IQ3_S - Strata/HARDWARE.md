@@ -1,7 +1,7 @@
 # Hardware, models and flags
 
 > **Era note:** everything in this folder was measured on the 2× Tesla V100 32 GB configuration,
-> 2026-09-30 to 2026-10-04. This is the box as it serves today; the earlier two-and-three-card
+> 2026-09-30 to 2026-10-07. This is the box as it serves today; the earlier two-and-three-card
 > RTX 3060 era is a different dataset, in [`../qwen3.8-27b-llama-cpp/`](../qwen3.8-27b-llama-cpp/).
 
 ## The box
@@ -50,15 +50,17 @@ a locally built engine.
 | v0.1.30 | installed 2026-09-30 | first install; single card, low-RAM mode |
 | v0.1.32 | 2026-10-01 | the sm_70 prompt-attn workaround becomes mandatory (`STRATA_PROMPT_ATTN_OLD=1`, upstream #371) |
 | v0.1.39 | 2026-10-04 | +22–31 % decode / +23–26 % prefill (experiment 06); vision enabled same day (experiment 07) |
+| v0.1.40.1 | 2026-10-07 | the sm_70 workaround retired (upstream fixed #371 in 0.1.33; the box had forced the old kernel); day-matched vs 0.1.39: +5.9 % prefill (experiment 08) |
 
 - Build: local, CUDA 12.9, `archs [70]` only — there is no sm_70 prebuilt (setup compiles it,
   `STRATA_EXPERIMENTAL_SM60=1` admits the V100 and adds `-DSTRATA_EXPERIMENTAL_SM60=ON`).
 - Layout under `/home/eamon/Strata/`: `engine-cuda12/strata` + `engine-cuda12/strata-vision`
-  (the v0.1.39 CUDA-12 layout the benchmarks ran on); `engine/strata` kept from the first
+  (the CUDA-12 layout the benchmarks ran on); `engine/strata` kept from the first
   install; the JSON config the benchmarks ran on is `strata-iq3_s.json`, with the engine log
   beside it.
-- Start/stop: hand-started (no systemd unit). `~/strata-start.sh` sets both sm_70 env flags
-  around the launch; wait on `curl http://127.0.0.1:8080/v1/models` — grepping the log for
+- Start/stop: hand-started (no systemd unit). `~/strata-start.sh` sets `STRATA_EXPERIMENTAL_SM60=1`
+  around the launch (until v0.1.39 it also forced `STRATA_PROMPT_ATTN_OLD=1` — the #371 workaround,
+  retired on v0.1.40.1); wait on `curl http://127.0.0.1:8080/v1/models` — grepping the log for
   "ready" can hit banner text. Stop: `kill -TERM <serve/server.py pid>`; verify VRAM drops.
   Every response carries a `timings` object, and the engine log prints a per-request line —
   that line is the authoritative readout; quote it rather than retyping.
@@ -90,6 +92,10 @@ at `/home/eamon/strata-ple/`.
 ```
 
 Two-card layer split (`gpus 0,1`), `host 0.0.0.0`, port 8080, ctx 262144.
+
+Start env: `STRATA_EXPERIMENTAL_SM60=1`. The 0.1.32–0.1.39 measurements additionally ran with
+`STRATA_PROMPT_ATTN_OLD=1` (the #371 workaround this box was forcing); from v0.1.40.1 the engine's
+own sm_70 prompt kernel is the default.
 
 ## Measurement
 
