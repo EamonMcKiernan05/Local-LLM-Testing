@@ -197,9 +197,9 @@ axs.text(0.055, y, "prefill  {:,.0f} \u2192 {:,.0f}".format(pre_b[-1], pre_a[-1]
 # ----------------------------------------------------------------- footer ----
 fig.add_artist(plt.Line2D([0.055, 0.965], [0.098, 0.098], color=RULE, lw=1))
 fig.text(0.055, 0.068, "Only the engine differs: same config (drafter gate 0.50), "
-                       "same six documents, same day, one run each.",
+                       "same six documents, same day, one run each. All deltas are within run-to-run margin of error (noise).",
          color=INK_DIM, fontsize=11.5, fontfamily=SANS, va="bottom")
-fig.text(0.055, 0.040, "raw: model-bench runs 2026-10-07T0926Z (0.1.40.1) and 2026-10-07T1247Z (0.1.40.2) \u00b7 box .5.",
+fig.text(0.055, 0.040, "raw: model-bench runs 2026-10-07T0926Z (0.1.40.1), 2026-10-07T1247Z (0.1.40.2) + 2026-10-07T1810Z 100k decode re-run \u00b7 box .5.",
          color=INK_DIM, fontsize=11.5, fontfamily=SANS, va="bottom")
 fig.text(0.965, 0.040, "prefill {} mean \u00b7 decode {} mean".format(pct(pre_mean), pct(dec_mean)),
          color=ACCENT, fontsize=12.5, fontfamily=SANS, ha="right", va="bottom")
