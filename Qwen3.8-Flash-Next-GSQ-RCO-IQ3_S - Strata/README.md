@@ -1,17 +1,20 @@
 # Qwen3.8-Flash-Next IQ3_S on Strata — every measurement we took
 
-**183 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
-V100 32 GB — measured 2026-10-03 to 2026-10-04 on the box brought up 2026-09-30.** One GGUF set
+**195 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
+V100 32 GB — measured 2026-10-03 to 2026-10-07 on the box brought up 2026-09-30.** One GGUF set
 throughout: the base `IQ3_S` (GSQ-RCO, 54.8 + 28.8 GB) on both cards. Every number came off a
 real run on this hardware; nothing is estimated from a datasheet.
 
 The findings that matter:
 
-- **Deep-context speed barely decays.** On v0.1.39: decode **73.9 tok/s at 20K** prompt depth →
-  **65.0 at 250K**; prefill 1,286 → **1,973 tok/s peak** (100K) → 1,823 at 250K. The full 256K
-  window runs on both cards (~29.3 / 31.5 GB VRAM in use at 250K depth).
+- **Deep-context speed barely decays.** On v0.1.40.1: decode **74.4 tok/s at 20K** prompt depth →
+  **62.0 at 250K**; prefill 1,366 → **2,102 tok/s peak** (100K) → 1,929 at 250K. The full 256K
+  window runs on both cards (~30.7 / 31.5 GB VRAM in use at 250K depth).
 - **The v0.1.39 release is a big one: +26.9 % decode, +21.5 % prefill** on an identical battery,
   same day, same config — only the engine differs (experiment 06).
+- **The v0.1.40.1 update adds +5.9 % prefill** on a day-matched battery — the win is the retired
+  sm_70 prompt-kernel workaround the box had been forcing (engine-to-engine the release is
+  ~neutral); decode moves within single-rep noise (experiment 08).
 - **The storage rule is the biggest lever the box has.** Strata's n-gram table is read randomly
   per token; it must live on the NVMe. This is the origin of the box's storage policy
   (experiment 01, `HARDWARE.md`).
@@ -21,7 +24,7 @@ The findings that matter:
   confirmed; the sampler trims are flat — no llama.cpp-style `top_k` trap (experiment 05).
 - **Vision works on the V100s.** Images read correctly on GPU (4.0 s, 93 tok/s decode); text
   prefill pays ~4.5 % for the VRAM reserve (experiment 07).
-- Runs recorded: **183 — all 183 with measurements** (warm-ups were discarded by design; a few
+- Runs recorded: **195 — all 195 with measurements** (warm-ups were discarded by design; a few
   rows are annotated warm-up/cold — see `PROVENANCE.md`).
 
 ## The figures
@@ -32,6 +35,7 @@ The findings that matter:
 | `charts/strata-v100-decode-depth.png` | the six-document 0.1.32 profile — **the card posted to X on 2026-10-04** | `scripts/make_chart_depth.py` |
 | `charts/strata-v100-decode-depth-v0139.png` | the same battery re-run on 0.1.39 | `scripts/make_chart_depth_v0139.py` |
 | `charts/strata-v100-0132-vs-0139.png` | 0.1.32 vs 0.1.39, per depth | `scripts/make_chart_compare.py` |
+| `charts/strata-v100-0139-vs-01401.png` | 0.1.39 vs 0.1.40.1, per depth — 0.1.39 re-run the same day | `scripts/make_chart_compare_v01401.py` |
 
 ## Layout
 
@@ -39,8 +43,8 @@ The findings that matter:
 data/csv/     every table from the raw records (built by scripts/build_data.py)
 data/raw/     per-arm JSONL, drivers, configs, logs, engine-log extracts
 experiments/  one write-up per experiment, in the order they were run
-charts/       the figures; scripts/ holds the code that regenerates three of them
-scripts/      build_data.py and the three chart scripts
+charts/       the figures; scripts/ holds the code that regenerates four of them
+scripts/      build_data.py, build_release_01401.py and the four chart scripts
 HARDWARE.md   the box, the models, the exact flag sets
 TUNING.md     what actually moves the needle, and what doesn't
 PROVENANCE.md where every file came from, and what could not be reached
@@ -57,6 +61,7 @@ PROVENANCE.md where every file came from, and what could not be reached
 | 05 | 2026-10-04 | full drafter sweep: gate × depth, suffix, coupled, samplers | 126 | gate 0.50; defaults confirmed; samplers flat |
 | 06 | 2026-10-04 | v0.1.32 → v0.1.39, same battery | 12 | +26.9 % decode / +21.5 % prefill |
 | 07 | 2026-10-04 | vision on the V100s | — | images read correctly; ~4.5 % text-prefill cost |
+| 08 | 2026-10-07 | v0.1.39 → v0.1.40.1, day-matched battery | 12 | +5.9 % prefill (mostly the retired sm_70 workaround); decode within noise |
 
 ## Method, and what is deliberately not claimed
 
@@ -103,3 +108,5 @@ measurement), and discard the first request after any load.
   re-run that cell several times.
 - **Vision was verified with one test image and text spot-checks**, not a formal battery.
 - **No other quants were measured** — this repo is IQ3_S only.
+- **The 0.1.40.1 comparison is one battery per side.** The 60K–250K prefill gains are consistent
+  across all six depths; the decode deltas are single-rep noise (experiment 08).
