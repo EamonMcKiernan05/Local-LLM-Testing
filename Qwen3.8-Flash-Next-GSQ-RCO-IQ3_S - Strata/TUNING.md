@@ -28,6 +28,11 @@ copying a command line. **The short version:**
    box forced the old prompt-attention kernel (`STRATA_PROMPT_ATTN_OLD=1`, upstream #371) from
    v0.1.32 until v0.1.40.1; the engine's own sm_70 kernel (the fix landed in 0.1.33) is ~6 %
    faster prefill than the forced path, day-matched (experiment 08).
+8. **`STRATA_PREFILL_CPU_SHARE` is single-GPU only — expect nothing from it on a layer split.**
+   On the 2-card box it measured +0.6 % mean on 512–4,000-token prompts (noise) and ±1 % on the
+   battery; the CPU pool is wired to the prefill path only when the run is not split
+   (`set_cpu_pool` is guarded by `!multi_gpu`), so the path can never engage here (experiment 10).
+   Upstream's −19–35 % (under 1,000-token prompts) comes from single-GPU boxes.
 
 ## How to set the gate
 

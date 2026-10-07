@@ -1,0 +1,53 @@
+{
+  "run_id": "2026-10-07T1320Z-strata-0-1-40-2-cpu-share",
+  "tool": "model-bench 0.1.0",
+  "label": "strata-0-1-40-2-cpu-share",
+  "endpoint": "http://127.0.0.1:8080",
+  "backend": "strata",
+  "detected": {
+    "endpoint": "http://127.0.0.1:8080",
+    "backend": "strata",
+    "model": "qwen3.8-flash-next-iq3_s",
+    "ctx": 262144
+  },
+  "battery": {
+    "depths_k": [
+      20000,
+      60000,
+      100000,
+      150000,
+      200000,
+      250000
+    ],
+    "gen": 400,
+    "reps": 1,
+    "temp": 0.5,
+    "seed": 12345,
+    "instruction": "[{tag}] Write a detailed technical explanation of lighthouse optics for an engineering audience. Aim for at least 400 words. ",
+    "skipped": []
+  },
+  "host": {
+    "hostname": "eamon-ai",
+    "gpus": [
+      {
+        "idx": 0,
+        "name": "Tesla V100-PCIE-32GB",
+        "used_mib": 31420,
+        "total_mib": 32768,
+        "temp_c": 38
+      },
+      {
+        "idx": 1,
+        "name": "Tesla V100-PCIE-32GB",
+        "used_mib": 32228,
+        "total_mib": 32768,
+        "temp_c": 38
+      }
+    ]
+  },
+  "started_utc": "2026-10-07 13:20:14",
+  "finished_utc": "2026-10-07 13:27:41",
+  "rows": 7,
+  "error_count": 0,
+  "aborted": false
+}
