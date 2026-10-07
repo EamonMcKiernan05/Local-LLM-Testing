@@ -51,6 +51,7 @@ a locally built engine.
 | v0.1.32 | 2026-10-01 | the sm_70 prompt-attn workaround becomes mandatory (`STRATA_PROMPT_ATTN_OLD=1`, upstream #371) |
 | v0.1.39 | 2026-10-04 | +22–31 % decode / +23–26 % prefill (experiment 06); vision enabled same day (experiment 07) |
 | v0.1.40.1 | 2026-10-07 | the sm_70 workaround retired (upstream fixed #371 in 0.1.33; the box had forced the old kernel); day-matched vs 0.1.39: +5.9 % prefill (experiment 08) |
+| v0.1.40.2 | 2026-10-07 | engine rebuilt (sm_70 unchanged); parity on this box — prefill +0.4 %, decode within noise (experiment 09) |
 
 - Build: local, CUDA 12.9, `archs [70]` only — there is no sm_70 prebuilt (setup compiles it,
   `STRATA_EXPERIMENTAL_SM60=1` admits the V100 and adds `-DSTRATA_EXPERIMENTAL_SM60=ON`).
