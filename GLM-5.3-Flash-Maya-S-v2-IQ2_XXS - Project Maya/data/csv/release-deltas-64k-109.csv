@@ -1,0 +1,5 @@
+depth_k,decode_before,decode_after,decode_delta_pct_derived,prefill_before,prefill_after,prefill_delta_pct_derived
+20000,11.9,13.5,13.4,161.7,226.4,40.0
+40000,16.3,15.1,-7.4,149.1,263.9,77.0
+60000,14.9,14.4,-3.4,142.3,270.8,90.3
+mean,,,0.9,,,69.1

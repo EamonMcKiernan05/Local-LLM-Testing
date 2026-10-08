@@ -1,0 +1,45 @@
+{
+ "exe": "/home/eamon/project-maya/build/strata",
+ "args": [
+  "--glm-pack",
+  "/mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs/pack",
+  "--max-context",
+  "65536"
+ ],
+ "cwd": "/home/eamon/project-maya",
+ "tokenizer": "/mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs/pack/tokenizer",
+ "model_name": "glm-5.3-flash",
+ "gpu": [
+  0,
+  1
+ ],
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95
+ },
+ "reasoning_effort": "medium",
+ "lib_dirs": [
+  "/usr/local/cuda-12.9/lib64",
+  "/usr/local/cuda-12.9/targets/x86_64-linux/lib"
+ ],
+ "port": 8080,
+ "host": "0.0.0.0",
+ "vision": {
+  "exe": "/home/eamon/project-maya/build-vision/bin/strata-vision",
+  "mmproj": "/mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs/vision/mmproj-GLM-5.3-Flash-F16.gguf",
+  "model": "/mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs/vision/GLM-5.3-Flash-vocab.gguf",
+  "gpu": true
+ },
+ "log": "/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.log",
+ "installer": {
+  "data_dir": "/mnt/models/Maya-data",
+  "quant": "Maya-S-v2-IQ2_XXS",
+  "gguf_dir": null,
+  "written": "2026-10-07 17:12"
+ },
+ "env": {
+  "STRATA_GLM_TIMING": "1",
+  "STRATA_GLM_POOL_STATS": "1",
+  "STRATA_GLM_RAM_HEADROOM_GB": "3"
+ }
+}
