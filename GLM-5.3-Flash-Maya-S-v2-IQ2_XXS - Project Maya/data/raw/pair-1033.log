@@ -1,0 +1,91 @@
+=== maya pair v1.0.33 vs v1.0.9 started Sun 11 Oct 13:08:34 UTC 2026 ===
+--- [1] restart v1.0.33, then bench (Sun 11 Oct 13:08:34 UTC 2026)
+stopping maya server pid 774919
+stopped; vram: 0 MiB 0 MiB 
+ready after ~130s (v1033)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+"src": "13c572a2c0c8d2ef"
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 412.6 tok/s, decode 14.5 tok/s, 400 gen, 76.9s
+arm 40k rep 1/1: prefill 501.5 tok/s, decode 17.4 tok/s, 400 gen, 103.5s
+arm 60k rep 1/1: prefill 476.9 tok/s, decode 16.8 tok/s, 400 gen, 150.4s
+
+# Model Bench: maya-s-v2-64k-v1033
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-11T1310Z-maya-s-v2-64k-v1033 · 2026-10-11 13:10:48 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 412.6 | 14.5 | 400 | 76.9 | 1 |
+| 40k | 40012 | 501.5 | 17.4 | 400 | 103.5 | 1 |
+| 60k | 59967 | 476.9 | 16.8 | 400 | 150.4 | 1 |
+
+- prefill peak: **501.5 tok/s** at 40k
+- decode peak: **17.4 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-11T1310Z-maya-s-v2-64k-v1033
+bench maya-s-v2-64k-v1033 rc=0 Sun 11 Oct 13:16:32 UTC 2026
+--- [2] rollback to v1.0.9 (7655730) (Sun 11 Oct 13:16:32 UTC 2026)
+stopping maya server pid 776879
+stopped; vram: 0 MiB 0 MiB 
+Note: switching to '7655730'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+HEAD: 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+ready after ~155s (v109)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+"src": "2b852534a0789476"
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 223.0 tok/s, decode 11.8 tok/s, 400 gen, 124.8s
+arm 40k rep 1/1: prefill 254.0 tok/s, decode 14.2 tok/s, 400 gen, 188.1s
+arm 60k rep 1/1: prefill 267.6 tok/s, decode 14.6 tok/s, 400 gen, 256.9s
+
+# Model Bench: maya-s-v2-64k-v109-rerun
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-11T1319Z-maya-s-v2-64k-v109-rerun · 2026-10-11 13:19:12 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20044 | 223.0 | 11.8 | 400 | 124.8 | 1 |
+| 40k | 40044 | 254.0 | 14.2 | 400 | 188.1 | 1 |
+| 60k | 60044 | 267.6 | 14.6 | 400 | 256.9 | 1 |
+
+- prefill peak: **267.6 tok/s** at 60k
+- decode peak: **14.6 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-11T1319Z-maya-s-v2-64k-v109-rerun
+bench maya-s-v2-64k-v109-rerun rc=0 Sun 11 Oct 13:29:01 UTC 2026
+--- [3] restore v1.0.33 (main) (Sun 11 Oct 13:29:01 UTC 2026)
+stopping maya server pid 778398
+stopped; vram: 0 MiB 0 MiB 
+Previous HEAD position was 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+HEAD: 6083122 v1.0.33
+ready after ~165s (v1033)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+"src": "13c572a2c0c8d2ef"
+=== pair done Sun 11 Oct 13:31:52 UTC 2026 ===
