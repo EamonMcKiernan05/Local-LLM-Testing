@@ -11,6 +11,8 @@ Runs (raw/):
   64k-v109          2026-10-08T1000Z-maya-s-v2-64k-v109         v1.0.9 after the update
   64k-v109-rerun    2026-10-11T....Z-maya-s-v2-64k-v109-rerun   v1.0.9 re-run on the v1.0.33 update day
   64k-v1033         2026-10-11T....Z-maya-s-v2-64k-v1033        v1.0.33 after the update
+  64k-v109-rerun2   2026-10-11T....Z-maya-s-v2-64k-v109-rerun2  v1.0.9 re-run again for the v1.0.34 pair
+  64k-v1034         2026-10-11T....Z-maya-s-v2-64k-v1034        v1.0.34 after the update
   128k / 128k-warm2 2026-10-07T1917Z / T2005Z                   bring-up, stock 128K config (record only)
 
 Outputs (csv/):
@@ -20,6 +22,9 @@ Outputs (csv/):
   depth-64k-v109-rerun.csv / depth-64k-v1033.csv
   release-64k-v109-vs-v1033.csv            + release-deltas-64k-1033.csv
   release-deltas-64k-v109-rerun-vs-archived.csv (agreement check for the 2026-10-11 pair)
+  depth-64k-v109-rerun2.csv / depth-64k-v1034.csv
+  release-64k-v109-vs-v1034.csv            + release-deltas-64k-1034.csv
+  release-deltas-64k-v109-rerun2-vs-archived.csv (agreement check for the v1.0.34 pair)
   bringup-128k-stock.csv
 """
 import csv
@@ -92,6 +97,8 @@ def main():
     v109_id, v109 = read_run("model-bench-64k-v109")
     v109r_id, v109r = read_run("model-bench-64k-v109-rerun")
     v1033_id, v1033 = read_run("model-bench-64k-v1033")
+    v109r2_id, v109r2 = read_run("model-bench-64k-v109-rerun2")
+    v1034_id, v1034 = read_run("model-bench-64k-v1034")
     b128_id, b128 = read_run("model-bench-128k")
     b128w_id, b128w = read_run("model-bench-128k-warm2")
 
@@ -112,6 +119,14 @@ def main():
               [["v1.0.33", v1033_id] + r for r in v1033])
     deltas("release-deltas-64k-1033.csv", v109r, v1033)
     deltas("release-deltas-64k-v109-rerun-vs-archived.csv", v109, v109r)
+
+    write_csv("depth-64k-v109-rerun2.csv", ["run_id"] + COLS, [[v109r2_id] + r for r in v109r2])
+    write_csv("depth-64k-v1034.csv", ["run_id"] + COLS, [[v1034_id] + r for r in v1034])
+    write_csv("release-64k-v109-vs-v1034.csv", ["engine", "run_id"] + COLS,
+              [["v1.0.9", v109r2_id] + r for r in v109r2] +
+              [["v1.0.34", v1034_id] + r for r in v1034])
+    deltas("release-deltas-64k-1034.csv", v109r2, v1034)
+    deltas("release-deltas-64k-v109-rerun2-vs-archived.csv", v109, v109r2)
 
     write_csv("bringup-128k-stock.csv", ["run", "run_id"] + COLS,
               [["128k", b128_id] + r for r in b128] +

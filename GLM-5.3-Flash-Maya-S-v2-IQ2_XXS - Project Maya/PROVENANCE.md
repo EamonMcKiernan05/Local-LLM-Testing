@@ -1,6 +1,6 @@
 # Provenance: where every file here came from
 
-Collected 2026-10-08; extended 2026-10-11 (the v1.0.33 comparison). The rule for this folder: **a number appears here only if it came off a real
+Collected 2026-10-08; extended 2026-10-11 (the v1.0.33 and v1.0.34 comparisons). The rule for this folder: **a number appears here only if it came off a real
 run, and every table says which run.** All measurements are on Maya-S-v2 IQ2_XXS (GLM-5.3-Flash).
 
 ## Sources, in order of reliability
@@ -19,25 +19,29 @@ run, and every table says which run.** All measurements are on Maya-S-v2 IQ2_XXS
    | `model-bench-64k-v109` | `2026-10-08T1000Z-maya-s-v2-64k-v109` | v1.0.9 after the update (the pair's "after") |
    | `model-bench-64k-v109-rerun` | `2026-10-11T1319Z-maya-s-v2-64k-v109-rerun` | v1.0.9 re-run on the v1.0.33 update day (the 2026-10-11 pair's "before") |
    | `model-bench-64k-v1033` | `2026-10-11T1310Z-maya-s-v2-64k-v1033` | v1.0.33 after the update (the 2026-10-11 pair's "after") |
+   | `model-bench-64k-v109-rerun2` | `2026-10-11T1454Z-maya-s-v2-64k-v109-rerun2` | v1.0.9 re-run again for the v1.0.34 pair (its "before") |
+   | `model-bench-64k-v1034` | `2026-10-11T1446Z-maya-s-v2-64k-v1034` | v1.0.34 after the update |
 
    Each record carries one discarded warm-up row and three measured arms (20K / 40K / 60K).
 2. **The serving config, the drivers and the logs** — `config-64k-served.json` is the 2026-10-11
-   config (rewritten by that day's setup; both sides of the v1.0.33 pair ran on exactly it — v1.0.9
-   accepts the same flag set). Drivers: `driver-bench-v109.sh` / `driver-bench-rerun.sh` (the
-   2026-10-08 pair) and `driver-pair-1033.sh` (the 2026-10-11 pair, checkout/re-build/restore
-   included), with `update-v109.log` and `pair-1033.log` holding those runs' own output.
+   config (rewritten by that day's setups; all four sides of the day's two pairs ran on exactly it —
+   v1.0.9 accepts the same flag set). Drivers: `driver-bench-v109.sh` / `driver-bench-rerun.sh`
+   (the 2026-10-08 pair), `driver-pair-1033.sh` and `driver-pair-1034.sh` (the two 2026-10-11 pairs,
+   checkout/re-build/restore included), with `update-v109.log`, `pair-1033.log` and `pair-1034.log`
+   holding those runs' own output.
 3. **Engine identity for the pair**: "previous build" = the tree at commit `142540b` (2026-10-07,
    pre-version-numbering); "v1.0.9" = `7655730` (2026-10-08). Both sides compiled locally for
    sm_70 (CUDA 12.9); the engine build stamps (`build/MAYA-BUILD.json` src hashes
    `326ec0d7adf59f7e` and `2b852534a0789476` respectively) were verified before each side was
-   benchmarked. For the 2026-10-11 pair: the v1.0.9 side re-compiled to the same stamp
-   `2b852534a0789476`, and "v1.0.33" = `6083122` with stamp `13c572a2c0c8d2ef` — both verified
-   before each side was benchmarked.
+   benchmarked. For the 2026-10-11 pairs: the v1.0.9 side re-compiled to its old stamp
+   `2b852534a0789476` both times; "v1.0.33" = `6083122` (stamp `13c572a2c0c8d2ef`) and
+   "v1.0.34" = `e728e52` (stamp `f15b35e76c6513ef`) — all verified before each side was
+   benchmarked.
 
 ## Counting the runs
 
-**21 recorded runs, every one with measurements; no failures:** 7 benches × 3 depth arms
-(20K / 40K / 60K). The seven warm-up requests were discarded by design — they stay visible in the
+**27 recorded runs, every one with measurements; no failures:** 9 benches × 3 depth arms
+(20K / 40K / 60K). The nine warm-up requests were discarded by design — they stay visible in the
 raw files (`"kind": "warmup"`) and are not counted.
 
 ## Derived values (the only numbers not read straight off a run)
@@ -48,6 +52,8 @@ raw files (`"kind": "warmup"`) and are not counted.
 | `release-deltas-64k-rerun-vs-archived.csv` | `*_delta_pct_derived` | same formula, re-run vs the archived 2026-10-07 run — the agreement check |
 | `release-deltas-64k-1033.csv` | `*_delta_pct_derived` | 100 × (v1.0.33 value / v1.0.9 re-run value − 1); the `mean` row averages the three **unrounded** deltas, then rounds |
 | `release-deltas-64k-v109-rerun-vs-archived.csv` | `*_delta_pct_derived` | same formula, the 2026-10-11 v1.0.9 re-run vs its 2026-10-08 archive — the agreement check |
+| `release-deltas-64k-1034.csv` | `*_delta_pct_derived` | 100 × (v1.0.34 value / v1.0.9 re-run value − 1); the `mean` row averages the three **unrounded** deltas, then rounds |
+| `release-deltas-64k-v109-rerun2-vs-archived.csv` | `*_delta_pct_derived` | same formula, the second 2026-10-11 v1.0.9 re-run vs its archive — the v1.0.34 pair's agreement check |
 
 The charts read their values from `data/csv/` at draw time (percentages included) — nothing is
 retyped into a chart script.
