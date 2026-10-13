@@ -25,7 +25,7 @@ OS: Ubuntu 24.04
 
 Cuda: 12.9
 
-Inference Engine: Strata v0.1.39 — Qwen3.8-Flash-Next IQ3_S on 2x V100, serving on `:8080`
+Inference Engine: Project Maya v1.0.9 — GLM-5.3-Flash Maya-S on 2x V100, serving on `:8080`
 
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
@@ -117,3 +117,33 @@ Two charts for the current numbers — speed at depth, and the release gain:
 **What's in the folder:** seven experiment write-ups in the order they were run; the per-arm JSONL and the drivers; every table as a CSV; four figures (three regenerate from the data); and the flag rules in `TUNING.md`.
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): one measured run per arm — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The hero card's plotting script was not retained.
+
+### GLM-5.3-Flash (Maya-S) on Project Maya — 15 recorded runs, all with measurements
+
+Everything we have on this model, in one place: **[`GLM-5.3-Flash-Maya-S-v2-IQ2_XXS - Project Maya/`](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/)**
+
+The 321B MoE GLM-5.3-Flash (Maya-S IQ2_XXS, 96.5 GB) served by Project Maya on **2x Tesla V100 32GB**, measured 2026-10-07 to 2026-10-08 — the bring-up benches at 128K and the tuned 64K config, then a same-day controlled before/after on the v1.0.9 update. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+
+**The findings:**
+
+| | |
+|---|---|
+| Best prefill @ 60K | **271 tok/s** (v1.0.9; 142 on the previous build, same day) |
+| Decode @ 60K prompt depth | **14.4 tok/s** (v1.0.9; 13–16 tok/s across depths) |
+| The v1.0.9 update, same bench, same day | **+69.1% prefill mean, +0.9% decode (noise)** — only the engine differs |
+| Storage rule | the expert tiers stream off the boot NVMe; the DRAM-less drive caps decode (~600 experts re-read per token) |
+| Runs recorded | 15 — all 15 measured, 0 failed |
+
+Two charts — the depth card for the current numbers, and the update gain:
+
+![GLM-5.3-Flash Maya-S on 2x Tesla V100 — decode and prefill by depth (v1.0.9)](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-depth.png)
+
+![Project Maya v1.0.9 vs previous build — depth benchmark](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-v109-vs-previous.png)
+
+**The lessons worth keeping:**
+
+- The v1.0.9 pair was measured day-matched: the previous build was rebuilt from its commit and re-run the same morning — the archived 7 Oct numbers agree within ~1% on prefill.
+- Decode on this box is storage-bound: measured disk waits are about half of each token's cost.
+- Warm-ups are discarded by design; the first big request after a load runs below the steady number.
+
+**What's in the folder:** five complete bench records, every table as a CSV, the two figures with the scripts that regenerate them, and the update write-up.
