@@ -1,12 +1,16 @@
 # GLM-5.3-Flash (Maya-S) on Project Maya — the bench record on box .5
 
-**15 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
-V100 32 GB — measured 2026-10-07 to 2026-10-08 on the box brought up 2026-09-30.** One GGUF set
+**27 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
+V100 32 GB — measured 2026-10-07 to 2026-10-11 on the box brought up 2026-09-30.** One GGUF set
 throughout: Maya-S-v2 IQ2_XXS (47.8 + 47.8 + 0.8 GB), layer-split across both cards. Every number
 came off a real run on this hardware; nothing is estimated from a datasheet.
 
 The findings that matter:
 
+- **The v1.0.34 engine update lifts prefill 77–113 % on a same-day, same-config pair (mean +97.5 %)** —
+  260 → 526 tok/s at 40K prompt depth, 269 → 476 at 60K — **and decode rises across all three
+  depths (mean +46.4 %)**. The v1.0.33 pair measured 40 minutes earlier was superseded by the next
+  release before publication (experiments 03/04).
 - **The v1.0.9 engine update adds 40–90 % prefill** on a same-day, same-config pair: 161.7 → 226.4
   tok/s at 20K prompt depth, 142.3 → 270.8 at 60K (mean **+69.1 %**; decode within noise at +0.9 %).
   The update's prefill work (SSD read-ahead + tensor-core attention) is the whole story of the gain.
@@ -17,7 +21,7 @@ The findings that matter:
   numbers are on the cards.
 - **The boot NVMe caps decode**: ~600 of the 12,096 experts re-stream off the DRAM-less SK hynix
   BC501 every token, and measured disk waits are about half the per-token cost (experiment 01).
-- Runs recorded: **15 — all 15 measured, 0 failed** (warm-ups were discarded by design).
+- Runs recorded: **27 — all 27 measured, 0 failed** (warm-ups were discarded by design).
 
 ## The figures
 
@@ -25,12 +29,16 @@ The findings that matter:
 |---|---|---|
 | `charts/maya-v100-64k-depth.png` | the depth card — v1.0.9 numbers, 20K–60K (re-issue of the 2026-10-07 card) | `scripts/make_chart_depth.py` |
 | `charts/maya-v100-64k-v109-vs-previous.png` | v1.0.9 vs previous build, per depth — the same-day pair | `scripts/make_chart_compare.py` |
+| `charts/maya-v100-64k-depth-v1033.png` | the depth card — v1.0.33 numbers, 20K–60K | `scripts/make_chart_depth_v1033.py` |
+| `charts/maya-v100-64k-v109-vs-v1033.png` | v1.0.33 vs v1.0.9, per depth — the same-day pair | `scripts/make_chart_compare_v1033.py` |
+| `charts/maya-v100-64k-depth-v1034.png` | the depth card — v1.0.34 numbers, 20K–60K | `scripts/make_chart_depth_v1034.py` |
+| `charts/maya-v100-64k-v109-vs-v1034.png` | v1.0.34 vs v1.0.9, per depth — the same-day pair | `scripts/make_chart_compare_v1034.py` |
 
 ## Layout
 
 ```
 data/csv/     every table from the raw records (built by scripts/build_data.py)
-data/raw/     the five model-bench run records (results.jsonl + meta.json + summary.csv),
+data/raw/     the nine model-bench run records (results.jsonl + meta.json + summary.csv),
               SHA256SUMS, the serving config, the drivers, the update log
 experiments/  one write-up per experiment, in the order they were run
 charts/       the figures; scripts/ holds the code that regenerates them
@@ -44,6 +52,8 @@ PROVENANCE.md where every file came from, and what is not here
 |---|---|---|---|---|
 | 01 | 2026-10-07 | bring-up: 128K stock benches, the tuned 64K config, and the boot-drive diagnosis | 9 | decode 9.4–12.5 stock → 12.4–15.9 tuned; the drive caps decode |
 | 02 | 2026-10-08 | v1.0.9 update: same-day controlled pair | 6 | prefill **+69.1 %** mean; decode within noise |
+| 03 | 2026-10-11 | v1.0.33 update: same-day controlled pair | 6 | prefill **+86.9 %** mean, decode **+20.2 %** mean — superseded before publication |
+| 04 | 2026-10-11 | v1.0.34 update: same-day controlled pair | 6 | prefill **+97.5 %** mean, decode **+46.4 %** mean |
 
 ## Method, and what is deliberately not claimed
 
@@ -55,6 +65,13 @@ PROVENANCE.md where every file came from, and what is not here
 - **The v1.0.9 comparison is a same-day pair** as the house method requires: the previous build was
   rebuilt from its commit (`142540b`) and re-run the same morning as the update, same config as
   served (64K context, RAM headroom 3) — only the engine differs.
+- **The v1.0.33 comparison is another same-day pair**: v1.0.9 (`7655730`) was rebuilt and re-run
+  the same morning, same config as served — only the engine differs. Its agreement check (re-run
+  vs the 2026-10-08 archive) is in experiment 03: prefill −2.1 % mean; decode sat ~6 % under its
+  archive, so the pair's decode mean carries that caveat.
+- **The v1.0.34 comparison repeats the exercise the same afternoon** (the release landed 40 minutes
+  after experiment 03's measurements): v1.0.9 rebuilt and re-run again — prefill agreement −1.5 %
+  mean, decode ~10 % under its archive (experiment 04).
 - **Decode claims are kept to the band, not to cells.** The three decode deltas of the pair
   (+13.4 / −7.4 / −3.4 %) are one run each; the mean (+0.9 %) is the claim.
 - **Every derived number is the per-depth delta** — `100 × (after / before − 1)` on the unrounded
