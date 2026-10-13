@@ -1,0 +1,16 @@
+# Exact serving command for the bench run (2026-10-13T0645Z), run on box .5 from /home/eamon/llama.cpp
+# env: GGML_CUDA_ALLREDUCE=internal   (NCCL on this box is a cuda13 build on a cuda12.9 system; see the
+#                                     flashnext sweep note - first allreduce aborts without this)
+# wrapper: /home/eamon/serve-v47.sh
+./build/bin/llama-server \
+  --model "/mnt/models/MiniCPM-V-4.7/openbmb/MiniCPM-V-4_7-35B-A3B-Q8_0/MiniCPM-V-4_7-35B-A3B-Q8_0.gguf" \
+  --mmproj "/mnt/models/MiniCPM-V-4.7/openbmb/mmproj-model-f16.gguf" \
+  --host 127.0.0.1 --port 8080 \
+  --ctx-size 262144 \
+  --n-gpu-layers 99 \
+  --device CUDA0,CUDA1 \
+  --fit off \
+  --alias minicpm-v4.7-35b-a3b-q8_0 \
+  --jinja
+# everything else at binary defaults: -b 2048, -ub 512, KV cache f16, flash-attention auto,
+# split-mode layer, 4 slots, kv-unified. Build: b11580 (4413a1924). Load: 8m52s from HDD.

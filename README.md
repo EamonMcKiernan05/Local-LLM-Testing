@@ -147,3 +147,33 @@ Two charts — the depth card for the current numbers, and the update gain:
 - Warm-ups are discarded by design; the first big request after a load runs below the steady number.
 
 **What's in the folder:** five complete bench records, every table as a CSV, the two figures with the scripts that regenerate them, and the update write-up.
+
+### MiniCPM-V 4.7 35B-A3B (Q8_0) on llama.cpp — 6 recorded runs, all measured
+
+Everything we have on this model, in one place: **[`MiniCPM-V-4.7-35B-A3B-Q8_0 - llama.cpp/`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/)**
+
+The new MiniCPM-V 4.7 MoE (35B total, 3B active — Qwen3.6 backbone + SigLIP2 vision) at Q8_0, on **2x Tesla V100 32GB**, measured 2026-10-13 with llama.cpp **b11580** — the first master build with MiniCPM-V 4.7 support. One six-depth battery, one run per depth:
+
+![MiniCPM-V 4.7 35B-A3B Q8_0 on 2x Tesla V100 — decode and prefill by depth](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/charts/minicpmv47-35b-a3b-q8-v100-depth.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Decode at 20K prompt depth | **87.5 tok/s** |
+| Decode at 250K prompt depth | **57.3 tok/s** |
+| Best prefill | **754 tok/s** (at 20K); 431 at 250K |
+| Context | the full 256K window on both cards; 22.8 / 20.5 GB VRAM in use at 250K depth |
+| Quant / storage | Q8_0, 36.9 GB — all 256 experts resident in combined VRAM, zero expert streaming at run time |
+| Vision | on, GPU: an image read back exactly in 5.2 s (one request) |
+| Runs recorded | 6 — all measured, 0 failed (plus one discarded warm-up) |
+
+**What the numbers say:**
+
+- A 35B MoE with 3B active decodes like a small dense model — **87.5 down to 57.3 tok/s** across a 12.5x context range on 2017 cards. That is the shape to want: big model in VRAM, small compute per token.
+- The `qwen35moe` path in llama.cpp does **500–754 tok/s prefill** on this rig, where the 2026-10-05 Flash-Next sweep on the `qwen4exp` path did ~110 — same cards, same afternoon-class build era; the architecture branch moved that number, nothing else.
+- No MTP arm exists: the official GGUF ships no MTP/nextn tensors (checked directly in the file). The DSpark drafter is a separate model — not tested here.
+
+**What's in the folder:** the raw per-arm record and run meta (sha256-checked copies), the engine's own per-request log extracts, the vision smoke-test response, the exact serving command, the depth table as a CSV, and the chart with the script that draws it.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/PROVENANCE.md)): one measured run per depth — single cells at depth carry the usual ±5-8% run-to-run noise class; stock serving flags only, no tuning sweeps; one quant (Q8_0); a vision smoke test, not a vision battery.
