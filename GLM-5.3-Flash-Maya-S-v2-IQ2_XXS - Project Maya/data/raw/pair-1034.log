@@ -1,0 +1,221 @@
+=== maya update v1.0.34 + pair started Sun 11 Oct 14:43:36 UTC 2026 ===
+--- [1] update to v1.0.34 (Sun 11 Oct 14:43:36 UTC 2026)
+stopping maya server pid 780087
+stopped; vram: 0 MiB 0 MiB 
+Updating 6083122..e728e52
+Fast-forward
+ CHANGELOG.md                      |  22 +++++++
+ README.md                         |   2 +
+ VERSION                           |   2 +-
+ include/strata/core/glm_model.hpp |  21 +++++--
+ src/core/glm_fast_path.cu         | 123 +++++++++++++++++++++++++++++++++++---
+ src/core/glm_fast_state.hpp       |   1 +
+ src/core/glm_model.cu             |   3 +-
+ src/core/glm_prefill.cu           |  45 ++++++++++++++
+ src/core/verify.cpp               |   5 ++
+ src/kernels/cuda/glm_fast.cu      |   2 +-
+ 10 files changed, 211 insertions(+), 15 deletions(-)
+HEAD: e728e52 v1.0.34
+VERSION: 1.0.34
+Project Maya v1.0.34 - GLM-5.3-Flash on your own GPU(s).
+
+=== Step 1: checking this PC ===
+  NVIDIA GPUs:
+    GPU 0 (Tesla V100-PCIE-32GB, 32 GB) - can be used
+    GPU 1 (Tesla V100-PCIE-32GB, 32 GB) - can be used
+
+  Maya can run on one GPU, or split the model's layers across several: each then caches the experts of its
+  own layers, so together they hold more of them (V100s: ~50 tok/s benchmark on two, ~24 on one).
+  1) GPU 0 (Tesla V100-PCIE-32GB, 32 GB) + GPU 1 (Tesla V100-PCIE-32GB, 32 GB) together   (recommended)
+  2) GPU 0 (Tesla V100-PCIE-32GB, 32 GB) only
+  [ok] using GPU 0 (Tesla V100-PCIE-32GB, 32 GB) + GPU 1 (Tesla V100-PCIE-32GB, 32 GB): the model's layers are split across the 2
+  [ok] CUDA toolkit 12.9: /usr/local/cuda/bin/nvcc
+  [ok] NVIDIA driver 580.178.04
+  [ok] C++ compiler: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+  [ok] CMake 4.4
+  [ok] Python 3.12.3 (/home/eamon/project-maya/.venv)
+  [ok] RAM: 31 GB, 30 GB available now - it runs with 32 GB; more RAM keeps more experts close and is faster
+  [ok] CPU: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz (AVX2, 28 threads)
+
+=== Step 2: your choices ===
+  [ok] context: 65536 tokens
+
+  The model to download (GLM-5.3-Flash GGUF files you already have: --gguf-dir <file or folder>):
+  1) Maya-S-v2-IQ2_XXS: downloaded, in /mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs   (recommended)
+  2) Maya-S24: download 94.7 GB from Hugging Face
+  3) Maya-M: download 116.0 GB from Hugging Face
+  4) Maya-M-Derisked: download 116.0 GB from Hugging Face
+  5) Maya-L: download 156.3 GB from Hugging Face
+  [ok] model: Maya-S-v2-IQ2_XXS, in /mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs
+
+=== Step 3: Python packages and llama.cpp's source ===
+  [ok] numpy, jinja2, regex, pyyaml, tqdm, requests, cmake, ninja, pillow, psutil already installed
+  [ok] llama.cpp 3cf03257f2: /home/eamon/project-maya/third_party/llama.cpp
+
+=== Step 4: the engine ===
+  Finding a CUDA toolkit and C++ compiler that build the engine here ...
+  [ok] /usr/local/cuda/bin/nvcc with the default g++
+  Compiling the engine for sm_70 (10-30 minutes the first time, a few minutes after an update) ...
+  (CMakeLists.txt refuses an explicit sm_70 - Maya's own floor is sm_75 - so CMake is asked for this
+  machine's GPUs instead: CMAKE_CUDA_ARCHITECTURES=native with CUDA_VISIBLE_DEVICES=0,1)
+  > /home/eamon/project-maya/.venv/bin/cmake -G Ninja -DCMAKE_MAKE_PROGRAM=/home/eamon/project-maya/.venv/bin/ninja -S /home/eamon/project-maya -B /home/eamon/project-maya/build -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=native -DSTRATA_NATIVE_EXPERTS=ON -DSTRATA_BUILD_TESTS=OFF -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DSTRATA_GGML_DIR=/home/eamon/project-maya/third_party/llama.cpp
+-- Strata: CUDA enabled, arch native
+-- strata: pack/full/experts.bin absent - the expert arena load test is NOT registered
+-- ccache found, compilation results will be cached. Disable with GGML_CCACHE=OFF.
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: -march=native 
+-- ggml version: 0.24.0
+-- ggml commit:  e728e52
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/eamon/project-maya/build
+  > /home/eamon/project-maya/.venv/bin/cmake --build /home/eamon/project-maya/build --target strata -j 7
+[1/12] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/glm_fast.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(514): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=23]" was declared but never referenced
+                                       float dot_t<23>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t*) { return dot_iq4_xs(v, y, kbx, iqs); }
+                                             ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(513): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=18]" was declared but never referenced
+                                       float dot_t<18>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq3_xxs_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(512): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=16]" was declared but never referenced
+                                       float dot_t<16>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq2_xxs_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(511): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=19]" was declared but never referenced
+                                       float dot_t<19>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq1_s_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+[2/12] Linking CXX static library libstrata_kernels.a
+[3/12] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[4/12] Linking CXX static library ggml/src/libggml-base.a
+[5/12] Building CXX object CMakeFiles/strata_engine.dir/src/core/verify.cpp.o
+/home/eamon/project-maya/src/core/verify.cpp: In static member function ‘static void strata::core::Verifier::raise_flag(uint32_t*, uint32_t)’:
+/home/eamon/project-maya/src/core/verify.cpp:1140:20: warning: unused variable ‘f’ [-Wunused-variable]
+ 1140 |     volatile long* f = (volatile long*) flag;
+      |                    ^
+[6/12] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_multi.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[7/12] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_prefill.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[8/12] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_model.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[9/12] Building CXX object CMakeFiles/strata.dir/src/program/generate.cpp.o
+/home/eamon/project-maya/src/program/generate.cpp:733:5: warning: ‘int {anonymous}::argmax(const std::vector<float>&)’ defined but not used [-Wunused-function]
+  733 | int argmax(const std::vector<float>& v) {
+      |     ^~~~~~
+[10/12] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_fast_path.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[11/12] Linking CXX static library libstrata_engine.a
+[12/12] Linking CXX executable strata
+  [ok] engine compiled: /home/eamon/project-maya/build/strata
+
+=== Step 5: the model (GLM-5.3-Flash, GGUF) ===
+  [ok] Maya-S-v2-IQ2_XXS: 3 file(s), 96.5 GB in /mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs
+
+=== Step 6: the pack (the engine's index of the model files) ===
+  [ok] pack already built: /mnt/models/Maya-data/models/glm-5.3-flash-maya-s-v2-iq2_xxs/pack
+
+=== Step 7: images (the vision encoder) ===
+  [ok] vision encoder: /home/eamon/project-maya/build-vision/bin/strata-vision
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json
+  [ok] start script: /home/eamon/project-maya/run-maya-maya-s-v2-iq2_xxs.sh
+
+All set. Start it with ./maya.sh (or ./run-maya-maya-s-v2-iq2_xxs.sh).
+setup rc=0
+v1034 stamp src: f15b35e76c6513ef
+--- [2] start v1.0.34, bench (Sun 11 Oct 14:44:16 UTC 2026)
+ready after ~115s (v1034)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 471.7 tok/s, decode 16.8 tok/s, 400 gen, 67.1s
+arm 40k rep 1/1: prefill 525.6 tok/s, decode 20.3 tok/s, 400 gen, 96.6s
+arm 60k rep 1/1: prefill 476.1 tok/s, decode 19.5 tok/s, 400 gen, 148.1s
+
+# Model Bench: maya-s-v2-64k-v1034
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-11T1446Z-maya-s-v2-64k-v1034 · 2026-10-11 14:46:07 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 471.7 | 16.8 | 400 | 67.1 | 1 |
+| 40k | 40012 | 525.6 | 20.3 | 400 | 96.6 | 1 |
+| 60k | 59967 | 476.1 | 19.5 | 400 | 148.1 | 1 |
+
+- prefill peak: **525.6 tok/s** at 40k
+- decode peak: **20.3 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-11T1446Z-maya-s-v2-64k-v1034
+bench maya-s-v2-64k-v1034 rc=0 Sun 11 Oct 14:51:30 UTC 2026
+--- [3] rollback to v1.0.9 (7655730) (Sun 11 Oct 14:51:30 UTC 2026)
+stopping maya server pid 784670
+stopped; vram: 0 MiB 0 MiB 
+Note: switching to '7655730'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+HEAD: 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+ready after ~150s (v109)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 221.7 tok/s, decode 10.5 tok/s, 400 gen, 129.5s
+arm 40k rep 1/1: prefill 259.5 tok/s, decode 14.3 tok/s, 400 gen, 183.8s
+arm 60k rep 1/1: prefill 268.8 tok/s, decode 14.2 tok/s, 400 gen, 256.8s
+
+# Model Bench: maya-s-v2-64k-v109-rerun2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-11T1454Z-maya-s-v2-64k-v109-rerun2 · 2026-10-11 14:54:05 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20044 | 221.7 | 10.5 | 400 | 129.5 | 1 |
+| 40k | 40044 | 259.5 | 14.3 | 400 | 183.8 | 1 |
+| 60k | 60044 | 268.8 | 14.2 | 400 | 256.8 | 1 |
+
+- prefill peak: **268.8 tok/s** at 60k
+- decode peak: **14.3 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-11T1454Z-maya-s-v2-64k-v109-rerun2
+bench maya-s-v2-64k-v109-rerun2 rc=0 Sun 11 Oct 15:03:56 UTC 2026
+--- [4] restore v1.0.34 (main) (Sun 11 Oct 15:03:56 UTC 2026)
+stopping maya server pid 785973
+stopped; vram: 0 MiB 0 MiB 
+Previous HEAD position was 7655730 v1.0.9: conversation slots - a conversation the next request doesn't continue is set aside on the SSD and taken back later instead of re-read (1x V100: going back to a 3.5k-token chat, prefill 10.2 s -> 2.2 s); disk landing ring 3% of free RAM up to 96; README speeds measured by users; --bench/--report prompt-only lines
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+HEAD: e728e52 v1.0.34
+ready after ~165s (v1034b)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+=== update+pair v1.0.34 done Sun 11 Oct 15:06:49 UTC 2026 ===

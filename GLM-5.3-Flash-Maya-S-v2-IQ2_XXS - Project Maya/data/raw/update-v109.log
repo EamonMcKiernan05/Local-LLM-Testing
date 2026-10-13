@@ -1,0 +1,117 @@
+Project Maya v1.0.9 - GLM-5.3-Flash on your own NVIDIA GPU(s). Built on Strata (MIT) and ggml/llama.cpp (MIT).
+  The engine's source changed since it was compiled (an update): compiling what changed ...
+  Compiling the engine for sm_70 (10-30 minutes the first time, a few minutes after an update) ...
+  (CMakeLists.txt refuses an explicit sm_70 - Strata's own floor is sm_75 - so CMake is asked for this
+  machine's GPUs instead: CMAKE_CUDA_ARCHITECTURES=native with CUDA_VISIBLE_DEVICES=0,1)
+  > /home/eamon/project-maya/.venv/bin/cmake -G Ninja -DCMAKE_MAKE_PROGRAM=/home/eamon/project-maya/.venv/bin/ninja -S /home/eamon/project-maya -B /home/eamon/project-maya/build -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=native -DSTRATA_NATIVE_EXPERTS=ON -DSTRATA_BUILD_TESTS=OFF -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DSTRATA_GGML_DIR=/home/eamon/project-maya/third_party/llama.cpp
+-- Strata: CUDA enabled, arch native
+-- strata: pack/full/experts.bin absent - the expert arena load test is NOT registered
+-- ccache found, compilation results will be cached. Disable with GGML_CCACHE=OFF.
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: -march=native 
+-- ggml version: 0.24.0
+-- ggml commit:  7655730
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/eamon/project-maya/build
+  > /home/eamon/project-maya/.venv/bin/cmake --build /home/eamon/project-maya/build --target strata -j 7
+[1/15] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/elementwise.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[2/15] Building CXX object CMakeFiles/strata_kernels.dir/src/kernels/ngram.cpp.o
+[3/15] Building CXX object CMakeFiles/strata_engine.dir/src/core/native_head.cpp.o
+[4/15] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[5/15] Linking CXX static library ggml/src/libggml-base.a
+[6/15] Building CXX object CMakeFiles/strata_engine.dir/src/core/native_dense.cpp.o
+[7/15] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/glm_batch.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[8/15] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_prefill.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[9/15] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_model.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[10/15] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/glm_fast.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(792): warning #128-D: loop is not reachable
+      for (int k = lane; k < nb * Fm::ipb; k += 32) {
+      ^
+          detected during:
+            instantiation of "void strata::kernels::glmf::<unnamed>::rows_dot<T,NR>(const uint8_t *const *, const block_q8_1 *, int, int, const uint32_t *, float *) [with T=10, NR=4]" at line 2151
+            instantiation of "void strata::kernels::glmf::<unnamed>::moe_gate_up_kernel<TG>(strata::kernels::glmf::MoeDev, int, int, int, float, const block_q8_1 *, block_q8_1 *, const uint8_t *, int, const block_q8_1 *, int, float *) [with TG=10]" at line 2959
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(792): warning #128-D: loop is not reachable
+      for (int k = lane; k < nb * Fm::ipb; k += 32) {
+      ^
+          detected during:
+            instantiation of "void strata::kernels::glmf::<unnamed>::rows_dot<T,NR>(const uint8_t *const *, const block_q8_1 *, int, int, const uint32_t *, float *) [with T=11, NR=4]" at line 2151
+            instantiation of "void strata::kernels::glmf::<unnamed>::moe_gate_up_kernel<TG>(strata::kernels::glmf::MoeDev, int, int, int, float, const block_q8_1 *, block_q8_1 *, const uint8_t *, int, const block_q8_1 *, int, float *) [with TG=11]" at line 2959
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(497): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=23]" was declared but never referenced
+                                       float dot_t<23>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t*) { return dot_iq4_xs(v, y, kbx, iqs); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(496): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=18]" was declared but never referenced
+                                       float dot_t<18>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq3_xxs_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(495): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=16]" was declared but never referenced
+                                       float dot_t<16>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq2_xxs_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(494): warning #177-D: function "strata::kernels::glmf::<unnamed>::dot_t<T>(const void *, const block_q8_1 *, int, int, const uint32_t *) [with T=19]" was declared but never referenced
+                                       float dot_t<19>(const void* v, const block_q8_1* y, int kbx, int iqs, const uint32_t* tab) { return dot_iq1_s_t(v, y, kbx, iqs, tab); }
+                                             ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(533): warning #114-D: function "strata::kernels::glmf::<unnamed>::dw<T>(const uint8_t *, int, int, const strata::kernels::glmf::<unnamed>::XV &, const uint32_t *) [with T=11]" was referenced but not defined
+                                            float dw(const uint8_t* row, int kbx, int iqs, const XV& x, const uint32_t* tab);
+                                                  ^
+
+/home/eamon/project-maya/src/kernels/cuda/glm_fast.cu(533): warning #114-D: function "strata::kernels::glmf::<unnamed>::dw<T>(const uint8_t *, int, int, const strata::kernels::glmf::<unnamed>::XV &, const uint32_t *) [with T=10]" was referenced but not defined
+                                            float dw(const uint8_t* row, int kbx, int iqs, const XV& x, const uint32_t* tab);
+                                                  ^
+
+Global is external, but doesn't have external or weak linkage!
+float (i8*, i32, i32, %struct._ZN6strata7kernels4glmf44_GLOBAL__N__8c068df4_11_glm_fast_cu_18058fc42XVE*, i32*)* @_ZN42_INTERNAL_8c068df4_11_glm_fast_cu_18058fc46strata7kernels4glmf44_GLOBAL__N__8c068df4_11_glm_fast_cu_18058fc42dwILi10EEEfPKhiiRKNS3_2XVEPKj
+Global is external, but doesn't have external or weak linkage!
+float (i8*, i32, i32, %struct._ZN6strata7kernels4glmf44_GLOBAL__N__8c068df4_11_glm_fast_cu_18058fc42XVE*, i32*)* @_ZN42_INTERNAL_8c068df4_11_glm_fast_cu_18058fc46strata7kernels4glmf44_GLOBAL__N__8c068df4_11_glm_fast_cu_18058fc42dwILi11EEEfPKhiiRKNS3_2XVEPKj
+[11/15] Linking CXX static library libstrata_kernels.a
+[12/15] Building CXX object CMakeFiles/strata.dir/src/program/generate.cpp.o
+/home/eamon/project-maya/src/program/generate.cpp:696:5: warning: ‘int {anonymous}::argmax(const std::vector<float>&)’ defined but not used [-Wunused-function]
+  696 | int argmax(const std::vector<float>& v) {
+      |     ^~~~~~
+[13/15] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_fast_path.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+[14/15] Linking CXX static library libstrata_engine.a
+[15/15] Linking CXX executable strata
+  [ok] engine compiled: /home/eamon/project-maya/build/strata
+
+  ----------------------------------------------------------------------------------------------------
+  Starting glm-5.3-flash (maya-maya-s-v2-iq2_xxs.json).
+  Dashboard:        http://127.0.0.1:8080/
+  API (OpenAI):     http://127.0.0.1:8080/v1        (any model name; the API key: any)
+  API (Anthropic):  http://127.0.0.1:8080/v1/messages
+  Other devices:    the server prints this machine's addresses when it is ready - WARNING: no API key, anyone on your network can use it (--api-key KEY)
+  Loading takes a few minutes: the engine pins up to all but about 6 GB of the free RAM for its expert tier
+  (STRATA_GLM_RAM_HEADROOM_GB changes the 6) and warms its caches - the first answers are the slowest.
+  Ctrl+C (or closing this terminal) stops it. Engine log: /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.log
+  ----------------------------------------------------------------------------------------------------
+[strata] sampling defaults from the config: temperature=1.0, top_p=0.95
+[strata] images: the vision encoder needs 2.69 GB on this GPU at up to 4096 image tokens
+loading the model (the first start takes a minute or two) ...
+[strata] layer split across GPUs [0, 1] (auto)
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] still starting (60 s) - please wait ...
+[strata] still starting (80 s) - please wait ...
+[strata] still starting (100 s) - please wait ...
+[strata] images: the vision encoder starts when a picture arrives, in 2.78 GB the model lends it
+[strata] thinking level when a request names none: medium
+[strata] thinking budget: 32768 tokens (then the answer)
+ready: http://127.0.0.1:8080/v1  (OpenAI: /v1/chat/completions, Anthropic: /v1/messages, context 65536 tokens, images on)
+       open http://127.0.0.1:8080/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.5:8080/   (API: http://192.168.1.5:8080/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
