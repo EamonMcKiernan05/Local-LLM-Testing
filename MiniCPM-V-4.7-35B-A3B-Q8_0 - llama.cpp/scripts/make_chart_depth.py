@@ -69,7 +69,7 @@ fig = plt.figure(figsize=(16, 10), dpi=150, facecolor=BG)
 fig.text(0.055, 0.965, "2\u00d7 Tesla V100 \u00b7 llama.cpp Benchmark", color=INK,
          fontsize=38, fontfamily=DISPLAY, va="top")
 fig.text(0.055, 0.902, "MiniCPM-V 4.7 35B-A3B (Q8_0) \u00b7 2\u00d7 Tesla V100 32 GB \u00b7 31 GB RAM \u00b7 "
-                       "256K context \u00b7 six unique documents",
+                       "256K context \u00b7 six unique documents \u00b7 layer split (default)",
          color=INK_DIM, fontsize=16.5, fontfamily=SANS, va="top")
 fig.text(0.965, 0.965, "llama.cpp b11580  \u00b7  CUDA 12.9  \u00b7  sm_70  \u00b7  2026-10-13",
          color=INK_DIM, fontsize=13, fontfamily=MONO, ha="right", va="top")
@@ -193,8 +193,8 @@ fig.text(0.055, 0.075, "Six unique texts, one per depth \u2014 decode {:.1f} tok
                        "{:.1f} tok/s at {:,}; prefill {:,.0f}\u2013{:,.0f} tok/s.".format(
         d20["decode_tps"], d20["ptok"], d250["decode_tps"], d250["ptok"], pf_min, pf_max),
          color=ACCENT, fontsize=13.5, fontfamily=SANS, va="bottom")
-fig.text(0.055, 0.042, "stock llama.cpp b11580 (4413a1924), mmproj loaded \u00b7 temperature 0.5, fixed seed \u00b7 "
-                       "one run per depth \u00b7 raw: model-bench run {} \u00b7 box .5".format(RUN_ID),
+fig.text(0.055, 0.042, "stock llama.cpp b11580 (4413a1924), mmproj loaded, layer split (default) \u00b7 temperature 0.5, fixed seed \u00b7 "
+                       "one run per depth \u00b7 raw: model-bench run 2026-10-13T0645Z (layer split) \u00b7 box .5",
          color=INK_DIM, fontsize=11.5, fontfamily=SANS, va="bottom")
 
 fig.savefig(OUT, facecolor=BG)

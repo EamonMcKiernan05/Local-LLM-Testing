@@ -1,0 +1,20 @@
+# Exact serving command for the TENSOR-SPLIT bench run (2026-10-13T0920Z), run on box .5 from /home/eamon/llama.cpp
+# env: GGML_CUDA_ALLREDUCE=internal   (NCCL on this box is a cuda13 build on a cuda12.9 system)
+# wrapper: /home/eamon/serve-v47-tsplit.sh
+./build/bin/llama-server \
+  --model "/mnt/models/MiniCPM-V-4.7/openbmb/MiniCPM-V-4_7-35B-A3B-Q8_0/MiniCPM-V-4_7-35B-A3B-Q8_0.gguf" \
+  --mmproj "/mnt/models/MiniCPM-V-4.7/openbmb/mmproj-model-f16.gguf" \
+  --host 127.0.0.1 --port 8080 \
+  --ctx-size 262144 \
+  --n-gpu-layers 99 \
+  --device CUDA0,CUDA1 \
+  --split-mode tensor \
+  --tensor-split 1,1 \
+  --fit off \
+  --alias minicpm-v4.7-35b-a3b-q8_0 \
+  --jinja
+# note: -sm row (the classic CUDA row split) was REMOVED upstream (commit 74976e1ae) - on this
+# build it aborts at load with `device CUDA0 does not support split buffers`. -sm tensor is the
+# current experimental tensor-parallel implementation (weights + KV split, per-layer reduction).
+# everything else at binary defaults: -b 2048, -ub 512, KV cache f16, flash-attention auto,
+# 4 slots, kv-unified. Build: b11580 (4413a1924). Load: ~10m30s from HDD.
