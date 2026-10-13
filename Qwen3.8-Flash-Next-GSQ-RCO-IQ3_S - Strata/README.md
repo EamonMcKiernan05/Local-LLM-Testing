@@ -1,6 +1,6 @@
 # Qwen3.8-Flash-Next IQ3_S on Strata — every measurement we took
 
-**261 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
+**285 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
 V100 32 GB — measured 2026-10-03 to 2026-10-13 on the box brought up 2026-09-30.** One GGUF set
 throughout: the base `IQ3_S` (GSQ-RCO, 54.8 + 28.8 GB) on both cards. Every number came off a
 real run on this hardware; nothing is estimated from a datasheet.
@@ -25,10 +25,11 @@ The findings that matter:
   it changes: answers revert to pre-tail-skip behaviour from 90 % cache occupancy on the V100s
   (fix #1884) plus the Linux adaptive-tier overlap default.
 - **The v0.1.44 update is parity on this box too**: fresh same-day pair reads prefill +0.6 %
-  mean / decode −3.1 % mean, both inside run-to-run wander — the pair's decode dip is the 0.1.43
-  re-run sitting high at 20–60K, and against the 10-11 baseline 0.1.44 agrees within ±0.5 %
-  prefill at 20–200K (experiment 12). Its wins land on other platforms: Unsloth and NVFP4 files,
-  Qwen3.6, AMD/Arc multi-GPU, Apple Silicon (Mac Metal).
+  mean / decode −3.1 % mean — and the same-night decode repeats (three passes per side) put net
+  decode at −1.0 %, inside the pass-to-pass spread; the pair's dip was the 0.1.43 side's
+  first-pass draw. Against the 10-11 baseline 0.1.44 agrees within ±0.5 % prefill at 20–200K
+  (experiment 12). Its wins land on other platforms: Unsloth and NVFP4 files, Qwen3.6, AMD/Arc
+  multi-GPU, Apple Silicon (Mac Metal).
 - **`STRATA_PREFILL_CPU_SHARE=auto` can't engage on this box** — it is a single-GPU feature
   (the CPU pool is wired to prefill only in non-split runs), and the measurements agree: short
   prompts +0.6 % mean, battery ±1 % (experiment 10).
@@ -41,7 +42,7 @@ The findings that matter:
   confirmed; the sampler trims are flat — no llama.cpp-style `top_k` trap (experiment 05).
 - **Vision works on the V100s.** Images read correctly on GPU (4.0 s, 93 tok/s decode); text
   prefill pays ~4.5 % for the VRAM reserve (experiment 07).
-- Runs recorded: **261 — all 261 with measurements** (warm-ups were discarded by design; a few
+- Runs recorded: **285 — all 285 with measurements** (warm-ups were discarded by design; a few
   rows are annotated warm-up/cold — see `PROVENANCE.md`).
 
 ## The figures
@@ -88,7 +89,7 @@ PROVENANCE.md where every file came from, and what could not be reached
 | 09 | 2026-10-07 | v0.1.40.1 → v0.1.40.2, same battery (same day) | 6 | parity on this box — deltas inside single-rep noise |
 | 10 | 2026-10-07 | CPU-share test: short prompts + battery control | 30 | no effect — single-GPU-only feature; a split box can't engage it |
 | 11 | 2026-10-11 | v0.1.42 → v0.1.43, same-day pair + agreement check | 18 | parity within wander — the pair's mid-range prefill gains are the 0.1.42 side's own undershoot; a behaviour fix (#1884) |
-| 12 | 2026-10-13 | v0.1.43 → v0.1.44, same-day pair + agreement check | 12 | parity within wander — the decode dip is the 0.1.43 re-run's own high 20–60K cells; 0.1.44 agrees with the 10-11 baseline within ±0.5 % prefill |
+| 12 | 2026-10-13 | v0.1.43 → v0.1.44, same-day pair + agreement check; decode repeats (×3 each side) | 36 | parity within wander — the decode dip was the 0.1.43 first-pass draw; repeats net −1.0 %, inside the pass spread (250K lean noted) |
 
 ## Method, and what is deliberately not claimed
 
@@ -140,8 +141,9 @@ measurement), and discard the first request after any load.
   comparison is likewise one battery per side — a parity read (experiment 09). The 0.1.42→0.1.43
   pair is one battery per side too, and its before-side wandered (5–8 % under its morning run,
   100–200K prefill) — the agreement check is in experiment 11. The 0.1.43→0.1.44 pair is likewise
-  one battery per side; its before-side sat high on decode at 20–60K, and 0.1.44 tracks the 10-11
-  v0.1.43 numbers within ±0.5 % prefill (experiment 12).
+  one battery per side, and its decode repeats (three passes per side, same night) netted
+  −1.0 % — inside the pass-to-pass spread; the 250K decode lean (~2.7 tok/s) is the one
+  cell left uncalled (experiment 12).
 - **The CPU-share feature is only tested out of its lane here.** It cannot engage on a layer
   split, so nothing here says how it behaves on the single-GPU boxes it was built for
   (experiment 10).
