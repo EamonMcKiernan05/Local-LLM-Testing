@@ -1,7 +1,7 @@
 # Qwen3.8-Flash-Next IQ3_S on Strata — every measurement we took
 
-**249 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
-V100 32 GB — measured 2026-10-03 to 2026-10-11 on the box brought up 2026-09-30.** One GGUF set
+**261 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
+V100 32 GB — measured 2026-10-03 to 2026-10-13 on the box brought up 2026-09-30.** One GGUF set
 throughout: the base `IQ3_S` (GSQ-RCO, 54.8 + 28.8 GB) on both cards. Every number came off a
 real run on this hardware; nothing is estimated from a datasheet.
 
@@ -24,6 +24,11 @@ The findings that matter:
   morning's numbers the two engines agree within ±0.5 % at 20–200K prefill (experiment 11). What
   it changes: answers revert to pre-tail-skip behaviour from 90 % cache occupancy on the V100s
   (fix #1884) plus the Linux adaptive-tier overlap default.
+- **The v0.1.44 update is parity on this box too**: fresh same-day pair reads prefill +0.6 %
+  mean / decode −3.1 % mean, both inside run-to-run wander — the pair's decode dip is the 0.1.43
+  re-run sitting high at 20–60K, and against the 10-11 baseline 0.1.44 agrees within ±0.5 %
+  prefill at 20–200K (experiment 12). Its wins land on other platforms: Unsloth and NVFP4 files,
+  Qwen3.6, AMD/Arc multi-GPU, Apple Silicon (Mac Metal).
 - **`STRATA_PREFILL_CPU_SHARE=auto` can't engage on this box** — it is a single-GPU feature
   (the CPU pool is wired to prefill only in non-split runs), and the measurements agree: short
   prompts +0.6 % mean, battery ±1 % (experiment 10).
@@ -36,7 +41,7 @@ The findings that matter:
   confirmed; the sampler trims are flat — no llama.cpp-style `top_k` trap (experiment 05).
 - **Vision works on the V100s.** Images read correctly on GPU (4.0 s, 93 tok/s decode); text
   prefill pays ~4.5 % for the VRAM reserve (experiment 07).
-- Runs recorded: **249 — all 249 with measurements** (warm-ups were discarded by design; a few
+- Runs recorded: **261 — all 261 with measurements** (warm-ups were discarded by design; a few
   rows are annotated warm-up/cold — see `PROVENANCE.md`).
 
 ## The figures
@@ -52,6 +57,8 @@ The findings that matter:
 | `charts/strata-v100-cpu-share-01402.png` | CPU-share vs default: 512–4,000-token prompts + the battery control | `scripts/make_chart_cpu_share_01402.py` |
 | `charts/strata-v100-0142-vs-0143.png` | 0.1.42 vs 0.1.43, per depth — 0.1.42 re-run the same day | `scripts/make_chart_compare_v0143.py` |
 | `charts/strata-v100-decode-depth-v0143.png` | the same battery re-run on 0.1.43 — **the card posted to X** | `scripts/make_chart_depth_v0143.py` |
+| `charts/strata-v100-0143-vs-0144.png` | 0.1.43 vs 0.1.44, per depth — 0.1.43 re-run the same day | `scripts/make_chart_compare_v0144.py` |
+| `charts/strata-v100-decode-depth-v0144.png` | the same battery re-run on 0.1.44 — the cycle's card | `scripts/make_chart_depth_v0144.py` |
 
 ## Layout
 
@@ -59,8 +66,8 @@ The findings that matter:
 data/csv/     every table from the raw records (built by scripts/build_data.py)
 data/raw/     per-arm JSONL, drivers, configs, logs, engine-log extracts
 experiments/  one write-up per experiment, in the order they were run
-charts/       the figures; scripts/ holds the code that regenerates eight of them
-scripts/      build_data.py, build_release_01401.py, build_release_01402.py, build_release_0143.py, build_cpu_share.py and the eight chart scripts
+charts/       the figures; scripts/ holds the code that regenerates ten of them
+scripts/      build_data.py, build_release_01401.py, build_release_01402.py, build_release_0143.py, build_release_0144.py, build_cpu_share.py and the ten chart scripts
 HARDWARE.md   the box, the models, the exact flag sets
 TUNING.md     what actually moves the needle, and what doesn't
 PROVENANCE.md where every file came from, and what could not be reached
@@ -81,6 +88,7 @@ PROVENANCE.md where every file came from, and what could not be reached
 | 09 | 2026-10-07 | v0.1.40.1 → v0.1.40.2, same battery (same day) | 6 | parity on this box — deltas inside single-rep noise |
 | 10 | 2026-10-07 | CPU-share test: short prompts + battery control | 30 | no effect — single-GPU-only feature; a split box can't engage it |
 | 11 | 2026-10-11 | v0.1.42 → v0.1.43, same-day pair + agreement check | 18 | parity within wander — the pair's mid-range prefill gains are the 0.1.42 side's own undershoot; a behaviour fix (#1884) |
+| 12 | 2026-10-13 | v0.1.43 → v0.1.44, same-day pair + agreement check | 12 | parity within wander — the decode dip is the 0.1.43 re-run's own high 20–60K cells; 0.1.44 agrees with the 10-11 baseline within ±0.5 % prefill |
 
 ## Method, and what is deliberately not claimed
 
@@ -131,7 +139,9 @@ measurement), and discard the first request after any load.
   across all six depths; the decode deltas are single-rep noise (experiment 08). The 0.1.40.2
   comparison is likewise one battery per side — a parity read (experiment 09). The 0.1.42→0.1.43
   pair is one battery per side too, and its before-side wandered (5–8 % under its morning run,
-  100–200K prefill) — the agreement check is in experiment 11.
+  100–200K prefill) — the agreement check is in experiment 11. The 0.1.43→0.1.44 pair is likewise
+  one battery per side; its before-side sat high on decode at 20–60K, and 0.1.44 tracks the 10-11
+  v0.1.43 numbers within ±0.5 % prefill (experiment 12).
 - **The CPU-share feature is only tested out of its lane here.** It cannot engage on a layer
   split, so nothing here says how it behaves on the single-GPU boxes it was built for
   (experiment 10).
