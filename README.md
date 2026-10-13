@@ -148,32 +148,39 @@ Two charts — the depth card for the current numbers, and the update gain:
 
 **What's in the folder:** five complete bench records, every table as a CSV, the two figures with the scripts that regenerate them, and the update write-up.
 
-### MiniCPM-V 4.7 35B-A3B (Q8_0) on llama.cpp — 6 recorded runs, all measured
+### MiniCPM-V 4.7 35B-A3B (Q8_0) on llama.cpp — 12 recorded runs, all measured
 
 Everything we have on this model, in one place: **[`MiniCPM-V-4.7-35B-A3B-Q8_0 - llama.cpp/`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/)**
 
-The new MiniCPM-V 4.7 MoE (35B total, 3B active — Qwen3.6 backbone + SigLIP2 vision) at Q8_0, on **2x Tesla V100 32GB**, measured 2026-10-13 with llama.cpp **b11580** — the first master build with MiniCPM-V 4.7 support. One six-depth battery, one run per depth:
+The new MiniCPM-V 4.7 MoE (35B total, 3B active — Qwen3.6 backbone + SigLIP2 vision) at Q8_0, on **2x Tesla V100 32GB**, measured 2026-10-13 with llama.cpp **b11580** — the first master build with MiniCPM-V 4.7 support. Two six-depth benches, one run per depth: layer split (the default) and tensor split (`-sm tensor -ts 1,1`):
 
-![MiniCPM-V 4.7 35B-A3B Q8_0 on 2x Tesla V100 — decode and prefill by depth](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/charts/minicpmv47-35b-a3b-q8-v100-depth.png)
+![MiniCPM-V 4.7 35B-A3B Q8_0 on 2x Tesla V100 — decode and prefill by depth, layer split](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/charts/minicpmv47-35b-a3b-q8-v100-depth.png)
+
+Tensor split changes the profile — decode up at every depth (to +22.7%), prefill down (from −46% to −17%):
+
+![Tensor split vs layer split — depth benchmark](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/charts/minicpmv47-split-comparison.png)
 
 **The findings:**
 
 | | |
 |---|---|
-| Decode at 20K prompt depth | **87.5 tok/s** |
-| Decode at 250K prompt depth | **57.3 tok/s** |
-| Best prefill | **754 tok/s** (at 20K); 431 at 250K |
-| Context | the full 256K window on both cards; 22.8 / 20.5 GB VRAM in use at 250K depth |
+| Decode at 20K prompt depth | **87.5 tok/s** (layer split), **92.5 tok/s** (tensor split) |
+| Decode at 250K prompt depth | **57.3** (layer) / **70.3** (tensor) |
+| Tensor vs layer, same bench | **decode +15.2% mean · prefill −29.5% mean** — tensor pays one reduce per layer over PCIe; its decode win grows to +22.7% at 250K while the prefill cost shrinks to −17% |
+| Best prefill | **754 tok/s** (layer, at 20K); tensor-mode prefill is flat ~400 tok/s across depths |
+| Context | the full 256K window on both cards; 22.8 / 20.5 GB (layer) and 21.6 / 20.5 GB (tensor) VRAM in use at 250K depth |
 | Quant / storage | Q8_0, 36.9 GB — all 256 experts resident in combined VRAM, zero expert streaming at run time |
 | Vision | on, GPU: an image read back exactly in 5.2 s (one request) |
-| Runs recorded | 6 — all measured, 0 failed (plus one discarded warm-up) |
+| `-sm row` status | removed from CUDA upstream (`74976e1ae`) — aborts at load on this build; `-sm tensor` is the working tensor mode |
+| Runs recorded | 12 — all measured, 0 failed (plus two discarded warm-ups) |
 
 **What the numbers say:**
 
-- A 35B MoE with 3B active decodes like a small dense model — **87.5 down to 57.3 tok/s** across a 12.5x context range on 2017 cards. That is the shape to want: big model in VRAM, small compute per token.
+- A 35B MoE with 3B active decodes like a small dense model — **87.5 down to 57.3 tok/s** (layer split) across a 12.5x context range on 2017 cards. That is the shape to want: big model in VRAM, small compute per token.
+- **Tensor split is the decode play at depth**: +5.7% at 20K rising to +22.7% at 250K, for a prefill cost that shrinks with depth (−46% → −17%). Classic `-sm row` is dead on CUDA (removed upstream); `-sm tensor` is the working mode.
 - The `qwen35moe` path in llama.cpp does **500–754 tok/s prefill** on this rig, where the 2026-10-05 Flash-Next sweep on the `qwen4exp` path did ~110 — same cards, same afternoon-class build era; the architecture branch moved that number, nothing else.
-- No MTP arm exists: the official GGUF ships no MTP/nextn tensors (checked directly in the file). The DSpark drafter is a separate model — not tested here.
+- No MTP arm exists: the official GGUF ships no MTP/nextn tensors — checked in the file and in the source checkpoint's weight index (0 of 1,152 keys). The DSpark drafter is a separate model — not tested here.
 
-**What's in the folder:** the raw per-arm record and run meta (sha256-checked copies), the engine's own per-request log extracts, the vision smoke-test response, the exact serving command, the depth table as a CSV, and the chart with the script that draws it.
+**What's in the folder:** both runs' raw per-arm records and served commands (sha256-checked copies), the engine's own per-request log extracts for each run, the vision smoke-test response, every depth table as a CSV (the data builder asserts both runs used identical prompts), and three charts with the scripts that draw them.
 
-**Honest limits** (full detail in [the folder's `PROVENANCE.md`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/PROVENANCE.md)): one measured run per depth — single cells at depth carry the usual ±5-8% run-to-run noise class; stock serving flags only, no tuning sweeps; one quant (Q8_0); a vision smoke test, not a vision battery.
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/PROVENANCE.md)): one measured run per depth per split mode — single cells at depth carry the usual ±5-8% run-to-run noise class (read the means and the shapes, not the third significant figure); tensor mode is upstream-experimental; one quant (Q8_0); a vision smoke test, not a vision battery.

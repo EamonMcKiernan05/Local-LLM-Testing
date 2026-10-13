@@ -1,0 +1,27 @@
+# llama-server per-request log extracts - tensor-split run, the engine's own lines for the six depth arms
+# (source: /home/eamon/llama-server-v47-tsplit.log on box .5; the full log stays on the box.)
+
+10.49.926.887 I slot print_timing: id  2 | task 18 | prompt processing, n_tokens =   1048, progress = 1.00, t =   4.30 s / 243.45 tokens per second
+10.50.272.062 I slot print_timing: id  2 | task 18 | prompt eval time =    4409.51 ms /  1052 tokens (    4.19 ms per token,   238.58 tokens per second)
+11.40.204.139 I slot print_timing: id  1 | task 37 | prompt processing, n_tokens =  20028, progress = 1.00, t =  49.16 s / 407.44 tokens per second
+11.44.620.992 I slot print_timing: id  1 | task 37 | prompt eval time =   49259.41 ms / 20032 tokens (    2.46 ms per token,   406.66 tokens per second)
+11.44.620.996 I slot print_timing: id  1 | task 37 |        eval time =    4312.65 ms /   400 tokens (   10.81 ms per token,    92.52 tokens per second)
+14.04.811.698 I slot print_timing: id  0 | task 449 | prompt processing, n_tokens =  60028, progress = 1.00, t = 139.05 s / 431.70 tokens per second
+14.09.484.670 I slot print_timing: id  0 | task 449 | prompt eval time =  139158.87 ms / 60032 tokens (    2.32 ms per token,   431.39 tokens per second)
+14.09.484.675 I slot print_timing: id  0 | task 449 |        eval time =    4565.06 ms /   400 tokens (   11.44 ms per token,    87.40 tokens per second)
+18.09.038.378 I slot print_timing: id  3 | task 881 | prompt processing, n_tokens = 100028, progress = 1.00, t = 237.67 s / 420.87 tokens per second
+18.13.947.876 I slot print_timing: id  3 | task 881 | prompt eval time =  237784.79 ms / 100032 tokens (    2.38 ms per token,   420.68 tokens per second)
+18.13.947.882 I slot print_timing: id  3 | task 881 |        eval time =    4796.25 ms /   400 tokens (   12.02 ms per token,    83.19 tokens per second)
+24.28.768.032 I slot print_timing: id  2 | task 1332 | prompt processing, n_tokens = 149504, progress = 1.00, t = 372.10 s / 401.79 tokens per second
+24.28.856.744 I slot print_timing: id  2 | task 1332 | prompt processing, n_tokens = 149516, progress = 1.00, t = 372.18 s / 401.73 tokens per second
+24.30.361.692 I slot print_timing: id  2 | task 1332 | prompt processing, n_tokens = 150028, progress = 1.00, t = 373.69 s / 401.48 tokens per second
+24.35.541.737 I slot print_timing: id  2 | task 1332 | prompt eval time =  373811.40 ms / 150032 tokens (    2.49 ms per token,   401.36 tokens per second)
+24.35.541.742 I slot print_timing: id  2 | task 1332 |        eval time =    5058.32 ms /   400 tokens (   12.68 ms per token,    78.88 tokens per second)
+33.26.428.013 I slot print_timing: id  1 | task 1808 | prompt processing, n_tokens = 199516, progress = 1.00, t = 527.42 s / 378.29 tokens per second
+33.28.065.707 I slot print_timing: id  1 | task 1808 | prompt processing, n_tokens = 200028, progress = 1.00, t = 529.06 s / 378.08 tokens per second
+33.33.543.842 I slot print_timing: id  1 | task 1808 | prompt eval time =  529186.71 ms / 200032 tokens (    2.65 ms per token,   378.00 tokens per second)
+33.33.543.846 I slot print_timing: id  1 | task 1808 |        eval time =    5347.46 ms /   400 tokens (   13.40 ms per token,    74.61 tokens per second)
+45.17.836.014 I slot print_timing: id  0 | task 2308 | prompt processing, n_tokens = 249516, progress = 1.00, t = 699.41 s / 356.75 tokens per second
+45.19.655.345 I slot print_timing: id  0 | task 2308 | prompt processing, n_tokens = 250028, progress = 1.00, t = 701.23 s / 356.56 tokens per second
+45.25.472.603 I slot print_timing: id  0 | task 2308 | prompt eval time =  701371.70 ms / 250032 tokens (    2.81 ms per token,   356.49 tokens per second)
+45.25.472.607 I slot print_timing: id  0 | task 2308 |        eval time =    5675.57 ms /   400 tokens (   14.22 ms per token,    70.30 tokens per second)
