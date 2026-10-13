@@ -1,0 +1,17 @@
+{
+ "wall_s": 5.2,
+ "finish": "stop",
+ "content": "The text in the image is \"STRATA VISION OK 417\". Below the text, there are three shapes: a blue rectangle, a green triangle, and a red circle.",
+ "reasoning_head": "",
+ "timings": {
+  "cache_n": 0,
+  "prompt_n": 361,
+  "prompt_ms": 944.417,
+  "prompt_per_token_ms": 2.6161135734072025,
+  "prompt_per_second": 382.2464017483802,
+  "predicted_n": 40,
+  "predicted_ms": 424.456,
+  "predicted_per_token_ms": 10.88348717948718,
+  "predicted_per_second": 91.88231524586764
+ }
+}
