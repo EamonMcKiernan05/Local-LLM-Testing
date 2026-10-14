@@ -75,6 +75,8 @@ short-prompt test: 4 sizes × 3 reps × 2 arms) + 6 (CPU-share battery control).
 | `release-deltas-01402.csv` | `*_delta_pct_derived` | 100 × (0.1.40.2 value / 0.1.40.1 value − 1); same mean rule |
 | `release-deltas-0143.csv` | `*_delta_pct_derived` | 100 × (0.1.43 value / 0.1.42 re-run value − 1); same mean rule |
 | `release-deltas-0144.csv` | `*_delta_pct_derived` | 100 × (0.1.44 value / 0.1.43 re-run value − 1); same mean rule |
+| `release-0-1-43-vs-0-1-44-mean3.csv` | `prefill_tps` / `decode_tps` (and `*_min` / `*_max`) | arithmetic mean of the three same-night passes per engine per depth; min/max are the observed spread |
+| `release-deltas-0144-mean3.csv` | `*_delta_pct_derived` | 100 × (mean 0.1.44 value / mean 0.1.43 value − 1); same mean rule |
 | `cpu-share-*` tables | medians, deltas | chart shows the median of the 3 reps per size per arm; battery deltas = 100 × (cpu_share / default − 1) |
 | `mtp-sweep-summary.csv` | means and bands | per-arm mean over the six depths; bands are min/max across that stage's arms |
 
@@ -85,7 +87,7 @@ Everything else is copied cell-for-cell from the raw records or the logs.
 - **One single-card attempt is missing from the logs.** An 8k run before `single2` (recorded in
   the set-up session at 26.8 tok/s) was not captured to a log file; its repeat is `single2` and
   that is what the tables use.
-- **The hero card was a one-off render.** Its plotting script was not retained; the other ten
+- **The hero card was a one-off render.** Its plotting script was not retained; the other twelve
   figures regenerate from `data/csv/` via `scripts/`.
 - **The full engine log stays on the box.** Only the per-request lines for the two 250K runs and
   sampled cache-hit lines are extracted, in `engine-log-extracts.txt`, with the grep documented
