@@ -1,0 +1,7 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-13T1956Z-strata-0-1-43-base-rerun,20000,1,frankenstein,"local tokenizer (exact, pack iq3_s)",20000,20084,400,1516.7,76.3,296,213,18.8,31418,41,32222,42,
+2026-10-13T1956Z-strata-0-1-43-base-rerun,60000,1,sherlock,"local tokenizer (exact, pack iq3_s)",60000,60084,400,1971.3,71.4,320,204,37.1,31418,45,32224,47,
+2026-10-13T1956Z-strata-0-1-43-base-rerun,100000,1,pride,"local tokenizer (exact, pack iq3_s)",100000,100084,400,2099.6,68.0,303,191,53.8,31418,48,32224,50,
+2026-10-13T1956Z-strata-0-1-43-base-rerun,150000,1,tale2cities,"local tokenizer (exact, pack iq3_s)",150000,150083,400,2085.6,65.4,356,199,78.4,31418,51,32226,53,
+2026-10-13T1956Z-strata-0-1-43-base-rerun,200000,1,greatexp,"local tokenizer (exact, pack iq3_s)",200000,200084,400,2011.5,64.0,292,182,106.1,31418,52,32228,53,
+2026-10-13T1956Z-strata-0-1-43-base-rerun,250000,1,mobydick,"local tokenizer (exact, pack iq3_s)",250000,250084,400,1943.0,63.8,280,184,135.4,31418,53,32230,54,

@@ -1,6 +1,6 @@
 # Provenance: where every file here came from
 
-Collected 2026-10-05; extended 2026-10-11 (the 0.1.40.1 / 0.1.40.2 comparisons, the CPU-share test, and the 0.1.42 → 0.1.43 pair). The rule for this folder: **a number appears here only if it came off a
+Collected 2026-10-05; extended 2026-10-13 (the 0.1.40.1 / 0.1.40.2 comparisons, the CPU-share test, the 0.1.42 → 0.1.43 pair, and the 0.1.43 → 0.1.44 pair with its decode repeats). The rule for this folder: **a number appears here only if it came off a
 real run, and every table says which run.** All measurements are on the base IQ3_S.
 
 ## Sources, in order of reliability
@@ -21,6 +21,12 @@ real run, and every table says which run.** All measurements are on the base IQ3
    | `model-bench-0-1-42-base-results.jsonl` | 7 | 0.1.42 battery — the morning run (the 0.1.43 pair's agreement-check anchor) |
    | `model-bench-0-1-42-base-rerun-results.jsonl` | 7 | 0.1.42 re-run for the same-day pair (its "before") |
    | `model-bench-0-1-43-base-results.jsonl` | 7 | 0.1.43 battery (same shape) |
+   | `model-bench-0-1-43-base-rerun-results.jsonl` | 7 | 0.1.43 re-run for the same-day pair (its "before") |
+   | `model-bench-0-1-44-base-results.jsonl` | 7 | 0.1.44 battery (same shape) |
+   | `model-bench-0-1-44-base-rep2-results.jsonl` | 7 | 0.1.44 decode-repeat pass 2 (same shape) |
+   | `model-bench-0-1-44-base-rep3-results.jsonl` | 7 | 0.1.44 decode-repeat pass 3 (same shape) |
+   | `model-bench-0-1-43-base-rep2-results.jsonl` | 7 | 0.1.43 decode-repeat pass 2 (the rollback side) |
+   | `model-bench-0-1-43-base-rep3-results.jsonl` | 7 | 0.1.43 decode-repeat pass 3 (same shape) |
    | `cpu-share-short-off.jsonl` | 12 | CPU-share short-prompt test, default arm (4 sizes × 3 reps) |
    | `cpu-share-short-auto.jsonl` | 12 | CPU-share short-prompt test, auto arm (same prompts) |
    | `depth-decode3.jsonl` | 6 | the six-document depth series |
@@ -33,17 +39,20 @@ real run, and every table says which run.** All measurements are on the base IQ3
 3. **The model-bench run directories on the box** (`~/model-bench/runs/2026-10-04T1320Z-…` and
    `T1335Z-…` for the first pair; `…2026-10-07T0926Z-…`/`T0954Z-…` for the 0.1.40.1 pair;
    `T1247Z-…` for the 0.1.40.2 run; `T1320Z-…` for the CPU-share battery; and 2026-10-11:
-   `T0911Z-…` (0.1.42 morning), `T1523Z-…` (0.1.43), `T1535Z-…` (0.1.42 re-run)) — every
+   `T0911Z-…` (0.1.42 morning), `T1523Z-…` (0.1.43), `T1535Z-…` (0.1.42 re-run); and
+   2026-10-13: `T1956Z-…` (0.1.43 re-run), `T2007Z-…` (0.1.44), `T2122Z-…`/`T2129Z-…` (0.1.44
+   decode-repeats), `T2139Z-…`/`T2146Z-…` (0.1.43 decode-repeats)) — every
    `results.jsonl` here is a byte-identical copy (sha256 checked against the box). The
    `cpu-share-short-*.jsonl` records were written by the test driver on the box and moved here
    verbatim.
 
 ## Counting the runs
 
-**249 recorded runs, every one with measurements; no failures:**
+**285 recorded runs, every one with measurements; no failures:**
 
-126 (MTP sweep) + 20 (sampler sweep) + 48 (release batteries: 0.1.32, 0.1.39, the 0.1.39 re-run,
-0.1.40.1, 0.1.40.2, 0.1.42, the 0.1.42 re-run and 0.1.43 — 6 each) + 6 (depth series) + 6 (hero
+126 (MTP sweep) + 20 (sampler sweep) + 60 (release batteries: 0.1.32, 0.1.39, the 0.1.39 re-run,
+0.1.40.1, 0.1.40.2, 0.1.42, the 0.1.42 re-run, 0.1.43, the 0.1.43 re-run and 0.1.44 — 6 each) +
+24 (decode-repeat batteries: 0.1.43 ×2 and 0.1.44 ×2 — 6 each) + 6 (depth series) + 6 (hero
 series) + 13 (load checks: 12 single/dual iterations + the 256K check) + 24 (CPU-share
 short-prompt test: 4 sizes × 3 reps × 2 arms) + 6 (CPU-share battery control).
 
@@ -65,6 +74,9 @@ short-prompt test: 4 sizes × 3 reps × 2 arms) + 6 (CPU-share battery control).
 | `release-deltas-01401.csv` | `*_delta_pct_derived` | 100 × (0.1.40.1 value / 0.1.39 value − 1); same mean rule |
 | `release-deltas-01402.csv` | `*_delta_pct_derived` | 100 × (0.1.40.2 value / 0.1.40.1 value − 1); same mean rule |
 | `release-deltas-0143.csv` | `*_delta_pct_derived` | 100 × (0.1.43 value / 0.1.42 re-run value − 1); same mean rule |
+| `release-deltas-0144.csv` | `*_delta_pct_derived` | 100 × (0.1.44 value / 0.1.43 re-run value − 1); same mean rule |
+| `release-0-1-43-vs-0-1-44-mean3.csv` | `prefill_tps` / `decode_tps` (and `*_min` / `*_max`) | arithmetic mean of the three same-night passes per engine per depth; min/max are the observed spread |
+| `release-deltas-0144-mean3.csv` | `*_delta_pct_derived` | 100 × (mean 0.1.44 value / mean 0.1.43 value − 1); same mean rule |
 | `cpu-share-*` tables | medians, deltas | chart shows the median of the 3 reps per size per arm; battery deltas = 100 × (cpu_share / default − 1) |
 | `mtp-sweep-summary.csv` | means and bands | per-arm mean over the six depths; bands are min/max across that stage's arms |
 
@@ -75,7 +87,7 @@ Everything else is copied cell-for-cell from the raw records or the logs.
 - **One single-card attempt is missing from the logs.** An 8k run before `single2` (recorded in
   the set-up session at 26.8 tok/s) was not captured to a log file; its repeat is `single2` and
   that is what the tables use.
-- **The hero card was a one-off render.** Its plotting script was not retained; the other eight
+- **The hero card was a one-off render.** Its plotting script was not retained; the other twelve
   figures regenerate from `data/csv/` via `scripts/`.
 - **The full engine log stays on the box.** Only the per-request lines for the two 250K runs and
   sampled cache-hit lines are extracted, in `engine-log-extracts.txt`, with the grep documented
