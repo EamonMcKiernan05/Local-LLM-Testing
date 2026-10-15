@@ -1,0 +1,7 @@
+engine,run_id,depth_k,ptok,gen,prefill_tps,decode_tps,wall_s,gpu0_used_mib,gpu1_used_mib,gpu0_temp_c,gpu1_temp_c,ts
+before (BC501 NVMe),"2026-10-15 night, mean of three runs",20000,20013,400,386.667,15.267,78.533,32036.0,31936.0,42.667,41.0,2026-10-15 (mean of 3 runs)
+before (BC501 NVMe),"2026-10-15 night, mean of three runs",40000,40012,400,461.667,18.867,108.967,32036.0,31936.0,45.0,43.333,2026-10-15 (mean of 3 runs)
+before (BC501 NVMe),"2026-10-15 night, mean of three runs",60000,59966,400,437.233,18.7,160.0,32036.0,31936.0,45.0,43.333,2026-10-15 (mean of 3 runs)
+after (SN730 NVMe),"2026-10-15 night, mean of three runs",20000,20014,400,594.767,20.367,54.3,32036.0,31936.0,45.333,43.333,2026-10-15 (mean of 3 runs)
+after (SN730 NVMe),"2026-10-15 night, mean of three runs",40000,40011,400,629.467,22.2,82.367,32036.0,31936.0,46.667,44.667,2026-10-15 (mean of 3 runs)
+after (SN730 NVMe),"2026-10-15 night, mean of three runs",60000,59966,400,646.467,22.567,111.3,32036.0,31936.0,47.333,46.0,2026-10-15 (mean of 3 runs)

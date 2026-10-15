@@ -1,0 +1,185 @@
+=== maya SN730 cycle started Thu 15 Oct 21:59:30 UTC 2026 UTC ===
+[2026-10-15T21:59:30Z] --- [0] preflight
+need: 98557730661 bytes
+free on /mnt/nvme: 248326475776
+e09d627251862335c7b149906ceeb28e  /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json
+[2026-10-15T21:59:30Z] preflight OK
+[2026-10-15T21:59:30Z] --- [1] copy maya HDD -> SN730 Thu 15 Oct 21:59:30 UTC 2026
+[2026-10-15T22:07:41Z] copy done Thu 15 Oct 22:07:41 UTC 2026
+du hdd=98557730661 nvme=98557730661
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00001-of-00003.gguf ok
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00002-of-00003.gguf ok
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00003-of-00003.gguf ok
+verify ok
+[2026-10-15T22:07:41Z] --- [2] flip
+[2026-10-15T22:07:41Z] flip done
+[2026-10-15T22:07:41Z] --- [3] burn battery (post-copy, discarded)
+--- launching ./setup.sh (burn) at Thu 15 Oct 22:07:41 UTC 2026
+api up after ~66s (burn)
+engine src stamp: 5a23fa1ec92e67aa
+engine reload marker hits: 1
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (burn)
+--- warm-up Thu 15 Oct 22:08:47 UTC 2026
+warmup ok: prompt_tokens 22614 | timings: {'cache_n': 0, 'prompt_n': 22614, 'prompt_ms': 38113.8, 'prompt_per_token_ms': 1.685, 'prompt_per_second': 593.3, 'predicted_n': 4, 'predicted_ms': 464.5, 'predicted_per_token_ms': 116.125, 'predicted_per_second': 8.6, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 593.3 tok/s, decode 21.6 tok/s, 400 gen, 52.5s
+arm 40k rep 1/1: prefill 629.0 tok/s, decode 22.0 tok/s, 400 gen, 82.2s
+arm 60k rep 1/1: prefill 647.7 tok/s, decode 20.9 tok/s, 400 gen, 113.8s
+
+# Model Bench: maya-s-v2-64k-sn730-postcopy-burn
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T2209Z-maya-s-v2-64k-sn730-postcopy-burn · 2026-10-15 22:09:26 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 593.3 | 21.6 | 400 | 52.5 | 1 |
+| 40k | 40011 | 629.0 | 22.0 | 400 | 82.2 | 1 |
+| 60k | 59966 | 647.7 | 20.9 | 400 | 113.8 | 1 |
+
+- prefill peak: **647.7 tok/s** at 60k
+- decode peak: **22.0 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T2209Z-maya-s-v2-64k-sn730-postcopy-burn
+bench maya-s-v2-64k-sn730-postcopy-burn rc=0 Thu 15 Oct 22:13:43 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T2209Z-maya-s-v2-64k-sn730-postcopy-burn
+glm stat: decode 116.12 ms/tok (8.61 tok/s) | vram hit 82.08% | ram fetches 31.25/tok | disk 16.25 reads/tok in 13.50 waits/tok, 54.59 ms/tok | promotions 43.75/tok | cpu lane 13.00/tok in 29.11 ms/tok | prompt 1.7 ms/tok | vram 7650/7901 ram 3210/3558
+glm stat: decode 77.58 ms/tok (12.89 tok/s) | vram hit 89.24% | ram fetches 24.38/tok | disk 9.75 reads/tok in 8.62 waits/tok, 34.50 ms/tok | promotions 31.62/tok | cpu lane 7.44/tok in 16.43 ms/tok | prompt 5.3 ms/tok | vram 7799/7901 ram 3258/3558
+glm stat: decode 46.27 ms/tok (21.61 tok/s) | vram hit 93.85% | ram fetches 16.38/tok | disk 2.91 reads/tok in 3.21 waits/tok, 9.86 ms/tok | promotions 19.28/tok | cpu lane 4.20/tok in 8.85 ms/tok | prompt 1.7 ms/tok | vram 7780/7901 ram 3515/3558
+glm stat: decode 45.40 ms/tok (22.02 tok/s) | vram hit 93.86% | ram fetches 16.98/tok | disk 2.06 reads/tok in 2.47 waits/tok, 6.93 ms/tok | promotions 19.10/tok | cpu lane 4.75/tok in 9.38 ms/tok | prompt 1.6 ms/tok | vram 7780/7901 ram 3488/3558
+glm stat: decode 47.85 ms/tok (20.90 tok/s) | vram hit 93.26% | ram fetches 18.62/tok | disk 2.16 reads/tok in 2.62 waits/tok, 7.42 ms/tok | promotions 20.90/tok | cpu lane 5.26/tok in 10.30 ms/tok | prompt 1.5 ms/tok | vram 7791/7901 ram 3491/3558
+stopping maya server pid 4316
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T22:13:51Z] --- [run 1] sn730-r1
+--- launching ./setup.sh (r1) at Thu 15 Oct 22:13:51 UTC 2026
+api up after ~88s (r1)
+engine src stamp: 5a23fa1ec92e67aa
+engine reload marker hits: 1
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r1)
+--- warm-up Thu 15 Oct 22:15:19 UTC 2026
+warmup ok: prompt_tokens 22614 | timings: {'cache_n': 0, 'prompt_n': 22614, 'prompt_ms': 38379.2, 'prompt_per_token_ms': 1.697, 'prompt_per_second': 589.2, 'predicted_n': 4, 'predicted_ms': 460.6, 'predicted_per_token_ms': 115.15, 'predicted_per_second': 8.7, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 595.0 tok/s, decode 20.1 tok/s, 400 gen, 54.5s
+arm 40k rep 1/1: prefill 629.2 tok/s, decode 22.0 tok/s, 400 gen, 82.5s
+arm 60k rep 1/1: prefill 645.3 tok/s, decode 22.2 tok/s, 400 gen, 111.7s
+
+# Model Bench: maya-s-v2-64k-sn730-r1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T2216Z-maya-s-v2-64k-sn730-r1 · 2026-10-15 22:16:00 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 595.0 | 20.1 | 400 | 54.5 | 1 |
+| 40k | 40012 | 629.2 | 22.0 | 400 | 82.5 | 1 |
+| 60k | 59966 | 645.3 | 22.2 | 400 | 111.7 | 1 |
+
+- prefill peak: **645.3 tok/s** at 60k
+- decode peak: **22.2 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T2216Z-maya-s-v2-64k-sn730-r1
+bench maya-s-v2-64k-sn730-r1 rc=0 Thu 15 Oct 22:20:18 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T2216Z-maya-s-v2-64k-sn730-r1
+glm stat: decode 115.15 ms/tok (8.68 tok/s) | vram hit 82.01% | ram fetches 30.00/tok | disk 17.25 reads/tok in 14.25 waits/tok, 58.60 ms/tok | promotions 43.75/tok | cpu lane 13.00/tok in 29.51 ms/tok | prompt 1.7 ms/tok | vram 7651/7901 ram 3187/3533
+glm stat: decode 75.50 ms/tok (13.24 tok/s) | vram hit 89.12% | ram fetches 23.50/tok | disk 9.44 reads/tok in 8.50 waits/tok, 33.93 ms/tok | promotions 30.62/tok | cpu lane 7.75/tok in 17.10 ms/tok | prompt 5.4 ms/tok | vram 7791/7901 ram 3239/3533
+glm stat: decode 49.86 ms/tok (20.06 tok/s) | vram hit 93.43% | ram fetches 17.86/tok | disk 3.17 reads/tok in 3.55 waits/tok, 10.81 ms/tok | promotions 21.05/tok | cpu lane 4.66/tok in 9.71 ms/tok | prompt 1.7 ms/tok | vram 7778/7901 ram 3495/3533
+glm stat: decode 45.44 ms/tok (22.01 tok/s) | vram hit 93.98% | ram fetches 17.07/tok | disk 2.09 reads/tok in 2.43 waits/tok, 7.14 ms/tok | promotions 19.24/tok | cpu lane 4.52/tok in 8.92 ms/tok | prompt 1.6 ms/tok | vram 7782/7901 ram 3483/3533
+glm stat: decode 45.04 ms/tok (22.20 tok/s) | vram hit 94.07% | ram fetches 16.94/tok | disk 1.78 reads/tok in 2.24 waits/tok, 5.94 ms/tok | promotions 18.86/tok | cpu lane 4.56/tok in 8.82 ms/tok | prompt 1.5 ms/tok | vram 7778/7901 ram 3421/3533
+stopping maya server pid 5118
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T22:20:26Z] --- [run 2] sn730-r2
+--- launching ./setup.sh (r2) at Thu 15 Oct 22:20:26 UTC 2026
+api up after ~66s (r2)
+engine src stamp: 5a23fa1ec92e67aa
+engine reload marker hits: 1
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r2)
+--- warm-up Thu 15 Oct 22:21:32 UTC 2026
+warmup ok: prompt_tokens 22614 | timings: {'cache_n': 0, 'prompt_n': 22614, 'prompt_ms': 38311.3, 'prompt_per_token_ms': 1.694, 'prompt_per_second': 590.3, 'predicted_n': 4, 'predicted_ms': 462.5, 'predicted_per_token_ms': 115.625, 'predicted_per_second': 8.6, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 594.4 tok/s, decode 20.6 tok/s, 400 gen, 54.1s
+arm 40k rep 1/1: prefill 629.7 tok/s, decode 21.5 tok/s, 400 gen, 82.9s
+arm 60k rep 1/1: prefill 647.0 tok/s, decode 22.5 tok/s, 400 gen, 111.3s
+
+# Model Bench: maya-s-v2-64k-sn730-r2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T2222Z-maya-s-v2-64k-sn730-r2 · 2026-10-15 22:22:13 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 594.4 | 20.6 | 400 | 54.1 | 1 |
+| 40k | 40012 | 629.7 | 21.5 | 400 | 82.9 | 1 |
+| 60k | 59966 | 647.0 | 22.5 | 400 | 111.3 | 1 |
+
+- prefill peak: **647.0 tok/s** at 60k
+- decode peak: **22.5 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T2222Z-maya-s-v2-64k-sn730-r2
+bench maya-s-v2-64k-sn730-r2 rc=0 Thu 15 Oct 22:26:30 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T2222Z-maya-s-v2-64k-sn730-r2
+glm stat: decode 115.61 ms/tok (8.65 tok/s) | vram hit 82.59% | ram fetches 28.50/tok | disk 17.00 reads/tok in 14.75 waits/tok, 56.68 ms/tok | promotions 42.75/tok | cpu lane 12.50/tok in 29.51 ms/tok | prompt 1.7 ms/tok | vram 7645/7901 ram 3182/3521
+glm stat: decode 76.55 ms/tok (13.06 tok/s) | vram hit 88.99% | ram fetches 23.94/tok | disk 9.62 reads/tok in 8.50 waits/tok, 34.26 ms/tok | promotions 31.00/tok | cpu lane 7.75/tok in 17.75 ms/tok | prompt 5.4 ms/tok | vram 7792/7901 ram 3228/3521
+glm stat: decode 48.65 ms/tok (20.56 tok/s) | vram hit 93.29% | ram fetches 17.34/tok | disk 3.31 reads/tok in 3.63 waits/tok, 11.20 ms/tok | promotions 20.63/tok | cpu lane 4.62/tok in 9.82 ms/tok | prompt 1.7 ms/tok | vram 7786/7901 ram 3477/3521
+glm stat: decode 46.46 ms/tok (21.52 tok/s) | vram hit 93.73% | ram fetches 17.62/tok | disk 2.16 reads/tok in 2.59 waits/tok, 7.37 ms/tok | promotions 19.86/tok | cpu lane 4.78/tok in 9.50 ms/tok | prompt 1.6 ms/tok | vram 7787/7901 ram 3465/3521
+glm stat: decode 44.40 ms/tok (22.52 tok/s) | vram hit 93.96% | ram fetches 17.00/tok | disk 1.82 reads/tok in 2.29 waits/tok, 6.18 ms/tok | promotions 19.01/tok | cpu lane 4.41/tok in 8.82 ms/tok | prompt 1.5 ms/tok | vram 7783/7901 ram 3416/3521
+stopping maya server pid 5987
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T22:26:38Z] --- [run 3] sn730-r3
+--- launching ./setup.sh (r3) at Thu 15 Oct 22:26:38 UTC 2026
+api up after ~86s (r3)
+engine src stamp: 5a23fa1ec92e67aa
+engine reload marker hits: 1
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r3)
+--- warm-up Thu 15 Oct 22:28:04 UTC 2026
+warmup ok: prompt_tokens 22614 | timings: {'cache_n': 0, 'prompt_n': 22614, 'prompt_ms': 38227.8, 'prompt_per_token_ms': 1.69, 'prompt_per_second': 591.6, 'predicted_n': 4, 'predicted_ms': 471.8, 'predicted_per_token_ms': 117.95, 'predicted_per_second': 8.5, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 594.9 tok/s, decode 20.4 tok/s, 400 gen, 54.3s
+arm 40k rep 1/1: prefill 629.5 tok/s, decode 23.1 tok/s, 400 gen, 81.7s
+arm 60k rep 1/1: prefill 647.1 tok/s, decode 23.0 tok/s, 400 gen, 110.9s
+
+# Model Bench: maya-s-v2-64k-sn730-r3
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T2228Z-maya-s-v2-64k-sn730-r3 · 2026-10-15 22:28:45 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 594.9 | 20.4 | 400 | 54.3 | 1 |
+| 40k | 40010 | 629.5 | 23.1 | 400 | 81.7 | 1 |
+| 60k | 59967 | 647.1 | 23.0 | 400 | 110.9 | 1 |
+
+- prefill peak: **647.1 tok/s** at 60k
+- decode peak: **23.1 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T2228Z-maya-s-v2-64k-sn730-r3
+bench maya-s-v2-64k-sn730-r3 rc=0 Thu 15 Oct 22:33:00 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T2228Z-maya-s-v2-64k-sn730-r3
+glm stat: decode 117.95 ms/tok (8.48 tok/s) | vram hit 82.01% | ram fetches 30.50/tok | disk 17.25 reads/tok in 14.25 waits/tok, 58.57 ms/tok | promotions 44.50/tok | cpu lane 12.50/tok in 29.95 ms/tok | prompt 1.7 ms/tok | vram 7655/7901 ram 3182/3530
+glm stat: decode 75.51 ms/tok (13.24 tok/s) | vram hit 89.16% | ram fetches 23.44/tok | disk 9.44 reads/tok in 8.38 waits/tok, 33.81 ms/tok | promotions 30.31/tok | cpu lane 7.75/tok in 17.28 ms/tok | prompt 5.4 ms/tok | vram 7792/7901 ram 3236/3530
+glm stat: decode 49.04 ms/tok (20.39 tok/s) | vram hit 93.64% | ram fetches 17.37/tok | disk 3.12 reads/tok in 3.38 waits/tok, 10.64 ms/tok | promotions 20.45/tok | cpu lane 4.52/tok in 9.39 ms/tok | prompt 1.7 ms/tok | vram 7779/7901 ram 3492/3530
+glm stat: decode 43.36 ms/tok (23.06 tok/s) | vram hit 94.03% | ram fetches 16.39/tok | disk 1.94 reads/tok in 2.28 waits/tok, 6.65 ms/tok | promotions 18.46/tok | cpu lane 4.49/tok in 8.87 ms/tok | prompt 1.6 ms/tok | vram 7780/7901 ram 3474/3530
+glm stat: decode 43.53 ms/tok (22.97 tok/s) | vram hit 94.29% | ram fetches 16.14/tok | disk 1.74 reads/tok in 2.22 waits/tok, 5.87 ms/tok | promotions 18.09/tok | cpu lane 4.20/tok in 7.98 ms/tok | prompt 1.5 ms/tok | vram 7787/7901 ram 3403/3530
+stopping maya server pid 7057
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T22:33:09Z] --- [7] final start (leave serving)
+--- launching ./setup.sh (serving) at Thu 15 Oct 22:33:09 UTC 2026
