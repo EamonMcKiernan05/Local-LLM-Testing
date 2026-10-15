@@ -25,7 +25,7 @@ OS: Ubuntu 24.04
 
 Cuda: 12.9
 
-Inference Engine: Project Maya v1.0.9 — GLM-5.3-Flash Maya-S on 2x V100, serving on `:8080`
+Inference Engine: Project Maya v1.1.11 — GLM-5.3-Flash Maya-S on 2x V100, serving on `:8080`
 
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
@@ -118,35 +118,38 @@ Two charts for the current numbers — speed at depth, and the release gain:
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): one measured run per arm — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The hero card's plotting script was not retained.
 
-### GLM-5.3-Flash (Maya-S) on Project Maya — 15 recorded runs, all with measurements
+### GLM-5.3-Flash (Maya-S) on Project Maya — 66 recorded runs, all with measurements
 
 Everything we have on this model, in one place: **[`GLM-5.3-Flash-Maya-S-v2-IQ2_XXS - Project Maya/`](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/)**
 
-The 321B MoE GLM-5.3-Flash (Maya-S IQ2_XXS, 96.5 GB) served by Project Maya on **2x Tesla V100 32GB**, measured 2026-10-07 to 2026-10-08 — the bring-up benches at 128K and the tuned 64K config, then a same-day controlled before/after on the v1.0.9 update. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+The 321B MoE GLM-5.3-Flash (Maya-S IQ2_XXS, 96.5 GB) served by Project Maya on **2x Tesla V100 32GB**, measured 2026-10-07 to 2026-10-15 — the bring-up benches at 128K and the tuned 64K config, same-day controlled before/afters through v1.0.9, v1.0.33, v1.0.34 and v1.1.11, the latest as a three-run-per-side pair (20K–60K) plus a short-prompt extension (0.5K–10K). Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
 
 **The findings:**
 
 | | |
 |---|---|
-| Best prefill @ 60K | **271 tok/s** (v1.0.9; 142 on the previous build, same day) |
-| Decode @ 60K prompt depth | **14.4 tok/s** (v1.0.9; 13–16 tok/s across depths) |
-| The v1.0.9 update, same bench, same day | **+69.1% prefill mean, +0.9% decode (noise)** — only the engine differs |
+| Best prefill @ 60K | **451 tok/s** (v1.1.1, 3-run mean; 271 on v1.0.9) |
+| Decode @ 60K prompt depth | **18.7 tok/s** (v1.1.11, 3-run mean; 14.4 on v1.0.9) |
+| The v1.1.11 update, same bench, same day | **+6.7% decode mean at 20K–60K, up to +16% at short prompts; prefill 0 to −5%** — three runs per side |
 | Storage rule | the expert tiers stream off the boot NVMe; the DRAM-less drive caps decode (~600 experts re-read per token) |
-| Runs recorded | 15 — all 15 measured, 0 failed |
+| Runs recorded | 66 — all with measurements; 3 (the calibration battery) excluded from the pair by design |
 
-Two charts — the depth card for the current numbers, and the update gain:
+Three charts — the depth card for the current numbers, the update gain, and the short-prompt view:
 
-![GLM-5.3-Flash Maya-S on 2x Tesla V100 — decode and prefill by depth (v1.0.9)](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-depth.png)
+![GLM-5.3-Flash Maya-S on 2x Tesla V100 — decode and prefill by depth (v1.1.11)](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-depth-v1111.png)
 
-![Project Maya v1.0.9 vs previous build — depth benchmark](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-v109-vs-previous.png)
+![Project Maya v1.1.11 vs v1.1.1 — depth benchmark](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-v111-vs-v1111.png)
+
+![Project Maya v1.1.11 vs v1.1.1 — short prompts, 0.5K–10K](GLM-5.3-Flash-Maya-S-v2-IQ2_XXS%20-%20Project%20Maya/charts/maya-v100-64k-shallow-v111-vs-v1111.png)
 
 **The lessons worth keeping:**
 
 - The v1.0.9 pair was measured day-matched: the previous build was rebuilt from its commit and re-run the same morning — the archived 7 Oct numbers agree within ~1% on prefill.
 - Decode on this box is storage-bound: measured disk waits are about half of each token's cost.
 - Warm-ups are discarded by design; the first big request after a load runs below the steady number.
+- The v1.1.11 pair ran three batteries per side, alternated — decode **+6.7% mean, every depth positive**; prefill unchanged. The update also writes the shipped expert profile into the config at first start (experiment 05).
 
-**What's in the folder:** five complete bench records, every table as a CSV, the two figures with the scripts that regenerate them, and the update write-up.
+**What's in the folder:** twenty-two complete bench records, every table as a CSV, six figures with the scripts that regenerate them, and the experiment write-ups.
 
 ### MiniCPM-V 4.7 35B-A3B (Q8_0) on llama.cpp — 12 recorded runs, all measured
 

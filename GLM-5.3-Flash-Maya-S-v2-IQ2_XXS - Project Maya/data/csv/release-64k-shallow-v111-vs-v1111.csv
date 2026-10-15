@@ -1,0 +1,9 @@
+engine,run_id,depth_k,ptok,gen,prefill_tps,decode_tps,wall_s,gpu0_used_mib,gpu1_used_mib,gpu0_temp_c,gpu1_temp_c,ts
+v1.1.1,2026-10-15 shallow mean of three runs,500,523,400,51.0,13.9,39.5,31930.667,31935.333,40.333,39.667,2026-10-15 (mean of 3 runs)
+v1.1.1,2026-10-15 shallow mean of three runs,1000,1038,400,102.533,18.833,31.8,31930.667,31935.333,41.667,40.0,2026-10-15 (mean of 3 runs)
+v1.1.1,2026-10-15 shallow mean of three runs,5000,5029,400,383.567,18.667,34.967,31930.667,31935.333,43.0,41.667,2026-10-15 (mean of 3 runs)
+v1.1.1,2026-10-15 shallow mean of three runs,10000,10040,400,363.767,18.167,50.067,31930.667,31935.333,43.0,42.0,2026-10-15 (mean of 3 runs)
+v1.1.11,2026-10-15 shallow mean of three runs,500,522,400,48.733,16.167,35.633,32036.0,31936.0,41.667,39.667,2026-10-15 (mean of 3 runs)
+v1.1.11,2026-10-15 shallow mean of three runs,1000,1037,400,97.367,21.3,29.5,32036.0,31936.0,43.0,41.0,2026-10-15 (mean of 3 runs)
+v1.1.11,2026-10-15 shallow mean of three runs,5000,5029,400,371.233,20.4,33.533,32036.0,31936.0,43.333,41.667,2026-10-15 (mean of 3 runs)
+v1.1.11,2026-10-15 shallow mean of three runs,10000,10039,400,352.4,20.233,48.667,32036.0,31936.0,44.0,42.0,2026-10-15 (mean of 3 runs)

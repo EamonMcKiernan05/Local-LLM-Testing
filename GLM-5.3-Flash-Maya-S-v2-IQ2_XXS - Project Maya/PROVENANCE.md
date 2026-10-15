@@ -1,6 +1,6 @@
 # Provenance: where every file here came from
 
-Collected 2026-10-08; extended 2026-10-11 (the v1.0.33 and v1.0.34 comparisons). The rule for this folder: **a number appears here only if it came off a real
+Collected 2026-10-08; extended 2026-10-11 (the v1.0.33 and v1.0.34 comparisons) and 2026-10-15 (the v1.1.11 three-run pair). The rule for this folder: **a number appears here only if it came off a real
 run, and every table says which run.** All measurements are on Maya-S-v2 IQ2_XXS (GLM-5.3-Flash).
 
 ## Sources, in order of reliability
@@ -21,6 +21,11 @@ run, and every table says which run.** All measurements are on Maya-S-v2 IQ2_XXS
    | `model-bench-64k-v1033` | `2026-10-11T1310Z-maya-s-v2-64k-v1033` | v1.0.33 after the update (the 2026-10-11 pair's "after") |
    | `model-bench-64k-v109-rerun2` | `2026-10-11T1454Z-maya-s-v2-64k-v109-rerun2` | v1.0.9 re-run again for the v1.0.34 pair (its "before") |
    | `model-bench-64k-v1034` | `2026-10-11T1446Z-maya-s-v2-64k-v1034` | v1.0.34 after the update |
+   | `model-bench-64k-v111-r1..r3` | `2026-10-15T0928Z / T1008Z / T1028Z-maya-s-v2-64k-v111-r1..r3` | v1.1.1 (installed build) — the 2026-10-15 pair's "before", three batteries |
+   | `model-bench-64k-v1111-r1..r3` | `2026-10-15T0958Z / T1018Z / T1038Z-maya-s-v2-64k-v1111-r1..r3` | v1.1.11 after the update — the pair's "after", three batteries |
+   | `model-bench-64k-v111-burn` | `2026-10-15T0919Z-maya-s-v2-64k-v111-postcopy-burn` | post-copy calibration battery, discarded by design (page-cache assist) |
+   | `model-bench-64k-v111-shallow-r1..r3` | `2026-10-15T1126Z / T1140Z / T1153Z` | v1.1.1 at 0.5K–10K - the short-prompt extension's "before" |
+   | `model-bench-64k-v1111-shallow-r1..r3` | `2026-10-15T1133Z / T1146Z / T1200Z` | v1.1.11 at 0.5K–10K - the extension's "after" |
 
    Each record carries one discarded warm-up row and three measured arms (20K / 40K / 60K).
 2. **The serving config, the drivers and the logs** — `config-64k-served.json` is the 2026-10-11
@@ -28,21 +33,22 @@ run, and every table says which run.** All measurements are on Maya-S-v2 IQ2_XXS
    v1.0.9 accepts the same flag set). Drivers: `driver-bench-v109.sh` / `driver-bench-rerun.sh`
    (the 2026-10-08 pair), `driver-pair-1033.sh` and `driver-pair-1034.sh` (the two 2026-10-11 pairs,
    checkout/re-build/restore included), with `update-v109.log`, `pair-1033.log` and `pair-1034.log`
-   holding those runs' own output.
+   holding those runs' own output. The 2026-10-15 pair adds `driver-pair-1111-prep.sh` / `-cycle.sh` / `-resume.sh` / `-restore.sh` with logs `pair-1111-*.log`, and the two configs the sides ran (`config-64k-v111-served.json`; `config-64k-v1111-served.json` carrying the `--expert-profile` the update's first start adds). The shallow extension adds `driver-pair-1111-shallow-swapin.sh` / `-cycle.sh` with `pair-1111-shallow*.log`.
 3. **Engine identity for the pair**: "previous build" = the tree at commit `142540b` (2026-10-07,
    pre-version-numbering); "v1.0.9" = `7655730` (2026-10-08). Both sides compiled locally for
    sm_70 (CUDA 12.9); the engine build stamps (`build/MAYA-BUILD.json` src hashes
    `326ec0d7adf59f7e` and `2b852534a0789476` respectively) were verified before each side was
    benchmarked. For the 2026-10-11 pairs: the v1.0.9 side re-compiled to its old stamp
    `2b852534a0789476` both times; "v1.0.33" = `6083122` (stamp `13c572a2c0c8d2ef`) and
-   "v1.0.34" = `e728e52` (stamp `f15b35e76c6513ef`) — all verified before each side was
-   benchmarked.
+   "v1.0.34" = `e728e52` (stamp `f15b35e76c6513ef`) — all verified before each side was benchmarked. For the 2026-10-15 pair: "v1.1.1" = `eb9b7ec` (stamp `d640b61395691e36`) and "v1.1.11" = `8931339` (stamp `5a23fa1ec92e67aa`) — verified before every arm of every battery.
 
 ## Counting the runs
 
-**27 recorded runs, every one with measurements; no failures:** 9 benches × 3 depth arms
-(20K / 40K / 60K). The nine warm-up requests were discarded by design — they stay visible in the
-raw files (`"kind": "warmup"`) and are not counted.
+**66 recorded runs, every one with measurements; no failures:** 22 benches (16 × 3-depth
+batteries at 20K / 40K / 60K, plus 6 × 4-depth batteries at 0.5K / 1K / 5K / 10K for the short-prompt
+extension). The twenty-two warm-up requests were discarded by design — they stay visible in the
+raw files (`"kind": "warmup"`) and are not counted. Of the 66, the three arms of the 2026-10-15
+post-copy calibration battery are excluded from that pair's means by design (experiment 05).
 
 ## Derived values (the only numbers not read straight off a run)
 
@@ -54,9 +60,15 @@ raw files (`"kind": "warmup"`) and are not counted.
 | `release-deltas-64k-v109-rerun-vs-archived.csv` | `*_delta_pct_derived` | same formula, the 2026-10-11 v1.0.9 re-run vs its 2026-10-08 archive — the agreement check |
 | `release-deltas-64k-1034.csv` | `*_delta_pct_derived` | 100 × (v1.0.34 value / v1.0.9 re-run value − 1); the `mean` row averages the three **unrounded** deltas, then rounds |
 | `release-deltas-64k-v109-rerun2-vs-archived.csv` | `*_delta_pct_derived` | same formula, the second 2026-10-11 v1.0.9 re-run vs its archive — the v1.0.34 pair's agreement check |
+| `release-deltas-64k-1111.csv` | `*_delta_pct_derived` | 100 × (v1.1.11 value / v1.1.1 value − 1) on the 3-run per-depth **means**; the `mean` row averages the three **unrounded** deltas, then rounds |
+| `release-deltas-64k-shallow.csv` | `*_delta_pct_derived` | same formula on the 0.5K–10K 3-run means (four depths) |
 
 The charts read their values from `data/csv/` at draw time (percentages included) — nothing is
-retyped into a chart script.
+retyped into a chart script. The 2026-10-15 mean CSVs (`depth-64k-v1111.csv`,
+`release-64k-v111-vs-v1111.csv` and the shallow `release-64k-shallow-v111-vs-v1111.csv`, built by
+`scripts/build_data_v1111.py` / `build_data_shallow_v1111.py`) are averages of the per-run measured
+values (three runs per side); the per-run rows they average are in `depth-64k-v1111-runs.csv` and
+`depth-64k-shallow-runs.csv`.
 
 ## What is not here, and why
 

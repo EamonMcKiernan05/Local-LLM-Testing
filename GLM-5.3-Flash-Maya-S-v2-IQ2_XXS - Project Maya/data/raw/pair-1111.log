@@ -1,0 +1,131 @@
+=== maya v1111 cycle started Thu 15 Oct 09:16:13 UTC 2026 UTC ===
+[2026-10-15T09:16:13Z] --- [0] preflight
+Note: switching to 'v1.1.1'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at eb9b7ec v1.1.1
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+checked out v1.1.1 at Thu 15 Oct 09:16:13 UTC 2026
+[2026-10-15T09:16:13Z] preflight OK
+[2026-10-15T09:16:13Z] --- [B] post-copy burn (discarded)
+--- launching ./setup.sh (v1.1.1 / v111-burn) at Thu 15 Oct 09:16:13 UTC 2026
+api up after ~136s (v1.1.1/v111-burn)
+stamp: d640b61395691e36
+engine reload marker hits: 1
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm split auto: the host reads RAM at 10 GB/s (a part's CPU lane: 5); the routes from the usage counts; the pipelined decode: a token costs the slower part
+glm fast: CUDA0 CPU lane: 7 threads, an expert 0.815 ms on the CPU vs 0.730 ms over PCIe -> of 0..8 RAM-tier experts the CPU takes 0 0 1 1 2 2 3 3 4
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (v1.1.1/v111-burn)
+--- warm-up Thu 15 Oct 09:18:29 UTC 2026
+warmup ok: prompt_tokens 22546 | timings: {'cache_n': 0, 'prompt_n': 22546, 'prompt_ms': 43082.2, 'prompt_per_token_ms': 1.911, 'prompt_per_second': 523.3, 'predicted_n': 4, 'predicted_ms': 887.7, 'predicted_per_token_ms': 221.925, 'predicted_per_second': 4.5, 'draft_n': 2, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 402.6 tok/s, decode 13.5 tok/s, 400 gen, 81.0s
+arm 40k rep 1/1: prefill 501.3 tok/s, decode 16.5 tok/s, 400 gen, 105.3s
+arm 60k rep 1/1: prefill 480.1 tok/s, decode 16.0 tok/s, 400 gen, 151.6s
+
+# Model Bench: maya-s-v2-64k-v111-postcopy-burn
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T0919Z-maya-s-v2-64k-v111-postcopy-burn · 2026-10-15 09:19:14 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 402.6 | 13.5 | 400 | 81.0 | 1 |
+| 40k | 40012 | 501.3 | 16.5 | 400 | 105.3 | 1 |
+| 60k | 59967 | 480.1 | 16.0 | 400 | 151.6 | 1 |
+
+- prefill peak: **501.3 tok/s** at 40k
+- decode peak: **16.5 tok/s** at 40k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T0919Z-maya-s-v2-64k-v111-postcopy-burn
+bench maya-s-v2-64k-v111-postcopy-burn rc=0 Thu 15 Oct 09:25:15 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T0919Z-maya-s-v2-64k-v111-postcopy-burn
+--- last glm stat lines:
+glm stat: decode 221.93 ms/tok (4.51 tok/s) | vram hit 86.26% | ram fetches 25.00/tok | disk 18.25 reads/tok in 16.00 waits/tok, 245.99 ms/tok | promotions 43.25/tok | cpu lane 8.50/tok in 19.27 ms/tok | prompt 1.9 ms/tok | vram 7678/7907 ram 3182/3542
+glm stat: decode 170.16 ms/tok (5.88 tok/s) | vram hit 86.93% | ram fetches 26.12/tok | disk 13.62 reads/tok in 12.00 waits/tok, 200.16 ms/tok | promotions 35.38/tok | cpu lane 9.06/tok in 20.79 ms/tok | prompt 14.7 ms/tok | vram 7810/7907 ram 3298/3542
+glm stat: decode 74.05 ms/tok (13.50 tok/s) | vram hit 92.79% | ram fetches 17.78/tok | disk 4.24 reads/tok in 4.30 waits/tok, 47.15 ms/tok | promotions 21.14/tok | cpu lane 5.62/tok in 13.51 ms/tok | prompt 2.5 ms/tok | vram 7794/7907 ram 3496/3542
+glm stat: decode 60.66 ms/tok (16.49 tok/s) | vram hit 93.74% | ram fetches 16.43/tok | disk 2.59 reads/tok in 2.85 waits/tok, 27.26 ms/tok | promotions 18.46/tok | cpu lane 5.12/tok in 11.58 ms/tok | prompt 2.0 ms/tok | vram 7791/7907 ram 3497/3542
+glm stat: decode 62.59 ms/tok (15.98 tok/s) | vram hit 93.35% | ram fetches 17.19/tok | disk 2.58 reads/tok in 2.90 waits/tok, 30.76 ms/tok | promotions 19.16/tok | cpu lane 5.61/tok in 11.26 ms/tok | prompt 2.1 ms/tok | vram 7792/7907 ram 3498/3542
+stopping maya server pid 1148163
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T09:25:23Z] --- [A1] v1.1.1 rep1
+HEAD is now at eb9b7ec v1.1.1
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+checked out v1.1.1 at Thu 15 Oct 09:25:23 UTC 2026
+--- launching ./setup.sh (v1.1.1 / v111-r1) at Thu 15 Oct 09:25:23 UTC 2026
+api up after ~141s (v1.1.1/v111-r1)
+stamp: d640b61395691e36
+engine reload marker hits: 1
+glm split: layers [0, 23) on CUDA0, [23, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm split auto: the host reads RAM at 10 GB/s (a part's CPU lane: 5); the routes from the usage counts; the pipelined decode: a token costs the slower part
+glm fast: CUDA0 CPU lane: 7 threads, an expert 0.955 ms on the CPU vs 0.716 ms over PCIe -> of 0..8 RAM-tier experts the CPU takes 0 0 1 1 2 2 2 3 3
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (v1.1.1/v111-r1)
+--- warm-up Thu 15 Oct 09:27:44 UTC 2026
+warmup ok: prompt_tokens 22546 | timings: {'cache_n': 0, 'prompt_n': 22546, 'prompt_ms': 50189.6, 'prompt_per_token_ms': 2.226, 'prompt_per_second': 449.2, 'predicted_n': 4, 'predicted_ms': 1075.4, 'predicted_per_token_ms': 268.85, 'predicted_per_second': 3.7, 'draft_n': 2, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 391.0 tok/s, decode 14.8 tok/s, 400 gen, 78.9s
+arm 40k rep 1/1: prefill 456.0 tok/s, decode 16.9 tok/s, 400 gen, 115.1s
+arm 60k rep 1/1: prefill 450.4 tok/s, decode 19.0 tok/s, 400 gen, 156.0s
+
+# Model Bench: maya-s-v2-64k-v111-r1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 65536
+- battery: depths 20k, 40k, 60k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)
+- run: 2026-10-15T0928Z-maya-s-v2-64k-v111-r1 · 2026-10-15 09:28:36 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 391.0 | 14.8 | 400 | 78.9 | 1 |
+| 40k | 40011 | 456.0 | 16.9 | 400 | 115.1 | 1 |
+| 60k | 59967 | 450.4 | 19.0 | 400 | 156.0 | 1 |
+
+- prefill peak: **456.0 tok/s** at 40k
+- decode peak: **19.0 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-15T0928Z-maya-s-v2-64k-v111-r1
+bench maya-s-v2-64k-v111-r1 rc=0 Thu 15 Oct 09:34:47 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-15T0928Z-maya-s-v2-64k-v111-r1
+--- last glm stat lines:
+glm stat: decode 268.86 ms/tok (3.72 tok/s) | vram hit 79.96% | ram fetches 40.00/tok | disk 20.25 reads/tok in 14.50 waits/tok, 232.09 ms/tok | promotions 56.00/tok | cpu lane 15.25/tok in 33.12 ms/tok | prompt 2.2 ms/tok | vram 7754/7887 ram 3113/3513
+glm stat: decode 155.42 ms/tok (6.43 tok/s) | vram hit 87.50% | ram fetches 26.81/tok | disk 11.62 reads/tok in 9.69 waits/tok, 158.17 ms/tok | promotions 35.62/tok | cpu lane 8.06/tok in 21.84 ms/tok | prompt 14.6 ms/tok | vram 7789/7887 ram 3293/3513
+glm stat: decode 67.64 ms/tok (14.78 tok/s) | vram hit 93.72% | ram fetches 16.13/tok | disk 3.41 reads/tok in 3.60 waits/tok, 40.63 ms/tok | promotions 19.14/tok | cpu lane 4.71/tok in 10.15 ms/tok | prompt 2.6 ms/tok | vram 7769/7887 ram 3473/3513
+glm stat: decode 59.15 ms/tok (16.91 tok/s) | vram hit 93.50% | ram fetches 17.49/tok | disk 2.31 reads/tok in 2.68 waits/tok, 26.34 ms/tok | promotions 19.64/tok | cpu lane 5.13/tok in 10.92 ms/tok | prompt 2.2 ms/tok | vram 7771/7887 ram 3449/3513
+glm stat: decode 52.51 ms/tok (19.05 tok/s) | vram hit 94.00% | ram fetches 16.36/tok | disk 1.63 reads/tok in 2.08 waits/tok, 18.75 ms/tok | promotions 17.78/tok | cpu lane 4.96/tok in 10.28 ms/tok | prompt 2.2 ms/tok | vram 7767/7887 ram 3445/3513
+stopping maya server pid 1148921
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-15T09:34:55Z] --- [B1] v1.1.11 rep1
+Previous HEAD position was eb9b7ec v1.1.1
+HEAD is now at 8931339 v1.1.11
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+checked out v1.1.11 at Thu 15 Oct 09:34:55 UTC 2026
+--- launching ./setup.sh (v1.1.11 / v1111-r1) at Thu 15 Oct 09:34:55 UTC 2026
+api up after ~346s (v1.1.11/v1111-r1)
+stamp: 5a23fa1ec92e67aa
+engine reload marker hits: 1
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm split auto: the host reads RAM at 10 GB/s (a part's CPU lane: 5); the routes from the default coverage curve (no usage counts); the pipelined decode: a token costs the slower part
+glm fast: CUDA0 CPU lane: 7 threads, an expert 0.875 ms on the CPU vs 0.726 ms over PCIe -> of 0..8 RAM-tier experts the CPU takes 0 0 1 1 2 2 3 3 4
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: FAILED
+md5sum: WARNING: 1 computed checksum did NOT match
+!!! FAILED: config drifted (v1.1.11/v1111-r1)
