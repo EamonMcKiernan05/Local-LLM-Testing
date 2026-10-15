@@ -75,3 +75,26 @@ on this box; decode wanders — read the means, not cells.
   start was stopped by the config-drift gate exactly as designed (the update rewrites the config on
   its first start; the gate caught it before any bench data was taken) — the full sequence is in
   `pair-1111.log` / `pair-1111-resume.log`.
+
+
+## Shallow-range extension (same day, after the pair)
+
+Asked for the short-prompt range; the battery's shallowest depth was 20K, so six more batteries ran:
+**0.5K / 1K / 5K / 10K, three per side, alternated A B A B A B**, same method (per-side configs pinned,
+warm-up discarded, one load per battery). Means:
+
+| depth | v1.1.1 decode | v1.1.11 decode | delta | v1.1.1 prefill | v1.1.11 prefill | delta |
+|---|---:|---:|---:|---:|---:|---:|
+| 0.5K | 13.90 | 16.17 | **+16.3 %** | 51.0 | 48.7 | −4.4 % |
+| 1K | 18.83 | 21.30 | **+13.1 %** | 102.5 | 97.4 | −5.0 % |
+| 5K | 18.67 | 20.40 | **+9.3 %** | 383.6 | 371.2 | −3.2 % |
+| 10K | 18.17 | 20.23 | **+11.4 %** | 363.8 | 352.4 | −3.1 % |
+| **mean** | | | **+12.5 %** | | | **−4.0 %** |
+
+- The decode gain grows as the prompt shrinks (+16 % at 0.5K vs +4 % at 60K). In absolute terms decode
+  peaks around 1K (~21.3 tok/s) and declines with depth (15.3 tok/s at 20K).
+- Prefill runs a few percent lower on every shallow cell — six of the seven cells across both ranges
+  are negative. A small, consistent cost; shown rather than smoothed over (no "within wander" claim).
+- Records: `data/raw/model-bench-64k-v111{,1}-shallow-r{1..3}` (+meta/summary); CSVs
+  `release-64k-shallow-v111-vs-v1111.csv`, `release-deltas-64k-shallow.csv`, `depth-64k-shallow-runs.csv`;
+  chart `maya-v100-64k-shallow-v111-vs-v1111.png` (`scripts/make_chart_shallow_v1111.py`).

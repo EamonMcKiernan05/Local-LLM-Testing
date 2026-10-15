@@ -1,0 +1,18 @@
+=== maya shallow swap-in started Thu 15 Oct 11:14:41 UTC 2026 UTC ===
+[2026-10-15T11:14:41Z] --- [0] preflight
+need: 98557730661
+[2026-10-15T11:14:41Z] preflight OK
+[2026-10-15T11:14:41Z] --- [1] stop strata
+stopping pid 1158816
+[2026-10-15T11:14:47Z] strata stopped; vram=0MiB
+[2026-10-15T11:14:47Z] --- [2] teardown iq3_s
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G   56G  166G  26% /
+[2026-10-15T11:14:51Z] --- [3] space gate
+free: 177523572736
+[2026-10-15T11:14:51Z] --- [4] copy maya hdd->nvme Thu 15 Oct 11:14:51 UTC 2026
+[2026-10-15T11:23:28Z] copy done Thu 15 Oct 11:23:28 UTC 2026
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G  148G   74G  67% /
+du hdd=98557730661 nvme=98557730661
+verify ok
+[2026-10-15T11:23:28Z] --- [5] flip
+[2026-10-15T11:23:28Z] swap-in done; box ready for shallow cycle

@@ -1,6 +1,6 @@
 # GLM-5.3-Flash (Maya-S) on Project Maya — the bench record on box .5
 
-**48 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
+**66 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
 V100 32 GB — measured 2026-10-07 to 2026-10-15 on the box brought up 2026-09-30.** One GGUF set
 throughout: Maya-S-v2 IQ2_XXS (47.8 + 47.8 + 0.8 GB), layer-split across both cards. Every number
 came off a real run on this hardware; nothing is estimated from a datasheet.
@@ -8,9 +8,10 @@ came off a real run on this hardware; nothing is estimated from a datasheet.
 The findings that matter:
 
 - **The v1.1.11 engine update lifts decode ~7 % on a three-run-per-side pair (mean +6.7 %, every
-  depth positive: +9.1 / +6.8 / +4.3 %)** — prefill is unchanged (−1.7 % mean, inside the box's
-  wander). The update also migrates the config itself: the shipped expert profile is added at its
-  first start (experiment 05).
+  depth positive: +9.1 / +6.8 / +4.3 %), and more at short prompts — +9 to +16 % across 0.5K–10K
+  (mean +12.5 %; decode peaks ~21.3 tok/s at 1K).** Prefill reads equal-to-−4 % (a small consistent
+  dip at short prompts is shown in experiment 05, not smoothed over). The update also migrates the
+  config itself: the shipped expert profile is added at its first start.
 - **The v1.0.34 engine update lifts prefill 77–113 % on a same-day, same-config pair (mean +97.5 %)** —
   260 → 526 tok/s at 40K prompt depth, 269 → 476 at 60K — **and decode rises across all three
   depths (mean +46.4 %)**. The v1.0.33 pair measured 40 minutes earlier was superseded by the next
@@ -25,8 +26,8 @@ The findings that matter:
   numbers are on the cards.
 - **The boot NVMe caps decode**: ~600 of the 12,096 experts re-stream off the DRAM-less SK hynix
   BC501 every token, and measured disk waits are about half the per-token cost (experiment 01).
-- Runs recorded: **48 — all 48 measured, 0 failed** (warm-ups were discarded by design; the
-  2026-10-15 calibration battery — 3 of the 48 — is excluded from the pair by design).
+- Runs recorded: **66 — all 66 measured, 0 failed** (warm-ups were discarded by design; the
+  2026-10-15 calibration battery — 3 of the 66 — is excluded from the pair by design).
 
 ## The figures
 
@@ -40,6 +41,7 @@ The findings that matter:
 | `charts/maya-v100-64k-v109-vs-v1034.png` | v1.0.34 vs v1.0.9, per depth — the same-day pair | `scripts/make_chart_compare_v1034.py` |
 | `charts/maya-v100-64k-depth-v1111.png` | the depth card — v1.1.11 numbers, 3-run means, 20K–60K | `scripts/make_chart_depth_v1111.py` |
 | `charts/maya-v100-64k-v111-vs-v1111.png` | v1.1.11 vs v1.1.1, per depth — three runs per side, mean shown | `scripts/make_chart_compare_v1111.py` |
+| `charts/maya-v100-64k-shallow-v111-vs-v1111.png` | v1.1.11 vs v1.1.1 at short prompts, 0.5K–10K — three runs per side | `scripts/make_chart_shallow_v1111.py` |
 
 ## Layout
 
@@ -61,12 +63,13 @@ PROVENANCE.md where every file came from, and what is not here
 | 02 | 2026-10-08 | v1.0.9 update: same-day controlled pair | 6 | prefill **+69.1 %** mean; decode within noise |
 | 03 | 2026-10-11 | v1.0.33 update: same-day controlled pair | 6 | prefill **+86.9 %** mean, decode **+20.2 %** mean — superseded before publication |
 | 04 | 2026-10-11 | v1.0.34 update: same-day controlled pair | 6 | prefill **+97.5 %** mean, decode **+46.4 %** mean |
-| 05 | 2026-10-15 | v1.1.11 update: three-run-per-side controlled pair | 21 | decode **+6.7 %** mean (every depth positive); prefill unchanged |
+| 05 | 2026-10-15 | v1.1.11 update: three-run-per-side pair + short-prompt extension | 39 | decode **+6.7 %** mean (20K–60K) and **+12.5 %** (0.5K–10K); prefill equal-to-−4 % |
 
 ## Method, and what is deliberately not claimed
 
 - **Three runs per side on the 2026-10-15 pair** (alternated loads, one load per battery, means; a
-  discarded post-copy calibration battery; the audit and spreads are in experiment 05). Earlier
+  discarded post-copy calibration battery; the audit and spreads are in experiment 05), plus six more
+  batteries for the 0.5K–10K short-prompt extension. Earlier
   pairs are one run per arm.
 - **One measured run per arm, unique documents, a discarded warm-up.** The bench slices the same
   three corpus documents per fixed depth (Frankenstein / Sherlock / a second Sherlock cut) with the
