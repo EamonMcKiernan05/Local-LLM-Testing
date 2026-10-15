@@ -1,0 +1,33 @@
+=== maya v1111 prep started Thu 15 Oct 09:07:39 UTC 2026 UTC ===
+[2026-10-15T09:07:39Z] --- [0] preflight
+v111 stamp: d640b61395691e36
+a248dcd6672895f96f199259240b7538  /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json
+maya bytes: 98557730661
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G  155G   67G  71% /
+[2026-10-15T09:07:39Z] preflight OK
+[2026-10-15T09:07:39Z] --- [1] stop strata
+stopping pid 1084138
+[2026-10-15T09:07:46Z] strata stopped; vram=0MiB
+[2026-10-15T09:07:46Z] --- [2] teardown iq3_s
+total 20
+drwxrwxr-x  3 eamon eamon  4096 Oct 15 09:07 .
+drwxr-x--- 41 eamon eamon 12288 Oct 15 09:07 ..
+drwxrwxr-x  2 eamon eamon  4096 Oct 15 09:07 packs
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G   56G  166G  26% /
+free: 177602035712
+[2026-10-15T09:07:50Z] --- [4] copy maya hdd->nvme Thu 15 Oct 09:07:50 UTC 2026
+[2026-10-15T09:16:13Z] copy done Thu 15 Oct 09:16:13 UTC 2026
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G  148G   74G  67% /
+du hdd=98557730661 nvme=98557730661
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00001-of-00003.gguf ok (47835993056)
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00002-of-00003.gguf ok (47797478080)
+GLM-5.3-Flash-Maya-S-v2-IQ2_XXS-00003-of-00003.gguf ok (835121120)
+vocab cmp ok
+[2026-10-15T09:16:13Z] --- [5] flip standard path -> NVMe
+total 16
+drwxrwxr-x 4 eamon eamon 4096 Oct 15 09:16 .
+drwxrwxr-x 3 eamon eamon 4096 Oct  7 15:27 ..
+drwxrwxr-x 2 eamon eamon 4096 Oct 12 08:44 GLM-5.3-Flash-DFlash2
+lrwxrwxrwx 1 eamon eamon   53 Oct 15 09:16 glm-5.3-flash-maya-s-v2-iq2_xxs -> /home/eamon/maya-nvme/glm-5.3-flash-maya-s-v2-iq2_xxs
+drwxrwxr-x 4 eamon eamon 4096 Oct  7 17:02 glm-5.3-flash-maya-s-v2-iq2_xxs.hdd-original
+[2026-10-15T09:16:13Z] prep done; box ready for cycle

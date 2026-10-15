@@ -1,0 +1,4 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-15T1018Z-maya-s-v2-64k-v1111-r2,20000,1,frankenstein,"local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)",20000,20012,400,385.2,14.7,398,280,79.7,32036,42,31936,41,
+2026-10-15T1018Z-maya-s-v2-64k-v1111-r2,40000,1,sherlock,"local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)",40000,40012,400,460.8,18.6,398,272,108.9,32036,45,31936,43,
+2026-10-15T1018Z-maya-s-v2-64k-v1111-r2,60000,1,sherlock,"local tokenizer (exact, gguf glm-5.3-flash-maya-s-v2-iq2_xxs)",60000,59967,400,435.9,18.0,398,271,161.2,32036,45,31936,43,

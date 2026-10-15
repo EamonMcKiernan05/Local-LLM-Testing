@@ -1,0 +1,33 @@
+=== maya v1111 restore started Thu 15 Oct 10:45:05 UTC 2026 UTC ===
+[2026-10-15T10:45:05Z] --- [0] stop maya
+no maya server running
+[2026-10-15T10:45:05Z] --- [1] state check
+[2026-10-15T10:45:05Z] --- [2] maya teardown
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G   56G  166G  26% /
+[2026-10-15T10:45:08Z] --- [3] iq3_s HDD masters
+free: 177523658752
+[2026-10-15T10:45:08Z] --- [4] copy iq3_s hdd->nvme Thu 15 Oct 10:45:08 UTC 2026
+pack copied Thu 15 Oct 10:49:44 UTC 2026
+shard1 copied Thu 15 Oct 10:54:37 UTC 2026
+/dev/mapper/ubuntu--vg-ubuntu--lv  232G  155G   66G  71% /
+[2026-10-15T10:55:00Z] --- [5] verify + flip
+pack du 51840305025/51840305025
+total 82544192
+drwxrwxr-x 2 eamon eamon        4096 Oct 15 10:55 .
+drwxrwxr-x 7 eamon eamon        4096 Oct  7 21:44 ..
+-rw-rw-r-- 1 eamon eamon   907543008 Oct  4 19:57 mmproj-Qwen3.8-Flash-Next-BF16.gguf
+lrwxrwxrwx 1 eamon eamon          82 Oct 15 10:55 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf -> /home/eamon/strata-nvme/iq3_s/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf
+-rw-rw-r-- 1 eamon eamon          48 Oct  3 15:10 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf.done
+-rw-rw-r-- 1 eamon eamon 54817524224 Sep 28 15:01 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf.hdd-original
+lrwxrwxrwx 1 eamon eamon          75 Oct  3 15:27 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf -> /home/eamon/strata-ple/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf
+-rw-rw-r-- 1 eamon eamon          48 Oct  3 15:10 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf.done
+-rw-rw-r-- 3 eamon eamon 28800138432 Sep 28 13:19 Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf.hdd-original
+[2026-10-15T10:55:00Z] --- [6] strata config sanity
+config OK; mmproj: /mnt/models/Qwen3.8-Flash-Next/ISTA DASLab/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S/mmproj-Qwen3.8-Flash-Next-BF16.gguf
+[2026-10-15T10:55:00Z] --- [7] start iq3_s
+model up after ~100s
+vision modality advertised
+{"object": "list", "data": [{"id": "qwen3.8-flash-next-iq3_s", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 262144}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+0, 31280 MiB
+1, 32124 MiB
+[2026-10-15T10:56:36Z] === maya v1111 restore done Thu 15 Oct 10:56:36 UTC 2026 ===
