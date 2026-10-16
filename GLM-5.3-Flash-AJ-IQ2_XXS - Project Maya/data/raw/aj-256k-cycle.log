@@ -1,0 +1,219 @@
+=== maya AJ-IQ2_XXS cycle started Fri 16 Oct 13:49:14 UTC 2026 UTC ===
+[2026-10-16T13:49:14Z] --- [0] preflight
+7e73a42dc4f2e75ac45dab17fb09a300  /home/eamon/project-maya/maya-aj-iq2_xxs.json
+e09d627251862335c7b149906ceeb28e  /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json
+[2026-10-16T13:49:14Z] preflight OK
+[2026-10-16T13:49:14Z] --- [burn] postcopy burn battery (discarded by design)
+--- launching ./run-maya-aj-iq2_xxs.sh (burn) at Fri 16 Oct 13:49:14 UTC 2026
+api up after ~66s (burn)
+n_ctx: 262144 (want 262144)
+engine src stamp: c823b8ca185405dd
+markers since arm start: glm mtp=0 glm dflash=0
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.53 GB: | kda q/k/v q14 1417 MB | attn output q14 787 MB | shared experts q14 413 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 117 MB | mla q/kv bf16 72 MB | routers bf16 47 MB | mhc bf16 36 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (burn)
+--- warm-up Fri 16 Oct 13:50:20 UTC 2026
+warmup ok: prompt_tokens 22658 | timings: {'cache_n': 0, 'prompt_n': 22658, 'prompt_ms': 35961.2, 'prompt_per_token_ms': 1.587, 'prompt_per_second': 630.1, 'predicted_n': 4, 'predicted_ms': 281.1, 'predicted_per_token_ms': 70.275, 'predicted_per_second': 14.2, 'draft_n': 0, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 649.0 tok/s, decode 22.7 tok/s, 400 gen, 49.1s
+arm 60k rep 1/1: prefill 696.9 tok/s, decode 24.0 tok/s, 400 gen, 103.6s
+arm 100k rep 1/1: prefill 756.8 tok/s, decode 24.1 tok/s, 400 gen, 150.3s
+arm 150k rep 1/1: prefill 786.7 tok/s, decode 23.4 tok/s, 400 gen, 210.0s
+arm 200k rep 1/1: prefill 794.6 tok/s, decode 22.7 tok/s, 400 gen, 272.8s
+arm 250k rep 1/1: prefill 788.9 tok/s, decode 21.8 tok/s, 400 gen, 343.5s
+
+# Model Bench: aj-iq2xxs-256k-sn730-postcopy-burn
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn · 2026-10-16 13:50:58 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 649.0 | 22.7 | 400 | 49.1 | 1 |
+| 60k | 59966 | 696.9 | 24.0 | 400 | 103.6 | 1 |
+| 100k | 99855 | 756.8 | 24.1 | 400 | 150.3 | 1 |
+| 150k | 150035 | 786.7 | 23.4 | 400 | 210.0 | 1 |
+| 200k | 200038 | 794.6 | 22.7 | 400 | 272.8 | 1 |
+| 250k | 249594 | 788.9 | 21.8 | 400 | 343.5 | 1 |
+
+- prefill peak: **794.6 tok/s** at 200k
+- decode peak: **24.1 tok/s** at 100k
+
+run dir: /home/eamon/model-bench/runs/2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn
+bench aj-iq2xxs-256k-sn730-postcopy-burn rc=0 Fri 16 Oct 14:09:58 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm stat: decode 42.77 ms/tok (23.38 tok/s) | vram hit 96.59% | ram fetches 8.86/tok | disk 0.80 reads/tok in 0.88 waits/tok, 2.38 ms/tok | promotions 9.72/tok | cpu lane 1.68/tok in 3.30 ms/tok | prompt 1.3 ms/tok | vram 8525/8646 ram 3034/3382
+glm stat: decode 44.01 ms/tok (22.72 tok/s) | vram hit 96.47% | ram fetches 9.23/tok | disk 0.89 reads/tok in 0.95 waits/tok, 2.68 ms/tok | promotions 10.17/tok | cpu lane 1.64/tok in 2.98 ms/tok | prompt 1.3 ms/tok | vram 8526/8646 ram 3047/3382
+glm stat: decode 45.95 ms/tok (21.76 tok/s) | vram hit 96.20% | ram fetches 9.92/tok | disk 0.83 reads/tok in 0.93 waits/tok, 2.58 ms/tok | promotions 10.82/tok | cpu lane 1.87/tok in 3.41 ms/tok | prompt 1.3 ms/tok | vram 8527/8646 ram 3014/3382
+stopping maya server pid 44381
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T14:10:06Z] --- [run 1] aj-iq2xxs-256k-sn730-r1
+--- launching ./run-maya-aj-iq2_xxs.sh (r1) at Fri 16 Oct 14:10:06 UTC 2026
+api up after ~61s (r1)
+n_ctx: 262144 (want 262144)
+engine src stamp: c823b8ca185405dd
+markers since arm start: glm mtp=0 glm dflash=0
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.53 GB: | kda q/k/v q14 1417 MB | attn output q14 787 MB | shared experts q14 413 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 117 MB | mla q/kv bf16 72 MB | routers bf16 47 MB | mhc bf16 36 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r1)
+--- warm-up Fri 16 Oct 14:11:07 UTC 2026
+warmup ok: prompt_tokens 22658 | timings: {'cache_n': 0, 'prompt_n': 22658, 'prompt_ms': 35470.2, 'prompt_per_token_ms': 1.565, 'prompt_per_second': 638.8, 'predicted_n': 4, 'predicted_ms': 259.0, 'predicted_per_token_ms': 64.75, 'predicted_per_second': 15.4, 'draft_n': 0, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 653.6 tok/s, decode 22.9 tok/s, 400 gen, 48.3s
+arm 60k rep 1/1: prefill 706.2 tok/s, decode 24.7 tok/s, 400 gen, 101.6s
+arm 100k rep 1/1: prefill 758.0 tok/s, decode 25.0 tok/s, 400 gen, 148.8s
+arm 150k rep 1/1: prefill 789.6 tok/s, decode 23.3 tok/s, 400 gen, 208.8s
+arm 200k rep 1/1: prefill 802.4 tok/s, decode 23.3 tok/s, 400 gen, 268.8s
+arm 250k rep 1/1: prefill 793.0 tok/s, decode 22.5 tok/s, 400 gen, 335.7s
+
+# Model Bench: aj-iq2xxs-256k-sn730-r1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-16T1411Z-aj-iq2xxs-256k-sn730-r1 · 2026-10-16 14:11:43 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 653.6 | 22.9 | 400 | 48.3 | 1 |
+| 60k | 59967 | 706.2 | 24.7 | 400 | 101.6 | 1 |
+| 100k | 99854 | 758.0 | 25.0 | 400 | 148.8 | 1 |
+| 150k | 150036 | 789.6 | 23.3 | 400 | 208.8 | 1 |
+| 200k | 200038 | 802.4 | 23.3 | 400 | 268.8 | 1 |
+| 250k | 249595 | 793.0 | 22.5 | 400 | 335.7 | 1 |
+
+- prefill peak: **802.4 tok/s** at 200k
+- decode peak: **25.0 tok/s** at 100k
+
+run dir: /home/eamon/model-bench/runs/2026-10-16T1411Z-aj-iq2xxs-256k-sn730-r1
+bench aj-iq2xxs-256k-sn730-r1 rc=0 Fri 16 Oct 14:30:24 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-16T1411Z-aj-iq2xxs-256k-sn730-r1
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm stat: decode 42.85 ms/tok (23.34 tok/s) | vram hit 96.36% | ram fetches 9.44/tok | disk 0.90 reads/tok in 0.99 waits/tok, 2.60 ms/tok | promotions 10.40/tok | cpu lane 1.77/tok in 3.07 ms/tok | prompt 1.3 ms/tok | vram 8532/8646 ram 3082/3398
+glm stat: decode 42.88 ms/tok (23.32 tok/s) | vram hit 96.68% | ram fetches 8.66/tok | disk 0.84 reads/tok in 0.93 waits/tok, 2.40 ms/tok | promotions 9.57/tok | cpu lane 1.50/tok in 2.66 ms/tok | prompt 1.2 ms/tok | vram 8531/8646 ram 3045/3398
+glm stat: decode 44.36 ms/tok (22.54 tok/s) | vram hit 96.62% | ram fetches 8.79/tok | disk 0.83 reads/tok in 0.90 waits/tok, 2.38 ms/tok | promotions 9.68/tok | cpu lane 1.62/tok in 2.84 ms/tok | prompt 1.3 ms/tok | vram 8530/8646 ram 3035/3398
+stopping maya server pid 46746
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T14:30:32Z] --- [run 2] aj-iq2xxs-256k-sn730-r2
+--- launching ./run-maya-aj-iq2_xxs.sh (r2) at Fri 16 Oct 14:30:32 UTC 2026
+api up after ~70s (r2)
+n_ctx: 262144 (want 262144)
+engine src stamp: c823b8ca185405dd
+markers since arm start: glm mtp=0 glm dflash=0
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.53 GB: | kda q/k/v q14 1417 MB | attn output q14 787 MB | shared experts q14 413 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 117 MB | mla q/kv bf16 72 MB | routers bf16 47 MB | mhc bf16 36 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r2)
+--- warm-up Fri 16 Oct 14:31:42 UTC 2026
+warmup ok: prompt_tokens 22658 | timings: {'cache_n': 0, 'prompt_n': 22658, 'prompt_ms': 35821.1, 'prompt_per_token_ms': 1.581, 'prompt_per_second': 632.5, 'predicted_n': 4, 'predicted_ms': 282.9, 'predicted_per_token_ms': 70.725, 'predicted_per_second': 14.1, 'draft_n': 0, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 647.6 tok/s, decode 23.0 tok/s, 400 gen, 49.3s
+arm 60k rep 1/1: prefill 705.5 tok/s, decode 24.5 tok/s, 400 gen, 102.3s
+arm 100k rep 1/1: prefill 757.2 tok/s, decode 24.6 tok/s, 400 gen, 149.4s
+arm 150k rep 1/1: prefill 790.7 tok/s, decode 23.8 tok/s, 400 gen, 208.4s
+arm 200k rep 1/1: prefill 796.5 tok/s, decode 23.3 tok/s, 400 gen, 273.4s
+arm 250k rep 1/1: prefill 789.6 tok/s, decode 22.1 tok/s, 400 gen, 338.7s
+
+# Model Bench: aj-iq2xxs-256k-sn730-r2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-16T1432Z-aj-iq2xxs-256k-sn730-r2 · 2026-10-16 14:32:20 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 647.6 | 23.0 | 400 | 49.3 | 1 |
+| 60k | 59967 | 705.5 | 24.5 | 400 | 102.3 | 1 |
+| 100k | 99855 | 757.2 | 24.6 | 400 | 149.4 | 1 |
+| 150k | 150036 | 790.7 | 23.8 | 400 | 208.4 | 1 |
+| 200k | 200038 | 796.5 | 23.3 | 400 | 273.4 | 1 |
+| 250k | 249595 | 789.6 | 22.1 | 400 | 338.7 | 1 |
+
+- prefill peak: **796.5 tok/s** at 200k
+- decode peak: **24.6 tok/s** at 100k
+
+run dir: /home/eamon/model-bench/runs/2026-10-16T1432Z-aj-iq2xxs-256k-sn730-r2
+bench aj-iq2xxs-256k-sn730-r2 rc=0 Fri 16 Oct 14:51:12 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-16T1432Z-aj-iq2xxs-256k-sn730-r2
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm stat: decode 41.95 ms/tok (23.84 tok/s) | vram hit 96.57% | ram fetches 8.96/tok | disk 0.81 reads/tok in 0.86 waits/tok, 2.33 ms/tok | promotions 9.81/tok | cpu lane 1.66/tok in 2.90 ms/tok | prompt 1.3 ms/tok | vram 8521/8644 ram 3066/3409
+glm stat: decode 42.95 ms/tok (23.28 tok/s) | vram hit 96.74% | ram fetches 8.39/tok | disk 0.85 reads/tok in 0.92 waits/tok, 2.52 ms/tok | promotions 9.31/tok | cpu lane 1.57/tok in 2.92 ms/tok | prompt 1.3 ms/tok | vram 8522/8644 ram 3070/3409
+glm stat: decode 45.33 ms/tok (22.06 tok/s) | vram hit 96.38% | ram fetches 9.29/tok | disk 0.93 reads/tok in 1.02 waits/tok, 2.73 ms/tok | promotions 10.29/tok | cpu lane 1.75/tok in 3.15 ms/tok | prompt 1.3 ms/tok | vram 8524/8644 ram 3082/3409
+stopping maya server pid 49608
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T14:51:21Z] --- [run 3] aj-iq2xxs-256k-sn730-r3
+--- launching ./run-maya-aj-iq2_xxs.sh (r3) at Fri 16 Oct 14:51:21 UTC 2026
+api up after ~73s (r3)
+n_ctx: 262144 (want 262144)
+engine src stamp: c823b8ca185405dd
+markers since arm start: glm mtp=0 glm dflash=0
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.53 GB: | kda q/k/v q14 1417 MB | attn output q14 787 MB | shared experts q14 413 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 117 MB | mla q/kv bf16 72 MB | routers bf16 47 MB | mhc bf16 36 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (r3)
+--- warm-up Fri 16 Oct 14:52:34 UTC 2026
+warmup ok: prompt_tokens 22658 | timings: {'cache_n': 0, 'prompt_n': 22658, 'prompt_ms': 35511.3, 'prompt_per_token_ms': 1.567, 'prompt_per_second': 638.1, 'predicted_n': 4, 'predicted_ms': 256.9, 'predicted_per_token_ms': 64.225, 'predicted_per_second': 15.6, 'draft_n': 0, 'draft_n_accepted': 0}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 653.9 tok/s, decode 23.9 tok/s, 400 gen, 48.0s
+arm 60k rep 1/1: prefill 704.0 tok/s, decode 25.1 tok/s, 400 gen, 101.9s
+arm 100k rep 1/1: prefill 760.7 tok/s, decode 23.8 tok/s, 400 gen, 149.3s
+arm 150k rep 1/1: prefill 793.3 tok/s, decode 23.5 tok/s, 400 gen, 207.8s
+arm 200k rep 1/1: prefill 803.4 tok/s, decode 23.2 tok/s, 400 gen, 268.6s
+arm 250k rep 1/1: prefill 792.3 tok/s, decode 22.7 tok/s, 400 gen, 335.8s
+
+# Model Bench: aj-iq2xxs-256k-sn730-r3
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-16T1453Z-aj-iq2xxs-256k-sn730-r3 · 2026-10-16 14:53:12 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 653.9 | 23.9 | 400 | 48.0 | 1 |
+| 60k | 59966 | 704.0 | 25.1 | 400 | 101.9 | 1 |
+| 100k | 99855 | 760.7 | 23.8 | 400 | 149.3 | 1 |
+| 150k | 150037 | 793.3 | 23.5 | 400 | 207.8 | 1 |
+| 200k | 200037 | 803.4 | 23.2 | 400 | 268.6 | 1 |
+| 250k | 249595 | 792.3 | 22.7 | 400 | 335.8 | 1 |
+
+- prefill peak: **803.4 tok/s** at 200k
+- decode peak: **25.1 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-16T1453Z-aj-iq2xxs-256k-sn730-r3
+bench aj-iq2xxs-256k-sn730-r3 rc=0 Fri 16 Oct 15:11:53 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-16T1453Z-aj-iq2xxs-256k-sn730-r3
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm stat: decode 42.47 ms/tok (23.55 tok/s) | vram hit 96.40% | ram fetches 9.41/tok | disk 0.84 reads/tok in 0.90 waits/tok, 2.43 ms/tok | promotions 10.30/tok | cpu lane 1.72/tok in 2.96 ms/tok | prompt 1.3 ms/tok | vram 8529/8646 ram 3073/3398
+glm stat: decode 43.15 ms/tok (23.17 tok/s) | vram hit 96.61% | ram fetches 8.89/tok | disk 0.83 reads/tok in 0.92 waits/tok, 2.41 ms/tok | promotions 9.80/tok | cpu lane 1.52/tok in 2.69 ms/tok | prompt 1.2 ms/tok | vram 8528/8646 ram 3050/3398
+glm stat: decode 44.09 ms/tok (22.68 tok/s) | vram hit 96.63% | ram fetches 8.84/tok | disk 0.78 reads/tok in 0.85 waits/tok, 2.22 ms/tok | promotions 9.66/tok | cpu lane 1.59/tok in 2.76 ms/tok | prompt 1.3 ms/tok | vram 8525/8646 ram 3010/3398
+stopping maya server pid 52443
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T15:12:01Z] --- [restore] Maya-S serving
+--- launching ./run-maya-maya-s-v2-iq2_xxs.sh (restore) at Fri 16 Oct 15:12:01 UTC 2026
+api up after ~60s (restore)
+n_ctx: 65536 (want 65536)
+engine src stamp: c823b8ca185405dd
+markers since arm start: glm mtp=1 glm dflash=0
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.66 GB: | kda q/k/v q14 1496 MB | attn output q14 813 MB | shared experts q14 433 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 123 MB | mla q/kv bf16 72 MB | routers bf16 49 MB | mhc bf16 37 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+start gates done (restore)
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]}}]}
+[2026-10-16T15:13:01Z] --- finish
+=== maya AJ cycle done Fri 16 Oct 15:13:01 UTC 2026 ===

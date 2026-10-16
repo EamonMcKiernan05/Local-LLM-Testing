@@ -1,0 +1,76 @@
+=== maya update v1.1.11 -> v1.1.13 started Fri 16 Oct 12:28:07 UTC 2026 UTC ===
+[2026-10-16T12:28:07Z] --- [0] pre-state
+8931339 v1.1.11
+v1.1.11
+VERSION: 1.1.11
+{"object": "list", "data": [{"id": "glm-5.3-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 65536}, "architecture": {"input_modalities": ["text", "image"], "output_modaliti
+e09d627251862335c7b149906ceeb28e  /home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json
+[2026-10-16T12:28:07Z] --- [1] stop Maya
+stopping maya server pid 8146
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T12:28:16Z] stop OK
+[2026-10-16T12:28:16Z] --- [2] fetch + checkout v1.1.13
+Previous HEAD position was 8931339 v1.1.11
+HEAD is now at 797819e v1.1.13
+v1.1.13
+797819e v1.1.13
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+[2026-10-16T12:28:16Z] checkout OK
+[2026-10-16T12:28:16Z] --- [3] start (refresh_engine rebuilds the engine)
+api up after ~121s
+n_ctx: 65536
+[2026-10-16T12:30:17Z] --- [4] gates
+compile lines in start log:
+29:[7/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_rows.cu.o
+31:[8/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_prefill.cu.o
+33:[9/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_model.cu.o
+35:[10/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_window.cu.o
+37:[11/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_dflash.cu.o
+39:[12/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_fast_path.cu.o
+53:[13/20] Building CUDA object CMakeFiles/strata_engine.dir/src/core/glm_mtp.cu.o
+55:[14/20] Building CXX object CMakeFiles/strata.dir/src/program/generate.cpp.o
+59:[15/20] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/glm_fast.cu.o
+79:[16/20] Linking CXX static library libstrata_kernels.a
+80:[17/20] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/exl3_cpu.cpp.o
+81:[18/20] Linking CXX static library libstrata_kernels_cpu.a
+82:[19/20] Linking CXX static library libstrata_engine.a
+83:[20/20] Linking CXX executable strata
+84:  [ok] engine compiled: /home/eamon/project-maya/build/strata
+stamp: c823b8ca185405dd (was 5a23fa1ec92e67aa)
+{
+ "src": "c823b8ca185405dd",
+ "archs": [
+  70
+ ],
+ "gpu_ids": [
+  0,
+  1
+ ],
+ "nvcc": "/usr/local/cuda/bin/nvcc",
+ "host_compiler": null,
+ "llama": "/home/eamon/project-maya/third_party/llama.cpp",
+ "lib_dirs": [
+  "/usr/local/cuda-12.9/lib64",
+  "/usr/local/cuda-12.9/targets/x86_64-linux/lib"
+ ],
+ "date": "2026-10-16 12:29"
+}
+{
+ "src": "3a8570cc5f1f1686",
+ "archs": [
+  70
+ ],
+ "llama": "/home/eamon/project-maya/third_party/llama.cpp",
+ "date": "2026-10-11 09:21"
+}
+/home/eamon/project-maya/maya-maya-s-v2-iq2_xxs.json: OK
+glm split: layers [0, 25) on CUDA0, [25, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+glm pack: CUDA0 dense weights 3.66 GB: | kda q/k/v q14 1496 MB | attn output q14 813 MB | shared experts q14 433 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 192 MB | mla q/kv q14 157 MB | kda small bf16 123 MB | mla q/kv bf16 72 MB | routers bf16 49 MB | mhc bf16 37 MB | dsa indexer bf16 13 MB | kda small f32 7 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm pack: CUDA1 dense weights 3.19 GB: | kda q/k/v q14 1181 MB | attn output q14 656 MB | other q14 496 MB | shared experts q14 393 MB | mla k_b/v_b bf16 160 MB | mla q/kv q14 131 MB | kda small bf16 97 MB | mla q/kv bf16 60 MB | routers bf16 45 MB | mhc bf16 30 MB | dsa indexer bf16 11 MB | kda small f32 6 MB | norms f32 0 MB | dense ffn f32 0 MB | other f32 0 MB | mla q/kv f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+[2026-10-16T12:30:17Z] --- [5] quick serve check
+content: 'ok'
+reasoning: 'The'
+timings: {'cache_n': 0, 'prompt_n': 19, 'prompt_ms': 1634.6, 'prompt_per_token_ms': 86.032, 'prompt_per_second': 11.6, 'predicted_n': 4, 'predicted_ms': 304.4, 'predicted_per_token_ms': 76.1, 'predicted_per_second': 13.1, 'draft_n': 2, 'draft_n_accepted': 0}
+[2026-10-16T12:30:19Z] --- [6] post
+v1.1.13
+=== maya update done Fri 16 Oct 12:30:19 UTC 2026 ===

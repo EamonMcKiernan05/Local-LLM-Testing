@@ -25,7 +25,7 @@ OS: Ubuntu 24.04
 
 Cuda: 12.9
 
-Inference Engine: Project Maya v1.1.11 — GLM-5.3-Flash Maya-S on 2x V100, serving on `:8080`
+Inference Engine: Project Maya v1.1.13 — GLM-5.3-Flash (AJ-IQ2_XXS) on 2x V100, serving on `:8080`
 
 Harness: Hermes Agent (on main Windows workstation in WSL)
 
@@ -187,3 +187,35 @@ Tensor split changes the profile — decode up at every depth (to +22.7%), prefi
 **What's in the folder:** both runs' raw per-arm records and served commands (sha256-checked copies), the engine's own per-request log extracts for each run, the vision smoke-test response, every depth table as a CSV (the data builder asserts both runs used identical prompts), and three charts with the scripts that draw them.
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/PROVENANCE.md)): one measured run per depth per split mode — single cells at depth carry the usual ±5-8% run-to-run noise class (read the means and the shapes, not the third significant figure); tensor mode is upstream-experimental; one quant (Q8_0); a vision smoke test, not a vision battery.
+
+### GLM-5.3-Flash (AJ-IQ2_XXS) on Project Maya — 33 recorded runs, all with measurements
+
+Everything we have on this model, in one place: **[`GLM-5.3-Flash-AJ-IQ2_XXS - Project Maya/`](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/)**
+
+aj9o9's hand-mixed AJ-IQ2_XXS quant of GLM-5.3-Flash (321B MoE, ~18B active — 87.35 GB, 2.23 bpw, **no MTP block**) served by Project Maya **v1.1.13** on **2x Tesla V100 32GB**, measured 2026-10-16 — a six-depth bench at the full **262,144 context** and a three-depth comparison at **131,072**, three fresh-load runs per depth. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+
+**The findings:**
+
+| | |
+|---|---|
+| Prefill @ 20K → 200K (256K ctx) | **652 → 801 tok/s** (3-run means); 792 at 250K |
+| Decode across 20K–250K (256K ctx) | **22.4–24.8 tok/s** — flat; no speculative drafting (the quant ships without its MTP block) |
+| 131K vs 256K, shared depths | decode **+2.6% mean · prefill +0.3% mean** — parity; context length is free on this box |
+| Storage | the expert tiers stream off the SN730 NVMe; ~0.8–1.3 disk reads per token at the measured depths |
+| Runs recorded | 33 — all with measurements; 6 (the post-copy calibration battery) excluded from the means by design |
+
+Three charts — the 256K card, the 131K card, and the context comparison:
+
+![GLM-5.3-Flash (AJ-IQ2_XXS) on 2x Tesla V100 — decode and prefill by depth (262,144 ctx)](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-mean.png)
+
+![GLM-5.3-Flash (AJ-IQ2_XXS) on 2x Tesla V100 — decode and prefill by depth (131,072 ctx)](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-131k-mean.png)
+
+![AJ-IQ2_XXS 131K vs 256K context — depth benchmark](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-vs-131k.png)
+
+**What the numbers say:**
+
+- **Raw decode, provably**: the quant carries no NextN block (checked in the GGUF header, the tensor lists, and at runtime — 0 `glm mtp` markers, `draft_n: 0` on every arm), so there was no drafting to hide behind; these are honest single-pass rates.
+- **Same file, same day, both contexts: parity.** Half the window changes prefill by +0.3% and decode by +2.6% (mean, three runs per side) — the full 256K window costs nothing measurable on this rig.
+- Cross-check, not a controlled pair: Maya-S **with** MTP drafting read 594–647 tok/s prefill / 20.1–23.1 decode at 20K–60K on 2026-10-15; AJ **without** drafting reads 652–705 / 23.3–24.8 at the same depths.
+
+**What's in the folder:** seven complete bench records, every table as a CSV, three figures with the scripts that regenerate them, and the experiment write-ups.

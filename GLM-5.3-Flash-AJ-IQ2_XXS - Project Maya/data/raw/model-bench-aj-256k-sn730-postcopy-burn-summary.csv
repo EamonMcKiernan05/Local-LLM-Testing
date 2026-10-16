@@ -1,0 +1,7 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,20000,1,frankenstein,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",20000,20013,400,649.0,22.7,0,0,49.1,31950,42,31942,42,
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,60000,1,sherlock,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",60000,59966,400,696.9,24.0,0,0,103.6,31950,45,31942,44,
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,100000,1,pride,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",100000,99855,400,756.8,24.1,0,0,150.3,31950,45,31942,45,
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,150000,1,tale2cities,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",150000,150035,400,786.7,23.4,0,0,210.0,31950,46,31942,46,
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,200000,1,greatexp,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",200000,200038,400,794.6,22.7,0,0,272.8,31950,46,31942,47,
+2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn,250000,1,mobydick,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",250000,249594,400,788.9,21.8,0,0,343.5,31950,46,31942,47,

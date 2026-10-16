@@ -1,0 +1,4 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-16T1516Z-aj-iq2xxs-131k-sn730-r1,20000,1,frankenstein,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",20000,20014,400,652.6,24.4,0,0,47.7,31954,43,31934,43,
+2026-10-16T1516Z-aj-iq2xxs-131k-sn730-r1,60000,1,sherlock,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",60000,59966,400,706.1,25.2,0,0,101.6,31954,45,31934,46,
+2026-10-16T1516Z-aj-iq2xxs-131k-sn730-r1,100000,1,pride,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",100000,99855,400,758.2,25.5,0,0,148.6,31954,46,31934,47,

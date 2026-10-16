@@ -1,0 +1,4 @@
+run_id,depth_k,ptok,gen,prefill_tps,decode_tps,wall_s,gpu0_used_mib,gpu1_used_mib,gpu0_temp_c,gpu1_temp_c,ts
+"2026-10-16, mean of three runs",20000,20013,400,653.1,24.1,48.133,31952.0,31934.667,43.333,43.333,2026-10-16 (mean of 3 runs)
+"2026-10-16, mean of three runs",60000,59966,400,708.03,24.867,101.7,31952.0,31934.667,45.667,46.0,2026-10-16 (mean of 3 runs)
+"2026-10-16, mean of three runs",100000,99854,400,760.67,25.367,148.3,31952.0,31934.667,46.333,47.0,2026-10-16 (mean of 3 runs)

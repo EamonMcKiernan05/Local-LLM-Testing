@@ -1,0 +1,4 @@
+Fri 16 Oct 14:09:58 UTC 2026 burn rundir=/home/eamon/model-bench/runs/2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn
+Fri 16 Oct 14:30:24 UTC 2026 r1 rundir=/home/eamon/model-bench/runs/2026-10-16T1411Z-aj-iq2xxs-256k-sn730-r1
+Fri 16 Oct 14:51:12 UTC 2026 r2 rundir=/home/eamon/model-bench/runs/2026-10-16T1432Z-aj-iq2xxs-256k-sn730-r2
+Fri 16 Oct 15:11:53 UTC 2026 r3 rundir=/home/eamon/model-bench/runs/2026-10-16T1453Z-aj-iq2xxs-256k-sn730-r3
