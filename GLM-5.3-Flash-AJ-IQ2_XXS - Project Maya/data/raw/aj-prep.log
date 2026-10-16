@@ -1,0 +1,8 @@
+=== AJ prep started Fri 16 Oct 13:28:55 UTC 2026 UTC ===
+[2026-10-16T13:28:55Z] --- preflight
+need=87346006708 free=149768658944
+[2026-10-16T13:28:55Z] --- copy HDD -> NVMe Fri 16 Oct 13:28:55 UTC 2026
+[2026-10-16T13:36:33Z] copy done Fri 16 Oct 13:36:33 UTC 2026
+du: cannot access '/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs': No such file or directory
+du src=87346006708 dst=
+!!! FAILED: du mismatch

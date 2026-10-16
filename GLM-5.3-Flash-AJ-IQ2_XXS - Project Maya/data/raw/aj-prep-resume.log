@@ -1,0 +1,14 @@
+=== AJ prep resume started Fri 16 Oct 13:38:19 UTC 2026 UTC ===
+[2026-10-16T13:38:19Z] --- preflight
+[2026-10-16T13:38:19Z] --- rename copied dir to glm-5.3-flash-aj-iq2_xxs
+du before rename: src=87346006708 dst=87346006708
+du src=87346006708 dst=87346006708
+[2026-10-16T13:38:19Z] --- sha256 the NVMe copies (vs HF metadata)
+GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf 1fa0535ecddaee4ff127eb8ffd47d3855ca7efa1cc29c996c24da699c5fbe3f7
+GLM-5.3-Flash-AJ-IQ2_XXS-00002-of-00002.gguf ab8abbde061254a7f6b1a16b3627c4b77e3084f52e3d9739ebaa515b9365945c
+[2026-10-16T13:42:25Z] --- vision files from the Maya-S copy (same files in every GLM-5.3-Flash quant)
+mmproj 3627575df16bd152db0f3fd7e488d270b33f3a9e6c7fa3b1b8ac381faafde882
+vocab 8f53cb1bd2e631c14ef413e3284735d9e53f3c508d07a6f609e705b487105912
+[2026-10-16T13:42:29Z] --- flip the standard path
+[2026-10-16T13:42:29Z] flip done: /mnt/models/GLM-5.3-Flash-AJ-IQ2_XXS-GGUF -> /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs
+=== AJ prep resume OK Fri 16 Oct 13:42:29 UTC 2026 ===

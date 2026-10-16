@@ -1,0 +1,169 @@
+=== AJ setup started Fri 16 Oct 13:43:45 UTC 2026 UTC ===
+[2026-10-16T13:43:45Z] --- stop Maya
+stopping maya server pid 37286
+stopped; vram: 0 MiB 0 MiB 
+[2026-10-16T13:43:55Z] --- setup (pack build; no start)
+Project Maya v1.1.13 - GLM-5.3-Flash on your own GPU(s).
+
+=== Step 1: checking this PC ===
+  NVIDIA GPUs:
+    GPU 0 (Tesla V100-PCIE-32GB, 32 GB) - can be used
+    GPU 1 (Tesla V100-PCIE-32GB, 32 GB) - can be used
+  [ok] using GPU 0 (Tesla V100-PCIE-32GB, 32 GB) + GPU 1 (Tesla V100-PCIE-32GB, 32 GB): the model's layers are split across the 2
+  [ok] CUDA toolkit 12.9: /usr/local/cuda/bin/nvcc
+  [ok] NVIDIA driver 580.178.04
+  [ok] C++ compiler: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+  [ok] CMake 4.4
+  [ok] Python 3.12.3 (/home/eamon/project-maya/.venv)
+  [ok] RAM: 31 GB, 30 GB available now - it runs with 32 GB; more RAM keeps more experts close and is faster
+  [ok] CPU: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz (AVX2, 28 threads)
+
+=== Step 2: your choices ===
+  [ok] context: 262144 tokens
+  [ok] model: /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf (yours)
+  [ok] drafting: the MTP block
+
+=== Step 3: Python packages and llama.cpp's source ===
+  [ok] numpy, jinja2, regex, pyyaml, tqdm, requests, cmake, ninja, pillow, psutil already installed
+  [ok] llama.cpp 3cf03257f2: /home/eamon/project-maya/third_party/llama.cpp
+
+=== Step 4: the engine ===
+  [ok] engine already compiled for sm_70: /home/eamon/project-maya/build/strata
+
+=== Step 5: the model (GLM-5.3-Flash) ===
+  [!]  AJ-IQ2_XXS: experimental - only Maya-S-v2-IQ2_XXS, Maya-S24, Maya-M, Maya-M-Derisked, Maya-L, EXL3-3.05bpw, EXL3-4.05bpw has been measured with Maya (README.md)
+  [ok] AJ-IQ2_XXS: 2 file(s), 87.3 GB in /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs
+
+=== Step 6: the pack (the engine's index of the model files) ===
+  Writing the index of every tensor, the small float weights (about 1 GB) and the tokenizer; the experts
+  stay in the GGUF files (a few minutes) ...
+  > /home/eamon/project-maya/.venv/bin/python /home/eamon/project-maya/tools/iq_pack.py --gguf /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf --out /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack --compat-bf16
+tokenizer/: vocab 154880, merges 321649, pre glm4, specials {'tokenizer.ggml.eos_token_id': 154820, 'tokenizer.ggml.padding_token_id': 154820, 'tokenizer.ggml.bos_token_id': 154822, 'tokenizer.ggml.eot_token_id': 154827, 'tokenizer.ggml.unknown_token_id': 154820, 'tokenizer.ggml.eom_token_id': 154829}
+glm5next: packing for the Glm5Model runner (quantized dense served natively; the driver gate remains closed until the pack wiring lands - docs/GLM5-FLASH.md §9)
+glm5next: block_count 45, nextn 0 -> trunk layers 0..44
+model shards: GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf, GLM-5.3-Flash-AJ-IQ2_XXS-00002-of-00002.gguf
+index.txt: 1257 tensors, 317 served natively, 0 in extra.bin, arena 0.88 GiB
+compat-bf16: 849 tensors, 0.88 GiB; expert and PLE table bytes unchanged
+  [ok] pack: /home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack
+
+=== Step 7: images (the vision encoder) ===
+  [ok] vision encoder: /home/eamon/project-maya/build-vision/bin/strata-vision
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /home/eamon/project-maya/maya-aj-iq2_xxs.json
+  [ok] start script: /home/eamon/project-maya/run-maya-aj-iq2_xxs.sh
+
+All set. Start it with ./maya.sh (or ./run-maya-aj-iq2_xxs.sh).
+setup rc=0
+[2026-10-16T13:44:10Z] --- verify config
+config OK: {
+ "exe": "/home/eamon/project-maya/build/strata",
+ "args": [
+  "--glm-pack",
+  "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack",
+  "--max-context",
+  "262144",
+  "--expert-cache",
+  "auto",
+  "--prefill",
+  "auto",
+  "--kv-streaming",
+  "on",
+  "--expert-profile",
+  "/home/eamon/project-maya/data/expert-profile-glm.bin"
+ ],
+ "cwd": "/home/eamon/project-maya",
+ "tokenizer": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack/tokenizer",
+ "model_name": "glm-5.3-flash",
+ "gpu": [
+  0,
+  1
+ ],
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95
+ },
+ "reasoning_effort": "high",
+ "lib_dirs": [
+  "/usr/local/cuda-12.9/lib64",
+  "/usr/local/cuda-12.9/targets/x86_64-linux/lib"
+ ],
+ "port": 8080,
+ "env": {
+  "STRATA_GLM_TIMING": "1",
+  "STRATA_GLM_POOL_STATS": "1",
+  "STRATA_GLM_RAM_HEADROOM_GB": "3"
+ },
+ "host": "0.0.0.0",
+ "vision": {
+  "exe": "/home/eamon/project-maya/build-vision/bin/strata-vision",
+  "mmproj": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/vision/mmproj-GLM-5.3-Flash-F16.gguf",
+  "model": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/vision/GLM-5.3-Flash-vocab.gguf",
+  "gpu": true
+ },
+ "log": "/home/eamon/project-maya/maya-aj-iq2_xxs.log",
+ "installer": {
+  "models_dir": "/mnt/models/Maya-data/models",
+  "quant": "AJ-IQ2_XXS",
+  "gguf": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf",
+  "gguf_dir": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs",
+  "draft": "mtp",
+  "written": "2026-10-16 13:44"
+ }
+}
+{
+ "exe": "/home/eamon/project-maya/build/strata",
+ "args": [
+  "--glm-pack",
+  "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack",
+  "--max-context",
+  "262144",
+  "--expert-cache",
+  "auto",
+  "--prefill",
+  "auto",
+  "--kv-streaming",
+  "on",
+  "--expert-profile",
+  "/home/eamon/project-maya/data/expert-profile-glm.bin"
+ ],
+ "cwd": "/home/eamon/project-maya",
+ "tokenizer": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack/tokenizer",
+ "model_name": "glm-5.3-flash",
+ "gpu": [
+  0,
+  1
+ ],
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95
+ },
+ "reasoning_effort": "high",
+ "lib_dirs": [
+  "/usr/local/cuda-12.9/lib64",
+  "/usr/local/cuda-12.9/targets/x86_64-linux/lib"
+ ],
+ "port": 8080,
+ "env": {
+  "STRATA_GLM_TIMING": "1",
+  "STRATA_GLM_POOL_STATS": "1",
+  "STRATA_GLM_RAM_HEADROOM_GB": "3"
+ },
+ "host": "0.0.0.0",
+ "vision": {
+  "exe": "/home/eamon/project-maya/build-vision/bin/strata-vision",
+  "mmproj": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/vision/mmproj-GLM-5.3-Flash-F16.gguf",
+  "model": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/vision/GLM-5.3-Flash-vocab.gguf",
+  "gpu": true
+ },
+ "log": "/home/eamon/project-maya/maya-aj-iq2_xxs.log",
+ "installer": {
+  "models_dir": "/mnt/models/Maya-data/models",
+  "quant": "AJ-IQ2_XXS",
+  "gguf": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/GLM-5.3-Flash-AJ-IQ2_XXS-00001-of-00002.gguf",
+  "gguf_dir": "/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs",
+  "draft": "mtp",
+  "written": "2026-10-16 13:44"
+ }
+}[2026-10-16T13:44:10Z] --- setup OK; config: /home/eamon/project-maya/maya-aj-iq2_xxs.json; run script: /home/eamon/project-maya/run-maya-aj-iq2_xxs.sh
+=== AJ setup done Fri 16 Oct 13:44:10 UTC 2026 ===
