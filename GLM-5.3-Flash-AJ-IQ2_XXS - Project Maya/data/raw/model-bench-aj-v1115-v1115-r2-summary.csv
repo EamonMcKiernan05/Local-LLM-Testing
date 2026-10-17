@@ -1,0 +1,7 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,20000,1,frankenstein,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",20000,20013,400,713.2,24.1,0,0,44.9,31944,44,31940,44,
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,60000,1,sherlock,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",60000,59967,400,773.0,24.6,0,0,94.3,31944,46,31940,46,
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,100000,1,pride,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",100000,99854,400,830.1,24.7,0,0,137.5,31944,47,31940,47,
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,150000,1,tale2cities,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",150000,150036,400,862.6,23.5,0,0,192.8,31944,47,31940,47,
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,200000,1,greatexp,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",200000,200038,400,869.9,23.1,0,0,249.6,31944,46,31940,47,
+2026-10-17T0950Z-aj-iq2xxs-256k-v1115-r2,250000,1,mobydick,"local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)",250000,249595,400,854.2,23.0,0,0,312.9,31944,46,31940,46,

@@ -1,0 +1,167 @@
+[2026-10-17T11:02:30Z] --- [0] preflight
+stopping maya server pid 134854
+vram: 0 MiB 0 MiB 
+no llama-server running
+[2026-10-17T11:02:44Z] --- write the --dflash config (calibration record kept, so it does not re-measure at start)
+args: ['--glm-pack', '/home/eamon/maya-nvme/glm-5.3-flash-aj-iq2_xxs/pack', '--max-context', '262144', '--expert-cache', 'auto', '--prefill', 'auto', '--kv-streaming', 'on', '--expert-profile', '/home/eamon/project-maya/data/expert-profile-glm.bin', '--dflash', '/mnt/models/Maya-data/models/GLM-5.3-Flash-DFlash2/GLM-5.3-Flash-DFlash2-Q4_K_M.gguf']
+5324f4280dd57f302ee1f637cd9a053e  /home/eamon/project-maya/maya-aj-iq2_xxs.json
+[2026-10-17T11:02:44Z] preflight OK
+[2026-10-17T11:02:44Z] --- arm dflash1
+--- launching ./run-maya-aj-iq2_xxs.sh (dflash1, v1.1.15 + --dflash) at Sat 17 Oct 11:02:44 UTC 2026
+api up after ~61s (dflash1)
+n_ctx: 262144 (want 262144)
+engine src stamp: 707211430e5c3035
+glm dflash markers since arm start: 3
+glm dflash: MTP off - the NextN draft block is not loaded, DFlash drafts instead
+glm dflash: a batched window's layer on both parts' CPU pools (CUDA0 + CUDA1)
+glm dflash: 5 layers, hidden 4096, 32 heads (8 kv), block 8, window 2048, selector top-16 rank 256, reads trunk layers 6,15,25,34,43; 717 MB on CUDA1
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+start gates done (dflash1)
+--- warm-up Sat 17 Oct 11:03:45 UTC 2026
+warmup ok: prompt_tokens 22729 | timings: {'cache_n': 0, 'prompt_n': 22729, 'prompt_ms': 32616.1, 'prompt_per_token_ms': 1.435, 'prompt_per_second': 696.9, 'predicted_n': 4, 'predicted_ms': 639.3, 'predicted_per_token_ms': 159.825, 'predicted_per_second': 6.3, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 708.3 tok/s, decode 16.4 tok/s, 400 gen, 52.8s
+arm 60k rep 1/1: prefill 758.0 tok/s, decode 18.4 tok/s, 400 gen, 101.3s
+arm 100k rep 1/1: prefill 815.6 tok/s, decode 16.9 tok/s, 400 gen, 147.1s
+arm 150k rep 1/1: prefill 837.9 tok/s, decode 17.1 tok/s, 400 gen, 204.1s
+arm 200k rep 1/1: prefill 844.3 tok/s, decode 16.7 tok/s, 400 gen, 263.1s
+arm 250k rep 1/1: prefill 837.5 tok/s, decode 15.8 tok/s, 400 gen, 326.6s
+
+# Model Bench: aj-iq2xxs-256k-v1115-dflash-r1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-17T1104Z-aj-iq2xxs-256k-v1115-dflash-r1 · 2026-10-17 11:04:18 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 708.3 | 16.4 | 400 | 52.8 | 1 |
+| 60k | 59967 | 758.0 | 18.4 | 400 | 101.3 | 1 |
+| 100k | 99854 | 815.6 | 16.9 | 400 | 147.1 | 1 |
+| 150k | 150036 | 837.9 | 17.1 | 400 | 204.1 | 1 |
+| 200k | 200038 | 844.3 | 16.7 | 400 | 263.1 | 1 |
+| 250k | 249595 | 837.5 | 15.8 | 400 | 326.6 | 1 |
+
+- prefill peak: **844.3 tok/s** at 200k
+- decode peak: **18.4 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-17T1104Z-aj-iq2xxs-256k-v1115-dflash-r1
+bench aj-iq2xxs-256k-v1115-dflash-r1 rc=0 Sat 17 Oct 11:22:43 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-17T1104Z-aj-iq2xxs-256k-v1115-dflash-r1
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm spec: 160 of 280 drafts accepted (57.1%)
+glm stat: decode 63.42 ms/tok (15.77 tok/s) | vram hit 95.11% | ram fetches 0.00/tok | disk 0.85 reads/tok in 0.82 waits/tok, 2.46 ms/tok | promotions 0.86/tok | cpu lane 20.85/tok in 19.51 ms/tok | prompt 1.2 ms/tok | vram 8362/8490 ram 3033/3372
+glm spec: 145 of 277 drafts accepted (52.3%)
+stopping maya server pid 135190
+vram: 0 MiB 0 MiB 
+[2026-10-17T11:22:51Z] --- arm dflash2
+--- launching ./run-maya-aj-iq2_xxs.sh (dflash2, v1.1.15 + --dflash) at Sat 17 Oct 11:22:51 UTC 2026
+api up after ~87s (dflash2)
+n_ctx: 262144 (want 262144)
+engine src stamp: 707211430e5c3035
+glm dflash markers since arm start: 3
+glm dflash: MTP off - the NextN draft block is not loaded, DFlash drafts instead
+glm dflash: a batched window's layer on both parts' CPU pools (CUDA0 + CUDA1)
+glm dflash: 5 layers, hidden 4096, 32 heads (8 kv), block 8, window 2048, selector top-16 rank 256, reads trunk layers 6,15,25,34,43; 717 MB on CUDA1
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+start gates done (dflash2)
+--- warm-up Sat 17 Oct 11:24:18 UTC 2026
+warmup ok: prompt_tokens 22729 | timings: {'cache_n': 0, 'prompt_n': 22729, 'prompt_ms': 32991.4, 'prompt_per_token_ms': 1.452, 'prompt_per_second': 688.9, 'predicted_n': 4, 'predicted_ms': 655.8, 'predicted_per_token_ms': 163.95, 'predicted_per_second': 6.1, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 707.0 tok/s, decode 16.4 tok/s, 400 gen, 53.7s
+arm 60k rep 1/1: prefill 758.7 tok/s, decode 18.2 tok/s, 400 gen, 102.1s
+arm 100k rep 1/1: prefill 813.1 tok/s, decode 17.3 tok/s, 400 gen, 147.3s
+arm 150k rep 1/1: prefill 839.2 tok/s, decode 16.8 tok/s, 400 gen, 204.5s
+arm 200k rep 1/1: prefill 846.9 tok/s, decode 16.8 tok/s, 400 gen, 262.5s
+arm 250k rep 1/1: prefill 840.2 tok/s, decode 17.1 tok/s, 400 gen, 323.5s
+
+# Model Bench: aj-iq2xxs-256k-v1115-dflash-r2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-17T1124Z-aj-iq2xxs-256k-v1115-dflash-r2 · 2026-10-17 11:24:54 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20014 | 707.0 | 16.4 | 400 | 53.7 | 1 |
+| 60k | 59967 | 758.7 | 18.2 | 400 | 102.1 | 1 |
+| 100k | 99855 | 813.1 | 17.3 | 400 | 147.3 | 1 |
+| 150k | 150037 | 839.2 | 16.8 | 400 | 204.5 | 1 |
+| 200k | 200038 | 846.9 | 16.8 | 400 | 262.5 | 1 |
+| 250k | 249595 | 840.2 | 17.1 | 400 | 323.5 | 1 |
+
+- prefill peak: **846.9 tok/s** at 200k
+- decode peak: **18.2 tok/s** at 60k
+
+run dir: /home/eamon/model-bench/runs/2026-10-17T1124Z-aj-iq2xxs-256k-v1115-dflash-r2
+bench aj-iq2xxs-256k-v1115-dflash-r2 rc=0 Sat 17 Oct 11:43:17 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-17T1124Z-aj-iq2xxs-256k-v1115-dflash-r2
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm spec: 170 of 265 drafts accepted (64.2%)
+glm stat: decode 58.57 ms/tok (17.07 tok/s) | vram hit 94.63% | ram fetches 0.00/tok | disk 0.95 reads/tok in 0.94 waits/tok, 2.75 ms/tok | promotions 0.96/tok | cpu lane 20.62/tok in 19.35 ms/tok | prompt 1.2 ms/tok | vram 8355/8490 ram 3072/3373
+glm spec: 173 of 257 drafts accepted (67.3%)
+stopping maya server pid 136891
+vram: 0 MiB 0 MiB 
+[2026-10-17T11:43:25Z] --- arm dflash3
+--- launching ./run-maya-aj-iq2_xxs.sh (dflash3, v1.1.15 + --dflash) at Sat 17 Oct 11:43:25 UTC 2026
+api up after ~72s (dflash3)
+n_ctx: 262144 (want 262144)
+engine src stamp: 707211430e5c3035
+glm dflash markers since arm start: 3
+glm dflash: MTP off - the NextN draft block is not loaded, DFlash drafts instead
+glm dflash: a batched window's layer on both parts' CPU pools (CUDA0 + CUDA1)
+glm dflash: 5 layers, hidden 4096, 32 heads (8 kv), block 8, window 2048, selector top-16 rank 256, reads trunk layers 6,15,25,34,43; 717 MB on CUDA1
+glm split: layers [0, 24) on CUDA0, [24, 45) on CUDA1 (one 64 KB host hop per boundary per token)
+/home/eamon/project-maya/maya-aj-iq2_xxs.json: OK
+start gates done (dflash3)
+--- warm-up Sat 17 Oct 11:44:37 UTC 2026
+warmup ok: prompt_tokens 22729 | timings: {'cache_n': 0, 'prompt_n': 22729, 'prompt_ms': 32666.0, 'prompt_per_token_ms': 1.437, 'prompt_per_second': 695.8, 'predicted_n': 4, 'predicted_ms': 645.8, 'predicted_per_token_ms': 161.45, 'predicted_per_second': 6.2, 'draft_n': 2, 'draft_n_accepted': 1}
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 708.8 tok/s, decode 17.5 tok/s, 400 gen, 51.8s
+arm 60k rep 1/1: prefill 757.8 tok/s, decode 17.5 tok/s, 400 gen, 102.8s
+arm 100k rep 1/1: prefill 817.4 tok/s, decode 16.7 tok/s, 400 gen, 147.3s
+arm 150k rep 1/1: prefill 840.0 tok/s, decode 16.5 tok/s, 400 gen, 204.6s
+arm 200k rep 1/1: prefill 845.6 tok/s, decode 17.4 tok/s, 400 gen, 261.8s
+arm 250k rep 1/1: prefill 847.2 tok/s, decode 14.7 tok/s, 400 gen, 325.1s
+
+# Model Bench: aj-iq2xxs-256k-v1115-dflash-r3
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `glm-5.3-flash` · ctx 262144
+- battery: depths 20k, 60k, 100k, 150k, 200k, 250k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+- run: 2026-10-17T1145Z-aj-iq2xxs-256k-v1115-dflash-r3 · 2026-10-17 11:45:12 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20013 | 708.8 | 17.5 | 400 | 51.8 | 1 |
+| 60k | 59967 | 757.8 | 17.5 | 400 | 102.8 | 1 |
+| 100k | 99855 | 817.4 | 16.7 | 400 | 147.3 | 1 |
+| 150k | 150037 | 840.0 | 16.5 | 400 | 204.6 | 1 |
+| 200k | 200038 | 845.6 | 17.4 | 400 | 261.8 | 1 |
+| 250k | 249595 | 847.2 | 14.7 | 400 | 325.1 | 1 |
+
+- prefill peak: **847.2 tok/s** at 250k
+- decode peak: **17.5 tok/s** at 20k
+
+run dir: /home/eamon/model-bench/runs/2026-10-17T1145Z-aj-iq2xxs-256k-v1115-dflash-r3
+bench aj-iq2xxs-256k-v1115-dflash-r3 rc=0 Sat 17 Oct 12:03:35 UTC 2026
+run dir: /home/eamon/model-bench/runs/2026-10-17T1145Z-aj-iq2xxs-256k-v1115-dflash-r3
+- prompts: local tokenizer (exact, gguf GLM-5.3-Flash-AJ-IQ2_XXS-GGUF)
+glm spec: 202 of 256 drafts accepted (78.9%)
+glm stat: decode 68.16 ms/tok (14.67 tok/s) | vram hit 92.86% | ram fetches 0.00/tok | disk 1.24 reads/tok in 1.24 waits/tok, 3.59 ms/tok | promotions 1.26/tok | cpu lane 29.82/tok in 27.94 ms/tok | prompt 1.2 ms/tok | vram 8362/8490 ram 3169/3375
+glm spec: 152 of 276 drafts accepted (55.1%)
+stopping maya server pid 138588
+vram: 0 MiB 0 MiB 
+[2026-10-17T12:03:43Z] --- [restore] original AJ config
+d98e1d5599f1f3ddd69f4297787de03a  /home/eamon/project-maya/maya-aj-iq2_xxs.json
+[2026-10-17T12:03:43Z] --- [restore] Nemotron llama-server
+nemotron API up
+[2026-10-17T12:06:44Z] --- finish
+=== AJ dflash cycle done Sat 17 Oct 12:06:44 UTC 2026 ===

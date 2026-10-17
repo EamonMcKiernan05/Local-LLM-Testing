@@ -1,16 +1,26 @@
 # GLM-5.3-Flash (AJ-IQ2_XXS) on Project Maya — the bench record on box .5
 
-**33 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
-V100 32 GB — measured 2026-10-16 on the box brought up 2026-09-30.** One GGUF set throughout:
+**87 recorded runs on GLM-5.3-Flash (321B MoE, ~18B active) served by Project Maya on 2× Tesla
+V100 32 GB — measured 2026-10-16 (engine v1.1.13) and 2026-10-17 (the v1.1.13 → v1.1.15 pair + a
+DFlash2 drafting test) on the box brought up 2026-09-30.** One GGUF set throughout:
 aj9o9's AJ-IQ2_XXS mix (87.35 GB, two shards, 2.23 bpw, no MTP block), layer-split across both
 cards, benched at the full **262,144 context** (six depths) and at **131,072** (the three shared
 depths). Every number came off a real run on this hardware; nothing is estimated from a datasheet.
 
 The findings that matter:
 
-- **Prefill runs 652 → 801 tok/s from 20K to 200K prompt depth (three-run means), settling at 792
-  at 250K; decode sits at 22.4–24.8 tok/s across all six depths.** At 131K the shared depths read
-  653 → 761 tok/s prefill and 24.1–25.4 decode.
+- **Engine v1.1.15 is +9.0 % prefill over v1.1.13 on this quant** (+7.6…+10.3 % at every depth,
+  alternated 3+3 pair, identical config); decode is unchanged within the box's session drift. The
+  applicable change is the V100 two-pass prompt attention (#196). The 256K card below carries the
+  v1.1.15 numbers; the v1.1.13 numbers are the 2026-10-16 record (re-measured within 1 % on the
+  17th, which is what makes the pair a version effect).
+- **DFlash2 drafting is slower on this box: 23.8 → 16.9 tok/s decode mean (−29 %)**, at every
+  depth, against no drafting at all (three fresh-load runs per side, same six depths). Maya's own
+  first-start calibration (DFlash2 19.6 vs 23.6 tok/s at 8K) agreed before the bench.
+- **Depth profile (v1.1.15): prefill climbs 714 → 870 tok/s from 20K to 200K, settling at 851 at
+  250K; decode sits at 22.5–24.9 tok/s across all six depths.** On v1.1.13 the same battery read
+  652 → 801 and 22.3–24.8. At 131K (v1.1.13) the shared depths read 653 → 761 tok/s prefill and
+  24.1–25.4 decode.
 - **No speculative drafting — the quant ships without its MTP block.** Zero `glm mtp` markers on
   every engine load, `draft_n: 0` on every measured arm: the numbers are raw single-pass decode
   (four independent checks in experiment 01).
@@ -36,13 +46,16 @@ The findings that matter:
 | `charts/aj-iq2xxs-256k-mean.png` | the 256K depth card — six depths, 3-run means | `scripts/make_chart_256k.py` |
 | `charts/aj-iq2xxs-131k-mean.png` | the 131K depth card — the three shared depths | `scripts/make_chart_131k.py` |
 | `charts/aj-iq2xxs-256k-vs-131k.png` | 131K vs 256K, per depth — the context comparison | `scripts/make_chart_compare_aj.py` |
+| `charts/aj-iq2xxs-256k-v1115.png` | the 256K depth card re-issued on engine v1.1.15 — six depths, 3-run means | `scripts/make_chart_v1115.py` |
+| `charts/aj-iq2xxs-256k-v1113-vs-v1115.png` | v1.1.13 vs v1.1.15, per depth — the engine comparison | `scripts/make_chart_v1113_vs_v1115.py` |
+| `charts/aj-iq2xxs-256k-v1115-dflash.png` | no drafting vs the DFlash2 drafter, per depth | `scripts/make_chart_dflash.py` |
 
 ## Layout
 
 ```
 data/csv/     every table from the raw records (built by scripts/build_data_aj.py)
-data/raw/     the seven model-bench run records (results.jsonl + meta.json + summary.csv),
-              SHA256SUMS, the two serving configs, the drivers and their logs, the update log,
+data/raw/     the model-bench run records (results.jsonl + meta.json + summary.csv),
+              SHA256SUMS, the serving configs, the drivers and their logs, the update logs,
               and the engine's own `glm stat:` extracts per battery
 experiments/  one write-up per experiment, in the order they were run
 charts/       the figures; scripts/ holds the code that regenerates them
@@ -56,6 +69,8 @@ PROVENANCE.md where every file came from, and what is not here
 |---|---|---|---|---|
 | 01 | 2026-10-16 | bring-up on the SN730 + the 256K bench: postcopy burn, then three fresh-load batteries at 20K–250K | 24 | prefill **652 → 801 tok/s** (20K→200K), decode **22.4–24.8**; no drafting (no MTP block) |
 | 02 | 2026-10-16 | the 131K context comparison: config flip + three batteries at the shared depths | 9 | parity — decode **+2.6 %** mean, prefill **+0.3 %** mean |
+| 03 | 2026-10-17 | engine pair v1.1.13 → v1.1.15, alternated 3+3, same 256K config | 36 | prefill **+9.0 %** mean (every depth +7.6…+10.3 %); decode parity |
+| 04 | 2026-10-17 | DFlash2 drafter vs no drafting, three fresh loads per side | 18 | decode **−28.9 %** mean, slower at every depth; prefill −1.6 % |
 
 ## Method, and what is deliberately not claimed
 
@@ -64,9 +79,14 @@ PROVENANCE.md where every file came from, and what is not here
   records (`side` = "256K ctx (burn, excluded)") and is excluded from the means by design.
 - **Same prompts, provably**: the battery slices the same corpus document per fixed depth on every
   run (frankenstein / sherlock / pride / tale2cities / greatexp / mobydick, exact-token with the
-  pack tokenizer); the data builder asserts the book and `sliced_tokens` match at every depth —
-  across all seven batteries and across both contexts — before it writes anything. `ptok` jitters
-  ±1–2 from the per-request unique tag (spread ≤ 2 here).
+  pack tokenizer); the data builders assert the book and `sliced_tokens` match at every depth —
+  across every battery in their table — before they write anything. `ptok` jitters ±1–2 from the
+  per-request unique tag (spread ≤ 2 here).
+- **Pairs alternate**: an engine/config comparison runs its arms alternating sides (O N O N O N),
+  one fresh load per battery, so the first-position edge a single-ordered pair carries cancels.
+  Both sides of a pair are measured the same day, from the same quant set and the same config
+  bytes (md5-gated); an archived number is only used as a reproducibility check, never as the
+  comparison side.
 - **Gates on every arm**: `n_ctx` asserted (262144 / 131072), engine `src` stamp asserted
   (`c823b8ca185405dd` = v1.1.13), the configs md5-gated on every start; the engine log shows
   `glm mtp=0 glm dflash=0` markers per battery.

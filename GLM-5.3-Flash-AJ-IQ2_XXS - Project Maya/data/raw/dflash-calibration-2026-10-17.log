@@ -1,0 +1,299 @@
+Project Maya v1.1.15 - GLM-5.3-Flash on your own GPU(s).
+
+  ----------------------------------------------------------------------------------------------------
+  Starting glm-5.3-flash (maya-aj-iq2_xxs.json).
+  Dashboard:        http://127.0.0.1:8080/
+  API (OpenAI):     http://127.0.0.1:8080/v1        (any model name; the API key: any)
+  API (Anthropic):  http://127.0.0.1:8080/v1/messages
+  Other devices:    the server prints this machine's addresses when it is ready - WARNING: no API key, anyone on your network can use it (--api-key KEY)
+  Loading takes a few minutes: the engine pins up to all but about 6 GB of the free RAM for its expert tier
+  (STRATA_GLM_RAM_HEADROOM_GB changes the 6) and warms its caches - the first answers are the slowest.
+  Ctrl+C (or closing this terminal) stops it. Engine log: /home/eamon/project-maya/maya-aj-iq2_xxs.log
+  ----------------------------------------------------------------------------------------------------
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95
+[maya] images: the vision encoder needs 2.69 GB on this GPU at up to 4096 image tokens
+loading the model (the first start takes a minute or two) ...
+[maya] layer split across GPUs [0, 1] (auto)
+[maya] starting the engine: reading the model's weights ...
+[maya] still starting (20 s) - please wait ...
+[maya] still starting (40 s) - please wait ...
+[maya] images: the vision encoder starts when a picture arrives, in 2.71 GB the model lends it
+[maya] thinking level when a request names none: high
+[maya] thinking budget: 32768 tokens (then the answer)
+ready: http://127.0.0.1:8080/v1  (OpenAI: /v1/chat/completions, Anthropic: /v1/messages, context 262144 tokens, images on)
+       open http://127.0.0.1:8080/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.5:8080/   (API: http://192.168.1.5:8080/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+[maya] reading the prompt: 22,729 tokens, 10 s so far
+[maya] reading the prompt: 8,192 of 22,729 tokens, 14 s so far
+[maya] reading the prompt: 8,192 of 22,729 tokens, 24 s so far
+[maya] reading the prompt: 22,728 of 22,729 tokens, 33 s so far
+[maya] done: 4 tokens in 33 s (6.3 tok/s) (length, cancel=False), expert cache 83.0% hit
+[maya] sessions: saved a 22728-token conversation (0.44 GB in 0.4 s); 1 kept, 0.44 GB
+[maya] reading the prompt: 1,044 of 1,045 tokens, 5 s so far
+[maya] answering: 12 of max 16 tokens, 12.8 tok/s, 6 s
+[maya] done: 16 tokens in 6 s (12.8 tok/s) (length, cancel=False), expert cache 86.2% hit
+[maya] sessions: saved a 1044-token conversation (0.17 GB in 0.2 s); 2 kept, 0.61 GB
+[maya] reading the prompt: 20,013 tokens, 10 s so far
+[maya] reading the prompt: 8,192 of 20,013 tokens, 14 s so far
+[maya] reading the prompt: 8,192 of 20,013 tokens, 24 s so far
+[maya] reading the prompt: 20,012 of 20,013 tokens, 28 s so far
+[maya] answering: 11 of max 400 tokens, 11.2 tok/s, 29 s
+[maya] answering: 22 of max 400 tokens, 11.1 tok/s, 30 s
+[maya] answering: 34 of max 400 tokens, 11.3 tok/s, 31 s
+[maya] answering: 47 of max 400 tokens, 11.5 tok/s, 32 s
+[maya] answering: 60 of max 400 tokens, 11.7 tok/s, 34 s
+[maya] answering: 74 of max 400 tokens, 12.0 tok/s, 35 s
+[maya] answering: 89 of max 400 tokens, 12.2 tok/s, 36 s
+[maya] answering: 105 of max 400 tokens, 12.7 tok/s, 37 s
+[maya] answering: 123 of max 400 tokens, 13.2 tok/s, 38 s
+[maya] answering: 138 of max 400 tokens, 13.3 tok/s, 39 s
+[maya] answering: 156 of max 400 tokens, 13.6 tok/s, 40 s
+[maya] answering: 177 of max 400 tokens, 14.2 tok/s, 41 s
+[maya] answering: 197 of max 400 tokens, 14.5 tok/s, 42 s
+[maya] answering: 219 of max 400 tokens, 15.0 tok/s, 43 s
+[maya] answering: 238 of max 400 tokens, 15.2 tok/s, 44 s
+[maya] answering: 258 of max 400 tokens, 15.4 tok/s, 45 s
+[maya] answering: 277 of max 400 tokens, 15.6 tok/s, 46 s
+[maya] answering: 296 of max 400 tokens, 15.8 tok/s, 47 s
+[maya] answering: 314 of max 400 tokens, 15.8 tok/s, 48 s
+[maya] answering: 335 of max 400 tokens, 16.1 tok/s, 49 s
+[maya] answering: 356 of max 400 tokens, 16.2 tok/s, 50 s
+[maya] answering: 373 of max 400 tokens, 16.2 tok/s, 51 s
+[maya] answering: 396 of max 400 tokens, 16.5 tok/s, 52 s
+[maya] done: 400 tokens in 53 s (16.4 tok/s) (length, cancel=False), expert cache 92.1% hit
+[maya] sessions: saved a 20012-token conversation (0.41 GB in 0.4 s); 3 kept, 1.01 GB
+[maya] reading the prompt: 59,967 tokens, 10 s so far
+[maya] reading the prompt: 8,192 of 59,967 tokens, 14 s so far
+[maya] reading the prompt: 8,192 of 59,967 tokens, 24 s so far
+[maya] reading the prompt: 8,192 of 59,967 tokens, 34 s so far
+[maya] reading the prompt: 24,576 of 59,967 tokens, 45 s so far
+[maya] reading the prompt: 24,576 of 59,967 tokens, 55 s so far
+[maya] reading the prompt: 40,960 of 59,967 tokens, 56 s so far
+[maya] reading the prompt: 40,960 of 59,967 tokens, 66 s so far
+[maya] reading the prompt: 54,592 of 59,967 tokens, 74 s so far
+[maya] reading the prompt: 59,966 of 59,967 tokens, 79 s so far
+[maya] answering: 8 of max 400 tokens, 8.4 tok/s, 80 s
+[maya] answering: 22 of max 400 tokens, 11.0 tok/s, 82 s
+[maya] answering: 41 of max 400 tokens, 13.4 tok/s, 83 s
+[maya] answering: 62 of max 400 tokens, 15.0 tok/s, 84 s
+[maya] answering: 80 of max 400 tokens, 15.3 tok/s, 85 s
+[maya] answering: 97 of max 400 tokens, 15.4 tok/s, 86 s
+[maya] answering: 119 of max 400 tokens, 16.2 tok/s, 87 s
+[maya] answering: 137 of max 400 tokens, 16.4 tok/s, 88 s
+[maya] answering: 159 of max 400 tokens, 16.9 tok/s, 89 s
+[maya] answering: 183 of max 400 tokens, 17.5 tok/s, 90 s
+[maya] answering: 203 of max 400 tokens, 17.7 tok/s, 91 s
+[maya] answering: 221 of max 400 tokens, 17.7 tok/s, 92 s
+[maya] answering: 241 of max 400 tokens, 17.8 tok/s, 93 s
+[maya] answering: 264 of max 400 tokens, 18.1 tok/s, 94 s
+[maya] answering: 283 of max 400 tokens, 18.1 tok/s, 95 s
+[maya] answering: 305 of max 400 tokens, 18.3 tok/s, 96 s
+[maya] answering: 324 of max 400 tokens, 18.3 tok/s, 97 s
+[maya] answering: 342 of max 400 tokens, 18.2 tok/s, 98 s
+[maya] answering: 359 of max 400 tokens, 18.2 tok/s, 99 s
+[maya] answering: 379 of max 400 tokens, 18.2 tok/s, 100 s
+[maya] done: 400 tokens in 101 s (18.4 tok/s) (length, cancel=False), expert cache 94.2% hit
+[maya] sessions: saved a 59966-token conversation (0.91 GB in 0.9 s); 4 kept, 1.93 GB
+[maya] reading the prompt: 99,854 tokens, 11 s so far
+[maya] reading the prompt: 8,192 of 99,854 tokens, 14 s so far
+[maya] reading the prompt: 16,384 of 99,854 tokens, 21 s so far
+[maya] reading the prompt: 24,576 of 99,854 tokens, 29 s so far
+[maya] reading the prompt: 32,768 of 99,854 tokens, 36 s so far
+[maya] reading the prompt: 40,960 of 99,854 tokens, 44 s so far
+[maya] reading the prompt: 40,960 of 99,854 tokens, 54 s so far
+[maya] reading the prompt: 40,960 of 99,854 tokens, 64 s so far
+[maya] reading the prompt: 57,344 of 99,854 tokens, 65 s so far
+[maya] reading the prompt: 57,344 of 99,854 tokens, 75 s so far
+[maya] reading the prompt: 57,344 of 99,854 tokens, 85 s so far
+[maya] reading the prompt: 73,728 of 99,854 tokens, 87 s so far
+[maya] reading the prompt: 73,728 of 99,854 tokens, 97 s so far
+[maya] reading the prompt: 73,728 of 99,854 tokens, 107 s so far
+[maya] reading the prompt: 90,112 of 99,854 tokens, 110 s so far
+[maya] reading the prompt: 90,112 of 99,854 tokens, 120 s so far
+[maya] reading the prompt: 99,853 of 99,854 tokens, 123 s so far
+[maya] answering: 9 of max 400 tokens, 9.0 tok/s, 124 s
+[maya] answering: 23 of max 400 tokens, 11.5 tok/s, 125 s
+[maya] answering: 44 of max 400 tokens, 14.5 tok/s, 126 s
+[maya] answering: 63 of max 400 tokens, 15.5 tok/s, 127 s
+[maya] answering: 82 of max 400 tokens, 16.1 tok/s, 128 s
+[maya] answering: 99 of max 400 tokens, 16.2 tok/s, 129 s
+[maya] answering: 120 of max 400 tokens, 16.8 tok/s, 130 s
+[maya] answering: 138 of max 400 tokens, 16.8 tok/s, 132 s
+[maya] answering: 153 of max 400 tokens, 16.6 tok/s, 133 s
+[maya] answering: 172 of max 400 tokens, 16.8 tok/s, 134 s
+[maya] answering: 192 of max 400 tokens, 17.0 tok/s, 135 s
+[maya] answering: 211 of max 400 tokens, 17.0 tok/s, 136 s
+[maya] answering: 227 of max 400 tokens, 16.9 tok/s, 137 s
+[maya] answering: 240 of max 400 tokens, 16.5 tok/s, 138 s
+[maya] answering: 254 of max 400 tokens, 16.3 tok/s, 139 s
+[maya] answering: 274 of max 400 tokens, 16.5 tok/s, 140 s
+[maya] answering: 291 of max 400 tokens, 16.5 tok/s, 141 s
+[maya] answering: 310 of max 400 tokens, 16.6 tok/s, 142 s
+[maya] answering: 330 of max 400 tokens, 16.7 tok/s, 143 s
+[maya] answering: 349 of max 400 tokens, 16.8 tok/s, 144 s
+[maya] answering: 368 of max 400 tokens, 16.9 tok/s, 145 s
+[maya] answering: 385 of max 400 tokens, 16.8 tok/s, 146 s
+[maya] done: 400 tokens in 147 s (16.9 tok/s) (length, cancel=False), expert cache 94.2% hit
+[maya] sessions: saved a 99853-token conversation (1.42 GB in 1.3 s); 4 kept, 2.90 GB
+[maya] reading the prompt: 150,036 tokens, 11 s so far
+[maya] reading the prompt: 8,192 of 150,036 tokens, 15 s so far
+[maya] reading the prompt: 16,384 of 150,036 tokens, 22 s so far
+[maya] reading the prompt: 24,576 of 150,036 tokens, 30 s so far
+[maya] reading the prompt: 32,768 of 150,036 tokens, 37 s so far
+[maya] reading the prompt: 40,960 of 150,036 tokens, 45 s so far
+[maya] reading the prompt: 49,152 of 150,036 tokens, 53 s so far
+[maya] reading the prompt: 57,344 of 150,036 tokens, 61 s so far
+[maya] reading the prompt: 65,536 of 150,036 tokens, 68 s so far
+[maya] reading the prompt: 73,728 of 150,036 tokens, 76 s so far
+[maya] reading the prompt: 81,920 of 150,036 tokens, 85 s so far
+[maya] reading the prompt: 90,112 of 150,036 tokens, 93 s so far
+[maya] reading the prompt: 90,112 of 150,036 tokens, 103 s so far
+[maya] reading the prompt: 90,112 of 150,036 tokens, 113 s so far
+[maya] reading the prompt: 106,496 of 150,036 tokens, 116 s so far
+[maya] reading the prompt: 106,496 of 150,036 tokens, 126 s so far
+[maya] reading the prompt: 106,496 of 150,036 tokens, 136 s so far
+[maya] reading the prompt: 122,880 of 150,036 tokens, 140 s so far
+[maya] reading the prompt: 122,880 of 150,036 tokens, 150 s so far
+[maya] reading the prompt: 122,880 of 150,036 tokens, 160 s so far
+[maya] reading the prompt: 139,264 of 150,036 tokens, 164 s so far
+[maya] reading the prompt: 139,264 of 150,036 tokens, 174 s so far
+[maya] reading the prompt: 150,035 of 150,036 tokens, 180 s so far
+[maya] answering: 10 of max 400 tokens, 10.7 tok/s, 181 s
+[maya] answering: 28 of max 400 tokens, 13.9 tok/s, 183 s
+[maya] answering: 42 of max 400 tokens, 13.8 tok/s, 184 s
+[maya] answering: 59 of max 400 tokens, 14.6 tok/s, 185 s
+[maya] answering: 77 of max 400 tokens, 15.0 tok/s, 186 s
+[maya] answering: 92 of max 400 tokens, 14.8 tok/s, 187 s
+[maya] answering: 109 of max 400 tokens, 14.9 tok/s, 188 s
+[maya] answering: 131 of max 400 tokens, 15.6 tok/s, 189 s
+[maya] answering: 148 of max 400 tokens, 15.7 tok/s, 190 s
+[maya] answering: 165 of max 400 tokens, 15.8 tok/s, 191 s
+[maya] answering: 181 of max 400 tokens, 15.8 tok/s, 192 s
+[maya] answering: 203 of max 400 tokens, 16.2 tok/s, 193 s
+[maya] answering: 222 of max 400 tokens, 16.3 tok/s, 194 s
+[maya] answering: 243 of max 400 tokens, 16.6 tok/s, 195 s
+[maya] answering: 262 of max 400 tokens, 16.7 tok/s, 196 s
+[maya] answering: 280 of max 400 tokens, 16.7 tok/s, 197 s
+[maya] answering: 298 of max 400 tokens, 16.8 tok/s, 198 s
+[maya] answering: 314 of max 400 tokens, 16.7 tok/s, 199 s
+[maya] answering: 334 of max 400 tokens, 16.8 tok/s, 200 s
+[maya] answering: 352 of max 400 tokens, 16.8 tok/s, 201 s
+[maya] answering: 373 of max 400 tokens, 17.0 tok/s, 202 s
+[maya] answering: 392 of max 400 tokens, 17.0 tok/s, 203 s
+[maya] done: 400 tokens in 204 s (17.1 tok/s) (length, cancel=False), expert cache 94.5% hit
+[maya] sessions: saved a 150035-token conversation (2.05 GB in 1.9 s); 4 kept, 4.79 GB
+[maya] reading the prompt: 200,038 tokens, 12 s so far
+[maya] reading the prompt: 8,192 of 200,038 tokens, 15 s so far
+[maya] reading the prompt: 16,384 of 200,038 tokens, 23 s so far
+[maya] reading the prompt: 24,576 of 200,038 tokens, 30 s so far
+[maya] reading the prompt: 32,768 of 200,038 tokens, 38 s so far
+[maya] reading the prompt: 40,960 of 200,038 tokens, 45 s so far
+[maya] reading the prompt: 49,152 of 200,038 tokens, 53 s so far
+[maya] reading the prompt: 57,344 of 200,038 tokens, 61 s so far
+[maya] reading the prompt: 65,536 of 200,038 tokens, 69 s so far
+[maya] reading the prompt: 73,728 of 200,038 tokens, 77 s so far
+[maya] reading the prompt: 81,920 of 200,038 tokens, 85 s so far
+[maya] reading the prompt: 90,112 of 200,038 tokens, 93 s so far
+[maya] reading the prompt: 98,304 of 200,038 tokens, 101 s so far
+[maya] reading the prompt: 106,496 of 200,038 tokens, 110 s so far
+[maya] reading the prompt: 114,688 of 200,038 tokens, 118 s so far
+[maya] reading the prompt: 122,880 of 200,038 tokens, 127 s so far
+[maya] reading the prompt: 131,072 of 200,038 tokens, 135 s so far
+[maya] reading the prompt: 139,264 of 200,038 tokens, 144 s so far
+[maya] reading the prompt: 139,264 of 200,038 tokens, 154 s so far
+[maya] reading the prompt: 139,264 of 200,038 tokens, 164 s so far
+[maya] reading the prompt: 155,648 of 200,038 tokens, 169 s so far
+[maya] reading the prompt: 155,648 of 200,038 tokens, 179 s so far
+[maya] reading the prompt: 155,648 of 200,038 tokens, 189 s so far
+[maya] reading the prompt: 172,032 of 200,038 tokens, 195 s so far
+[maya] reading the prompt: 172,032 of 200,038 tokens, 205 s so far
+[maya] reading the prompt: 172,032 of 200,038 tokens, 215 s so far
+[maya] reading the prompt: 188,416 of 200,038 tokens, 221 s so far
+[maya] reading the prompt: 188,416 of 200,038 tokens, 231 s so far
+[maya] reading the prompt: 200,037 of 200,038 tokens, 239 s so far
+[maya] answering: 10 of max 400 tokens, 9.4 tok/s, 240 s
+[maya] answering: 24 of max 400 tokens, 11.4 tok/s, 241 s
+[maya] answering: 43 of max 400 tokens, 13.5 tok/s, 242 s
+[maya] answering: 59 of max 400 tokens, 13.7 tok/s, 243 s
+[maya] answering: 78 of max 400 tokens, 14.6 tok/s, 244 s
+[maya] answering: 96 of max 400 tokens, 15.1 tok/s, 245 s
+[maya] answering: 115 of max 400 tokens, 15.5 tok/s, 246 s
+[maya] answering: 130 of max 400 tokens, 15.4 tok/s, 247 s
+[maya] answering: 145 of max 400 tokens, 15.3 tok/s, 248 s
+[maya] answering: 160 of max 400 tokens, 15.3 tok/s, 249 s
+[maya] answering: 176 of max 400 tokens, 15.3 tok/s, 250 s
+[maya] answering: 193 of max 400 tokens, 15.4 tok/s, 251 s
+[maya] answering: 212 of max 400 tokens, 15.6 tok/s, 253 s
+[maya] answering: 228 of max 400 tokens, 15.5 tok/s, 254 s
+[maya] answering: 245 of max 400 tokens, 15.6 tok/s, 255 s
+[maya] answering: 261 of max 400 tokens, 15.6 tok/s, 256 s
+[maya] answering: 283 of max 400 tokens, 15.9 tok/s, 257 s
+[maya] answering: 299 of max 400 tokens, 15.9 tok/s, 258 s
+[maya] answering: 320 of max 400 tokens, 16.1 tok/s, 259 s
+[maya] answering: 341 of max 400 tokens, 16.3 tok/s, 260 s
+[maya] answering: 361 of max 400 tokens, 16.4 tok/s, 261 s
+[maya] answering: 381 of max 400 tokens, 16.6 tok/s, 262 s
+[maya] done: 400 tokens in 263 s (16.7 tok/s) (length, cancel=False), expert cache 95.0% hit
+[maya] sessions: saved a 200037-token conversation (2.69 GB in 2.7 s); 4 kept, 7.07 GB
+[maya] reading the prompt: 249,595 tokens, 13 s so far
+[maya] reading the prompt: 8,192 of 249,595 tokens, 16 s so far
+[maya] reading the prompt: 16,384 of 249,595 tokens, 24 s so far
+[maya] reading the prompt: 24,576 of 249,595 tokens, 31 s so far
+[maya] reading the prompt: 32,768 of 249,595 tokens, 39 s so far
+[maya] reading the prompt: 40,960 of 249,595 tokens, 46 s so far
+[maya] reading the prompt: 49,152 of 249,595 tokens, 54 s so far
+[maya] reading the prompt: 57,344 of 249,595 tokens, 62 s so far
+[maya] reading the prompt: 65,536 of 249,595 tokens, 70 s so far
+[maya] reading the prompt: 73,728 of 249,595 tokens, 78 s so far
+[maya] reading the prompt: 81,920 of 249,595 tokens, 86 s so far
+[maya] reading the prompt: 90,112 of 249,595 tokens, 94 s so far
+[maya] reading the prompt: 98,304 of 249,595 tokens, 102 s so far
+[maya] reading the prompt: 106,496 of 249,595 tokens, 111 s so far
+[maya] reading the prompt: 114,688 of 249,595 tokens, 119 s so far
+[maya] reading the prompt: 122,880 of 249,595 tokens, 128 s so far
+[maya] reading the prompt: 131,072 of 249,595 tokens, 136 s so far
+[maya] reading the prompt: 139,264 of 249,595 tokens, 145 s so far
+[maya] reading the prompt: 147,456 of 249,595 tokens, 154 s so far
+[maya] reading the prompt: 155,648 of 249,595 tokens, 163 s so far
+[maya] reading the prompt: 163,840 of 249,595 tokens, 172 s so far
+[maya] reading the prompt: 172,032 of 249,595 tokens, 181 s so far
+[maya] reading the prompt: 180,224 of 249,595 tokens, 190 s so far
+[maya] reading the prompt: 188,416 of 249,595 tokens, 200 s so far
+[maya] reading the prompt: 188,416 of 249,595 tokens, 210 s so far
+[maya] reading the prompt: 188,416 of 249,595 tokens, 220 s so far
+[maya] reading the prompt: 204,800 of 249,595 tokens, 226 s so far
+[maya] reading the prompt: 204,800 of 249,595 tokens, 236 s so far
+[maya] reading the prompt: 204,800 of 249,595 tokens, 246 s so far
+[maya] reading the prompt: 221,184 of 249,595 tokens, 253 s so far
+[maya] reading the prompt: 221,184 of 249,595 tokens, 263 s so far
+[maya] reading the prompt: 221,184 of 249,595 tokens, 273 s so far
+[maya] reading the prompt: 237,568 of 249,595 tokens, 281 s so far
+[maya] reading the prompt: 237,568 of 249,595 tokens, 291 s so far
+[maya] reading the prompt: 249,594 of 249,595 tokens, 301 s so far
+[maya] answering: 10 of max 400 tokens, 10.0 tok/s, 302 s
+[maya] answering: 26 of max 400 tokens, 12.3 tok/s, 303 s
+[maya] answering: 45 of max 400 tokens, 14.1 tok/s, 304 s
+[maya] answering: 61 of max 400 tokens, 14.4 tok/s, 305 s
+[maya] answering: 74 of max 400 tokens, 14.1 tok/s, 306 s
+[maya] answering: 86 of max 400 tokens, 13.7 tok/s, 307 s
+[maya] answering: 103 of max 400 tokens, 14.0 tok/s, 308 s
+[maya] answering: 119 of max 400 tokens, 14.2 tok/s, 309 s
+[maya] answering: 137 of max 400 tokens, 14.5 tok/s, 310 s
+[maya] answering: 154 of max 400 tokens, 14.6 tok/s, 311 s
+[maya] answering: 171 of max 400 tokens, 14.8 tok/s, 312 s
+[maya] answering: 188 of max 400 tokens, 14.9 tok/s, 313 s
+[maya] answering: 206 of max 400 tokens, 15.1 tok/s, 314 s
+[maya] answering: 228 of max 400 tokens, 15.5 tok/s, 316 s
+[maya] answering: 247 of max 400 tokens, 15.7 tok/s, 317 s
+[maya] answering: 264 of max 400 tokens, 15.7 tok/s, 318 s
+[maya] answering: 281 of max 400 tokens, 15.7 tok/s, 319 s
+[maya] answering: 295 of max 400 tokens, 15.6 tok/s, 320 s
+[maya] answering: 311 of max 400 tokens, 15.6 tok/s, 321 s
+[maya] answering: 325 of max 400 tokens, 15.4 tok/s, 322 s
+[maya] answering: 343 of max 400 tokens, 15.5 tok/s, 323 s
+[maya] answering: 360 of max 400 tokens, 15.5 tok/s, 324 s
+[maya] answering: 381 of max 400 tokens, 15.8 tok/s, 325 s
+[maya] answering: 397 of max 400 tokens, 15.8 tok/s, 326 s
+[maya] done: 400 tokens in 326 s (15.8 tok/s) (length, cancel=False), expert cache 95.1% hit
+[maya] stopping: the engine ends

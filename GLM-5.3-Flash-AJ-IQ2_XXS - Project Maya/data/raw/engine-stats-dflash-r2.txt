@@ -1,0 +1,20 @@
+glm spec: 160 of 280 drafts accepted (57.1%)
+glm stat: decode 63.42 ms/tok (15.77 tok/s) | vram hit 95.11% | ram fetches 0.00/tok | disk 0.85 reads/tok in 0.82 waits/tok, 2.46 ms/tok | promotions 0.86/tok | cpu lane 20.85/tok in 19.51 ms/tok | prompt 1.2 ms/tok | vram 8362/8490 ram 3033/3372
+glm spec: 145 of 277 drafts accepted (52.3%)
+glm dflash: MTP off - the NextN draft block is not loaded, DFlash drafts instead
+glm stat: decode 163.94 ms/tok (6.10 tok/s) | vram hit 82.74% | ram fetches 0.00/tok | disk 10.00 reads/tok in 8.50 waits/tok, 27.84 ms/tok | promotions 10.25/tok | cpu lane 47.75/tok in 51.12 ms/tok | prompt 1.5 ms/tok | vram 7969/8490 ram 3194/3373
+glm spec: 1 of 2 drafts accepted (50.0%)
+glm stat: decode 79.92 ms/tok (12.51 tok/s) | vram hit 86.14% | ram fetches 0.00/tok | disk 5.56 reads/tok in 5.19 waits/tok, 17.69 ms/tok | promotions 5.50/tok | cpu lane 37.25/tok in 38.02 ms/tok | prompt 4.3 ms/tok | vram 8248/8490 ram 2988/3373
+glm spec: 10 of 10 drafts accepted (100.0%)
+glm stat: decode 60.95 ms/tok (16.41 tok/s) | vram hit 91.98% | ram fetches 0.00/tok | disk 1.49 reads/tok in 1.45 waits/tok, 4.51 ms/tok | promotions 1.50/tok | cpu lane 31.39/tok in 29.82 ms/tok | prompt 1.4 ms/tok | vram 8363/8490 ram 3297/3373
+glm spec: 167 of 262 drafts accepted (63.7%)
+glm stat: decode 54.89 ms/tok (18.22 tok/s) | vram hit 94.38% | ram fetches 0.00/tok | disk 1.07 reads/tok in 1.07 waits/tok, 3.12 ms/tok | promotions 1.09/tok | cpu lane 22.32/tok in 20.98 ms/tok | prompt 1.3 ms/tok | vram 8364/8490 ram 3172/3373
+glm spec: 177 of 283 drafts accepted (62.5%)
+glm stat: decode 57.80 ms/tok (17.30 tok/s) | vram hit 94.11% | ram fetches 0.00/tok | disk 0.99 reads/tok in 0.97 waits/tok, 2.84 ms/tok | promotions 1.00/tok | cpu lane 23.60/tok in 22.34 ms/tok | prompt 1.2 ms/tok | vram 8360/8490 ram 3130/3373
+glm spec: 162 of 266 drafts accepted (60.9%)
+glm stat: decode 59.40 ms/tok (16.83 tok/s) | vram hit 92.69% | ram fetches 0.00/tok | disk 1.03 reads/tok in 1.02 waits/tok, 2.99 ms/tok | promotions 1.05/tok | cpu lane 28.19/tok in 26.07 ms/tok | prompt 1.2 ms/tok | vram 8364/8490 ram 3127/3373
+glm spec: 174 of 256 drafts accepted (68.0%)
+glm stat: decode 59.47 ms/tok (16.81 tok/s) | vram hit 94.11% | ram fetches 0.00/tok | disk 0.96 reads/tok in 0.94 waits/tok, 2.80 ms/tok | promotions 0.97/tok | cpu lane 23.21/tok in 21.74 ms/tok | prompt 1.2 ms/tok | vram 8361/8490 ram 3081/3373
+glm spec: 170 of 265 drafts accepted (64.2%)
+glm stat: decode 58.57 ms/tok (17.07 tok/s) | vram hit 94.63% | ram fetches 0.00/tok | disk 0.95 reads/tok in 0.94 waits/tok, 2.75 ms/tok | promotions 0.96/tok | cpu lane 20.62/tok in 19.35 ms/tok | prompt 1.2 ms/tok | vram 8355/8490 ram 3072/3373
+glm spec: 173 of 257 drafts accepted (67.3%)
