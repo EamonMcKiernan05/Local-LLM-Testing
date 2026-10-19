@@ -1,7 +1,7 @@
 # Qwen3.8-Flash-Next IQ3_S on Strata — every measurement we took
 
-**285 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
-V100 32 GB — measured 2026-10-03 to 2026-10-13 on the box brought up 2026-09-30.** One GGUF set
+**305 recorded runs on Qwen3.8-Flash-Next (125B MoE, ~6B active) served by Strata on 2× Tesla
+V100 32 GB — measured 2026-10-03 to 2026-10-19 on the box brought up 2026-09-30.** One GGUF set
 throughout: the base `IQ3_S` (GSQ-RCO, 54.8 + 28.8 GB) on both cards. Every number came off a
 real run on this hardware; nothing is estimated from a datasheet.
 
@@ -30,6 +30,13 @@ The findings that matter:
   first-pass draw. Against the 10-11 baseline 0.1.44 agrees within ±0.5 % prefill at 20–200K
   (experiment 12). Its wins land on other platforms: Unsloth and NVFP4 files, Qwen3.6, AMD/Arc
   multi-GPU, Apple Silicon (Mac Metal).
+- **The v0.2.0-beta update (engine 0.1.45.3) is parity-plus — once the PLE shard is on the
+  NVMe.** One battery against 0.1.44's three-pass mean reads **prefill +2.2 % / decode +0.8 %**
+  (decode inside the single-rep band). The first battery on the box as served read prefill a
+  third slower: 0.2.0's new 4 KiB random PLE read path exposed the 28.8 GB n-gram shard still
+  sitting on the SATA boot SSD (engine probe 10,447 vs 58–73k rows/s). Moving it to the NVMe
+  recovers **+54.2 % prefill** at the same config — the storage rule is now load-bearing
+  (experiment 13).
 - **`STRATA_PREFILL_CPU_SHARE=auto` can't engage on this box** — it is a single-GPU feature
   (the CPU pool is wired to prefill only in non-split runs), and the measurements agree: short
   prompts +0.6 % mean, battery ±1 % (experiment 10).
@@ -42,8 +49,9 @@ The findings that matter:
   confirmed; the sampler trims are flat — no llama.cpp-style `top_k` trap (experiment 05).
 - **Vision works on the V100s.** Images read correctly on GPU (4.0 s, 93 tok/s decode); text
   prefill pays ~4.5 % for the VRAM reserve (experiment 07).
-- Runs recorded: **285 — all 285 with measurements** (warm-ups were discarded by design; a few
-  rows are annotated warm-up/cold — see `PROVENANCE.md`).
+- Runs recorded: **305 — all 305 with measurements** (warm-ups were discarded by design; the
+  new 0.2.0 arms include one deliberate burn and two cold 20K arms, named where excluded —
+  see `PROVENANCE.md`).
 
 ## The figures
 
@@ -62,6 +70,8 @@ The findings that matter:
 | `charts/strata-v100-decode-depth-v0144.png` | the same battery re-run on 0.1.44 — the cycle's card | `scripts/make_chart_depth_v0144.py` |
 | `charts/strata-v100-0143-vs-0144-mean3.png` | 0.1.43 vs 0.1.44 from the three-pass means — the settled read | `scripts/make_chart_compare_v0144_mean3.py` |
 | `charts/strata-v100-decode-depth-v0144-mean3.png` | the 0.1.44 card from the three-pass means | `scripts/make_chart_depth_v0144_mean3.py` |
+| `charts/strata-v100-0144-vs-020beta.png` | 0.1.44 (3-pass mean) vs 0.2.0-beta, per depth — the release comparison | `scripts/make_chart_compare_v020.py` |
+| `charts/strata-v100-020-ple-location.png` | 0.2.0-beta with the PLE shard on the SATA SSD vs the NVMe | `scripts/make_chart_ple_location_v020.py` |
 
 ## Layout
 
@@ -69,8 +79,8 @@ The findings that matter:
 data/csv/     every table from the raw records (built by scripts/build_data.py)
 data/raw/     per-arm JSONL, drivers, configs, logs, engine-log extracts
 experiments/  one write-up per experiment, in the order they were run
-charts/       the figures; scripts/ holds the code that regenerates twelve of them
-scripts/      build_data.py, build_release_01401.py, build_release_01402.py, build_release_0143.py, build_release_0144.py, build_release_0144_mean3.py, build_cpu_share.py and the twelve chart scripts
+charts/       the figures; scripts/ holds the code that regenerates fourteen of them
+scripts/      build_data.py, build_release_01401.py, build_release_01402.py, build_release_0143.py, build_release_0144.py, build_release_0144_mean3.py, build_release_020beta.py, build_cpu_share.py and the chart scripts
 HARDWARE.md   the box, the models, the exact flag sets
 TUNING.md     what actually moves the needle, and what doesn't
 PROVENANCE.md where every file came from, and what could not be reached
@@ -92,6 +102,7 @@ PROVENANCE.md where every file came from, and what could not be reached
 | 10 | 2026-10-07 | CPU-share test: short prompts + battery control | 30 | no effect — single-GPU-only feature; a split box can't engage it |
 | 11 | 2026-10-11 | v0.1.42 → v0.1.43, same-day pair + agreement check | 18 | parity within wander — the pair's mid-range prefill gains are the 0.1.42 side's own undershoot; a behaviour fix (#1884) |
 | 12 | 2026-10-13 | v0.1.43 → v0.1.44, same-day pair + agreement check; decode repeats (×3 each side) | 36 | parity within wander — the decode dip was the 0.1.43 first-pass draw; repeats net −0.9 %, inside the pass spread (250K lean noted) |
+| 13 | 2026-10-19 | v0.1.44 → v0.2.0-beta (engine 0.1.45.3); PLE shard SATA vs NVMe | 20 | parity-plus: prefill +2.2 % / decode +0.8 % with the PLE on the NVMe; the SATA shard cost a third of prefill until moved (+54.2 % recovered) |
 
 ## Method, and what is deliberately not claimed
 
@@ -146,6 +157,11 @@ measurement), and discard the first request after any load.
   one battery per side, and its decode repeats (three passes per side, same night) netted
   −0.9 % — inside the pass-to-pass spread; the 250K decode lean (~2.7 tok/s) is the one
   cell left uncalled (experiment 12).
+- **The 0.2.0-beta comparison is one battery on the new side** against 0.1.44's archived
+  three-pass mean; 0.1.44 was not re-run on the NVMe PLE, so the +2.2 % prefill cannot be
+  split between engine and storage (experiment 13). The PLE-location series uses two SATA
+  passes at 60K–250K and one warm 20K re-run; the two cold 20K arms are recorded but excluded
+  from that mean. The 100K post-copy burn is recorded and excluded.
 - **The CPU-share feature is only tested out of its lane here.** It cannot engage on a layer
   split, so nothing here says how it behaves on the single-GPU boxes it was built for
   (experiment 10).

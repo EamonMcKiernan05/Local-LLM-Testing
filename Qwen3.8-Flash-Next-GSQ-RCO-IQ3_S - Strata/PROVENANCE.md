@@ -1,6 +1,6 @@
 # Provenance: where every file here came from
 
-Collected 2026-10-05; extended 2026-10-13 (the 0.1.40.1 / 0.1.40.2 comparisons, the CPU-share test, the 0.1.42 → 0.1.43 pair, and the 0.1.43 → 0.1.44 pair with its decode repeats). The rule for this folder: **a number appears here only if it came off a
+Collected 2026-10-05; extended 2026-10-13 (the 0.1.40.1 / 0.1.40.2 comparisons, the CPU-share test, the 0.1.42 → 0.1.43 pair, and the 0.1.43 → 0.1.44 pair with its decode repeats) and 2026-10-19 (the 0.1.44 → 0.2.0-beta comparison and the PLE-location test). The rule for this folder: **a number appears here only if it came off a
 real run, and every table says which run.** All measurements are on the base IQ3_S.
 
 ## Sources, in order of reliability
@@ -27,6 +27,11 @@ real run, and every table says which run.** All measurements are on the base IQ3
    | `model-bench-0-1-44-base-rep3-results.jsonl` | 7 | 0.1.44 decode-repeat pass 3 (same shape) |
    | `model-bench-0-1-43-base-rep2-results.jsonl` | 7 | 0.1.43 decode-repeat pass 2 (the rollback side) |
    | `model-bench-0-1-43-base-rep3-results.jsonl` | 7 | 0.1.43 decode-repeat pass 3 (same shape) |
+   | `model-bench-0-2-0-beta-sata-pass1-results.jsonl` | 7 | 0.2.0-beta as served, PLE on SATA (warm-up + 6 arms) |
+   | `model-bench-0-2-0-beta-sata-pass2-results.jsonl` | 7 | the same, pass 2 |
+   | `model-bench-0-2-0-beta-sata-warm20k-results.jsonl` | 2 | warm 20K re-run after the cold first arms (warm-up + 1 arm) |
+   | `model-bench-0-2-0-beta-nvme-results.jsonl` | 7 | 0.2.0-beta comparison arm, PLE on the NVMe (warm-up + 6 arms) |
+   | `model-bench-0-2-0-beta-nvme-burn-results.jsonl` | 2 | 100K post-copy burn — **excluded** (discarded by design) |
    | `cpu-share-short-off.jsonl` | 12 | CPU-share short-prompt test, default arm (4 sizes × 3 reps) |
    | `cpu-share-short-auto.jsonl` | 12 | CPU-share short-prompt test, auto arm (same prompts) |
    | `depth-decode3.jsonl` | 6 | the six-document depth series |
@@ -41,20 +46,26 @@ real run, and every table says which run.** All measurements are on the base IQ3
    `T1247Z-…` for the 0.1.40.2 run; `T1320Z-…` for the CPU-share battery; and 2026-10-11:
    `T0911Z-…` (0.1.42 morning), `T1523Z-…` (0.1.43), `T1535Z-…` (0.1.42 re-run); and
    2026-10-13: `T1956Z-…` (0.1.43 re-run), `T2007Z-…` (0.1.44), `T2122Z-…`/`T2129Z-…` (0.1.44
-   decode-repeats), `T2139Z-…`/`T2146Z-…` (0.1.43 decode-repeats)) — every
+   decode-repeats), `T2139Z-…`/`T2146Z-…` (0.1.43 decode-repeats); and 2026-10-19:
+   `T1556Z-…`/`T1607Z-…` (0.2.0-beta on the SATA PLE), `T1618Z-…` (warm 20K), `T1626Z-…`
+   (excluded burn), `T1627Z-…` (0.2.0-beta on the NVMe PLE)) — every
    `results.jsonl` here is a byte-identical copy (sha256 checked against the box). The
    `cpu-share-short-*.jsonl` records were written by the test driver on the box and moved here
    verbatim.
 
 ## Counting the runs
 
-**285 recorded runs, every one with measurements; no failures:**
+**305 recorded runs, every one with measurements; no failures:**
 
 126 (MTP sweep) + 20 (sampler sweep) + 60 (release batteries: 0.1.32, 0.1.39, the 0.1.39 re-run,
 0.1.40.1, 0.1.40.2, 0.1.42, the 0.1.42 re-run, 0.1.43, the 0.1.43 re-run and 0.1.44 — 6 each) +
 24 (decode-repeat batteries: 0.1.43 ×2 and 0.1.44 ×2 — 6 each) + 6 (depth series) + 6 (hero
 series) + 13 (load checks: 12 single/dual iterations + the 256K check) + 24 (CPU-share
-short-prompt test: 4 sizes × 3 reps × 2 arms) + 6 (CPU-share battery control).
+short-prompt test: 4 sizes × 3 reps × 2 arms) + 6 (CPU-share battery control) + 20 (0.2.0-beta:
+6 SATA pass 1, 6 SATA pass 2, 1 warm 20K, 1 excluded burn, 6 NVMe).
+
+The 0.2.0-beta table uses 19 of those 20: the 100K burn is excluded, and the two cold 20K arms
+are replaced by the warm re-run in the PLE-location series (all three remain in the raw files).
 
 - **Warm-up requests were discarded by design** — one per battery and per final compare run.
   They stay visible in their raw files, and they are not counted. (The batteries' warm-ups are

@@ -28,15 +28,19 @@ turns on (experiment 01).
 The policy: **the actively-used model files live on the NVMe; the HDD is a cold catalogue.**
 
 - Hot set: `/home/eamon/strata-nvme/` (base pack + shard 1), `/home/eamon/strata-ple/` (the
-  n-gram shard). Symlinks at the standard `/mnt/models` paths; the HDD originals kept beside as
-  `.hdd-original`.
+  n-gram shard — a symlink to `/mnt/nvme/strata-ple/` since 2026-10-19; the SATA original
+  kept as `.sata-original`). Symlinks at the standard `/mnt/models` paths; the HDD originals
+  kept beside as `.hdd-original`.
 - **Symlink, don't repoint.** The loader discovers shards by exact-path probe from `--native`
   and appends `--ple-gguf` only when the string differs — a config pointing at a new path while
   shard 2 still exists beside shard 1 loads three shards, two of them #2, and dies with
   `native dense: duplicate split shard number`. Swap the file for a symlink; keep config paths
   standard.
 - Regression check: decode under ~30 tok/s means the PLE reads are slow again — check the
-  storage type of every path the engine reads randomly.
+  storage type of every path the engine reads randomly. From v0.2.0 the start banner probes
+  it: `PLE direct read probe: <n> rows/s (fine)` on the NVMe, or a `--ple-io direct measures
+  slow here` warning when the shard sits on the SATA boot SSD (~43 MB/s of 4 KiB random reads
+  there; prefill loses about a third).
 
 ## Strata on this box
 
@@ -52,6 +56,9 @@ a locally built engine.
 | v0.1.39 | 2026-10-04 | +22–31 % decode / +23–26 % prefill (experiment 06); vision enabled same day (experiment 07) |
 | v0.1.40.1 | 2026-10-07 | the sm_70 workaround retired (upstream fixed #371 in 0.1.33; the box had forced the old kernel); day-matched vs 0.1.39: +5.9 % prefill (experiment 08) |
 | v0.1.40.2 | 2026-10-07 | engine rebuilt (sm_70 unchanged); parity on this box — prefill +0.4 %, decode within noise (experiment 09) |
+| v0.1.43 | 2026-10-11 | parity within wander (experiment 11); behaviour fix #1884, tail-skip revert at ≥90 % cache occupancy |
+| v0.1.44 | 2026-10-13 | parity on this box — prefill +0.6 % / decode −3.1 % in the pair, −0.9 % over three decode passes (experiment 12) |
+| v0.2.0-beta | 2026-10-19 | engine 0.1.45.3, rebuilt for sm_70; prefill +2.2 % / decode +0.8 % vs 0.1.44 with the PLE on the NVMe; 4 KiB random PLE reads exposed the SATA shard (experiment 13) |
 
 - Build: local, CUDA 12.9, `archs [70]` only — there is no sm_70 prebuilt (setup compiles it,
   `STRATA_EXPERIMENTAL_SM60=1` admits the V100 and adds `-DSTRATA_EXPERIMENTAL_SM60=ON`).
@@ -74,7 +81,7 @@ a locally built engine.
 
 Packs (the expert arena, built at install) at `/mnt/models/Strata-data/packs/iq3_s`; the MTP
 draft layer at `/mnt/models/Strata-data/mtp/rt`. The n-gram shard (28.8 GB) lives on the NVMe
-at `/home/eamon/strata-ple/`.
+at `/mnt/nvme/strata-ple/`, reached through `/home/eamon/strata-ple/`.
 
 ## Flag sets
 
