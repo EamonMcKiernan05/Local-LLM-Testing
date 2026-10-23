@@ -1,6 +1,6 @@
 # DeepSeek-V4.1-Flash-1017 (Maya-XS IQ1_S) on Project Maya — the bench record on box .5
 
-**2 recorded runs — 6 measured arms, all measured, 0 failed.** DeepSeek-V4.1-Flash-1017 served by
+**2 recorded runs (6 measured arms), 0 failed.** DeepSeek-V4.1-Flash-1017 served by
 Project Maya **v1.1.22** (engine `maya-ds4`) on **2× Tesla V100 32 GB**, measured **2026-10-22** on
 box .5. One GGUF set: Maya-XS IQ1_S, **276.6 GB** across five shards, layer-split across both cards,
 **131,072 context**, no speculation. Every number came off a real run on this hardware.
