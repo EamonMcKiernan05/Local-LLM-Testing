@@ -1,0 +1,4 @@
+depth,ptok,book,prefill_run1,prefill_run2,prefill_mean,prefill_peak,prefill_spread_pct,decode_run1,decode_run2,decode_mean,decode_peak,decode_spread_pct,gpu0_used_mib,gpu1_used_mib,method
+20000,20029,frankenstein,226.8,283.4,255.1,283.4,22.2,20.9,7.2,14.05,20.9,97.5,31988,31992,"local tokenizer (exact, gguf Maya-XS)"
+60000,59983,sherlock,365.7,314.4,340.05,365.7,15.1,20.8,11.8,16.3,20.8,55.2,31988,31992,"local tokenizer (exact, gguf Maya-XS)"
+100000,99739,pride,383.7,372.9,378.3,383.7,2.9,19.9,14.6,17.25,19.9,30.7,31988,31992,"local tokenizer (exact, gguf Maya-XS)"

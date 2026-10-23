@@ -1,0 +1,92 @@
+[2026-10-21T14:09:56Z] === DS4 bench cycle start ===
+[2026-10-21T14:09:56Z] ready after 5s
+[2026-10-21T14:09:56Z] START ds4-maya-s-128k-burn
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 153.2 tok/s, decode 5.5 tok/s, 400 gen, 203.5s
+arm 60k rep 1/1: prefill 146.1 tok/s, decode 6.1 tok/s, 400 gen, 478.4s
+arm 100k rep 1/1: prefill 153.8 tok/s, decode 7.6 tok/s, 400 gen, 703.6s
+
+# Model Bench: ds4-maya-s-128k-burn
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-S)
+- run: 2026-10-21T1409Z-ds4-maya-s-128k-burn · 2026-10-21 14:09:56 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 153.2 | 5.5 | 400 | 203.5 | 1 |
+| 60k | 59983 | 146.1 | 6.1 | 400 | 478.4 | 1 |
+| 100k | 99739 | 153.8 | 7.6 | 400 | 703.6 | 1 |
+
+- prefill peak: **153.8 tok/s** at 100k
+- decode peak: **7.6 tok/s** at 100k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-21T1409Z-ds4-maya-s-128k-burn
+[2026-10-21T14:33:36Z] DONE ds4-maya-s-128k-burn
+[2026-10-21T14:33:36Z] START ds4-maya-s-128k-run1
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 140.3 tok/s, decode 6.2 tok/s, 400 gen, 207.3s
+arm 60k rep 1/1: prefill 147.0 tok/s, decode 7.8 tok/s, 400 gen, 460.4s
+arm 100k rep 1/1: prefill 149.8 tok/s, decode 8.7 tok/s, 400 gen, 713.2s
+
+# Model Bench: ds4-maya-s-128k-run1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-S)
+- run: 2026-10-21T1433Z-ds4-maya-s-128k-run1 · 2026-10-21 14:33:37 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 140.3 | 6.2 | 400 | 207.3 | 1 |
+| 60k | 59983 | 147.0 | 7.8 | 400 | 460.4 | 1 |
+| 100k | 99739 | 149.8 | 8.7 | 400 | 713.2 | 1 |
+
+- prefill peak: **149.8 tok/s** at 100k
+- decode peak: **8.7 tok/s** at 100k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-21T1433Z-ds4-maya-s-128k-run1
+[2026-10-21T14:57:13Z] DONE ds4-maya-s-128k-run1
+[2026-10-21T14:57:13Z] restart for run2
+[2026-10-21T14:57:13Z] killing maya.py pid=354816
+0, 0 MiB
+1, 0 MiB
+[2026-10-21T14:58:19Z] ready after 55s
+[2026-10-21T14:58:19Z] START ds4-maya-s-128k-run2
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 147.1 tok/s, decode 4.7 tok/s, 400 gen, 220.9s
+arm 60k rep 1/1: prefill 147.3 tok/s, decode 4.8 tok/s, 400 gen, 492.6s
+arm 100k rep 1/1: prefill 155.3 tok/s, decode 6.0 tok/s, 400 gen, 711.1s
+
+# Model Bench: ds4-maya-s-128k-run2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-S)
+- run: 2026-10-21T1458Z-ds4-maya-s-128k-run2 · 2026-10-21 14:58:20 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 147.1 | 4.7 | 400 | 220.9 | 1 |
+| 60k | 59983 | 147.3 | 4.8 | 400 | 492.6 | 1 |
+| 100k | 99739 | 155.3 | 6.0 | 400 | 711.1 | 1 |
+
+- prefill peak: **155.3 tok/s** at 100k
+- decode peak: **6.0 tok/s** at 100k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-21T1458Z-ds4-maya-s-128k-run2
+[2026-10-21T15:22:43Z] DONE ds4-maya-s-128k-run2
+[2026-10-21T15:22:43Z] ALL DONE

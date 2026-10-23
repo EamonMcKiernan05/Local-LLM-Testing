@@ -1,0 +1,4 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-22T1911Z-ds4-maya-xs-128k-burn,20000,1,frankenstein,"local tokenizer (exact, gguf Maya-XS)",20000,20029,400,272.1,7.6,0,0,126.6,31988,35,31992,36,
+2026-10-22T1911Z-ds4-maya-xs-128k-burn,60000,1,sherlock,"local tokenizer (exact, gguf Maya-XS)",60000,59983,400,363.7,15.4,0,0,193.2,31988,40,31992,43,
+2026-10-22T1911Z-ds4-maya-xs-128k-burn,100000,1,pride,"local tokenizer (exact, gguf Maya-XS)",100000,99739,400,384.2,17.7,0,0,282.9,31988,41,31992,44,

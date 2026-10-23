@@ -1,0 +1,9 @@
+3c6fde94e03ae67c1f043a47ceadadd65f7cc347d17d11e02f05b19438c2a0b4  model-bench-ds4-maya-xs-128k-burn-meta.json
+e4eeea4fbb7f228da1701d48eb29972aaf40320c58c500de2f936a8a6109f313  model-bench-ds4-maya-xs-128k-burn-results.jsonl
+ce62033abd39bd1cf96b271cfb38861137b4d6a05c6dd9ea34a04c2885432974  model-bench-ds4-maya-xs-128k-burn-summary.csv
+c092172d9c7584239f2e5662ddaf1d52a49303ac4b8c61a0122c326cdbf12213  model-bench-ds4-maya-xs-128k-run1-meta.json
+4b44e7aa82ae3d43cb0ca07d8ab3271829408e6619c18b567854668f8f88476d  model-bench-ds4-maya-xs-128k-run1-results.jsonl
+5991f1b67a512dddf242c9bdcc01f1cfe4a4282b14275b097067ac676326fdbe  model-bench-ds4-maya-xs-128k-run1-summary.csv
+2099003714e91725401de74d0204c27d37fbbd23410e1184b4f2c448b367911e  model-bench-ds4-maya-xs-128k-run2-meta.json
+a8e7ae2f0d4d876ebfea53c6b2e9856bd9ae9b45ffee651b6cbdf85ca658f299  model-bench-ds4-maya-xs-128k-run2-results.jsonl
+387e4c8097fa2e78be13a75328186085a1a93b2dd1febc36dffb5e79869f1da6  model-bench-ds4-maya-xs-128k-run2-summary.csv
