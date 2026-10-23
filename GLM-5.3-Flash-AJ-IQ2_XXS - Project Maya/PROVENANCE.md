@@ -16,15 +16,28 @@ run, and every table says which run.** All measurements are on aj9o9's AJ-IQ2_XX
    | `model-bench-aj-256k-sn730-postcopy-burn` | `2026-10-16T1350Z-aj-iq2xxs-256k-sn730-postcopy-burn` | post-copy calibration battery, discarded by design |
    | `model-bench-aj-256k-sn730-r1..r3` | `2026-10-16T1411Z / T1432Z / T1453Z-aj-iq2xxs-256k-sn730-r1..r3` | the 256K measured batteries, three fresh loads |
    | `model-bench-aj-131k-sn730-r1..r3` | `2026-10-16T1516Z / T1524Z / T1531Z-aj-iq2xxs-131k-sn730-r1..r3` | the 131K measured batteries, three fresh loads |
+   | `model-bench-aj-v1115-v1113-r1..r3` | `2026-10-17T0847Z / T0929Z / T1010Z-aj-iq2xxs-256k-v1113-r1..r3` | the v1.1.13 side of the engine pair, three fresh loads |
+   | `model-bench-aj-v1115-v1115-r1..r3` | `2026-10-17T0910Z / T0950Z / T1032Z-aj-iq2xxs-256k-v1115-r1..r3` | the v1.1.15 side of the engine pair, three fresh loads |
+   | `model-bench-aj-v1115-dflash-r1..r3` | `2026-10-17T1104Z / T1124Z / T1145Z-aj-iq2xxs-256k-v1115-dflash-r1..r3` | DFlash2 drafting batteries, three fresh loads |
 
    Each record carries one discarded warm-up row (`"kind": "warmup"`) and its measured arms — six
    at 256K, three at 131K. Each battery is one engine load, driven by the two cycle scripts below.
+   The 2026-10-17 files are listed in their own manifest, `raw/SHA256SUMS-v1115` (the 2026-10-16
+   set keeps the original `raw/SHA256SUMS`).
 
 2. **The serving configs, the drivers and the logs** — `config-256k-served.json` and
    `config-131k-served.json` are the configs the two cycles ran on (on the box:
    `~/project-maya/maya-aj-iq2_xxs.json`, the two differing only in `--max-context`; the 256K
    config's md5 in the gates was `7e73a42dc4f2e75ac45dab17fb09a300`, the 131K one
    `4d65f6be873d543244a497d3ba104940`).
+   The 2026-10-17 pair and DFlash2 test ran on `config-aj-v1115-pair-served.json` (byte-identical
+   for both engine sides, md5 `7e73a42dc4f2e75ac45dab17fb09a300`), `config-aj-v1115-dflash.json`
+   (`--dflash` added on top of the calibrated config, md5 `5324f4280dd57f302ee1f637cd9a053e`) and
+   `config-aj-v1115-plain-calibrated.json` (the state after Maya's one-time draft calibration —
+   `installer.speed_calibration`, `kept: mtp`; md5 `d98e1d5599f1f3ddd69f4297787de03a`). Their
+   drivers are `driver-aj-v1115-cycle.sh` and `driver-aj-v1115-dflash-cycle.sh`, logs
+   `aj-v1115-cycle.log` and `aj-v1115-dflash-cycle.log`, plus
+   `dflash-calibration-2026-10-17.log` (the calibration's own two-load transcript).
    Drivers: `driver-aj-prep.sh` / `driver-aj-prep-resume.sh` (HDD → SN730 copy, sha256 vs HF,
    symlink flip, vision pre-place), `driver-aj-setup.sh` (the pack build + config write, run as
    `maya.sh --setup --yes --no-start --gguf-dir … --gpus 0,1 --context 262144`), and
@@ -36,7 +49,10 @@ run, and every table says which run.** All measurements are on aj9o9's AJ-IQ2_XX
    resume script renamed and completed the staging — both scripts and both logs are here so the
    whole sequence is auditable.
 3. **Engine identity**: v1.1.13 = commit `797819e` (the update's `git describe`), engine build
-   stamp `c823b8ca185405dd` — asserted before **every arm of every battery** by the cycle scripts
+   stamp `c823b8ca185405dd`; **v1.1.15 build stamp `707211430e5c3035`** (first built 2026-10-17
+   09:09Z, plain-path rebuild over v1.1.13; `third_party/llama.cpp` unchanged, vision source
+   changed but deliberately not rebuilt — text-only bench, encoder stays at `3a8570cc5f1f1686`).
+   Both stamps were asserted before **every arm of every battery** by the cycle scripts
    (`engine src stamp:` lines). The update replaced v1.1.11 (`8931339`, stamp `5a23fa1ec92e67aa`)
    the same morning; the config the update was started on is byte-identical after (the update log
    shows the `md5sum -c` pass).
@@ -58,6 +74,9 @@ run, and every table says which run.** All measurements are on aj9o9's AJ-IQ2_XX
 
 - 256K cycle: 4 batteries × 6 depths = **24 arms** (20K / 60K / 100K / 150K / 200K / 250K).
 - 131K cycle: 3 batteries × 3 depths = **9 arms** (20K / 60K / 100K).
+- Engine pair (2026-10-17): 6 batteries × 6 depths = **36 arms** (v1.1.13 ×3 and v1.1.15 ×3,
+  alternated), plus 6 warm-ups discarded.
+- DFlash2 test (2026-10-17): 3 batteries × 6 depths = **18 arms**, plus 3 warm-ups discarded.
 - The 2026-10-16 post-copy burn battery's 6 arms are excluded from the means by design (they
   read 0.2–1.2 % under the measured batteries); they stay visible in the raw records and in
   `depth-aj-runs.csv` (`side` = "256K ctx (burn, excluded)").
@@ -70,6 +89,8 @@ run, and every table says which run.** All measurements are on aj9o9's AJ-IQ2_XX
 |---|---|---|
 | `depth-aj-256k.csv`, `depth-aj-131k.csv`, `ctx-aj-256k-vs-131k.csv` | all columns | mean of the three per-run measured values per depth; prefill rounded to 2 dp and decode to 3 dp — the working precision the cards were drawn from (they display prefill whole and decode to 1 dp); `ptok` is the smallest per-run prompt token count at that depth |
 | `ctx-deltas-aj-256k-vs-131k.csv` | `*_delta_pct_derived` | 100 × (131K value / 256K value − 1) on the **unrounded** means; the `mean` row averages the three unrounded deltas, then rounds |
+| `version-aj-v1113-v1115.csv`, `version-deltas-aj-v1113-v1115.csv` | all columns | 3-run means per engine per depth (2 dp prefill / 3 dp decode), deltas on the unrounded means; `scripts/build_data_v1115.py` |
+| `dflash-aj-v1115.csv`, `dflash-deltas-aj-v1115.csv` | all columns | the same shape for the DFlash2 test against the v1.1.15 no-drafting side; `scripts/build_data_dflash.py` asserts `draft_n > 0` on the drafter arms and `draft_n = 0` on the plain ones |
 
 The charts read their values from `data/csv/` at draw time — nothing is retyped into a chart
 script. The data builder asserts the same book and `sliced_tokens` per depth across all seven
