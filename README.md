@@ -213,3 +213,65 @@ Three charts — the 256K card, the 131K card, and the context comparison:
 - Cross-check, not a controlled pair: Maya-S **with** MTP drafting read 594–647 tok/s prefill / 20.1–23.1 decode at 20K–60K on 2026-10-15; AJ **without** drafting reads 652–705 / 23.3–24.8 at the same depths.
 
 **What's in the folder:** seven complete bench records, every table as a CSV, three figures with the scripts that regenerate them, and the experiment write-ups.
+
+### DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS) on Project Maya — 2 recorded runs, both measured
+
+Everything we have on this model file, in one place: **[`DeepSeek-V4.1-Flash-Maya-S-IQ2_XXS - Project Maya/`](DeepSeek-V4.1-Flash-Maya-S-IQ2_XXS%20-%20Project%20Maya/)**
+
+The first DeepSeek run on the V100s: DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS, 339.5 GB in six shards) served by Project Maya **v1.1.19** on **2x Tesla V100 32GB**, measured 2026-10-21 at **131,072 context** — two fresh-load batteries across 20K/60K/100K prompt depth, no speculation. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+
+![DeepSeek-V4.1-Flash-1017 on Maya-S — 2x Tesla V100, 128K context](DeepSeek-V4.1-Flash-Maya-S-IQ2_XXS%20-%20Project%20Maya/charts/ds4-maya-s-128k-v100.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Prefill at 20K / 60K / 100K | **143.7 / 147.2 / 152.6 tok/s** (2-run means); peak **155.3 tok/s** |
+| Decode at 20K / 60K / 100K | **5.5 / 6.3 / 7.3 tok/s**; peak **8.7 tok/s** |
+| Prefill across the range | flat — 143.7 → 152.6 tok/s, 6% end to end |
+| Run-to-run spread | prefill 0.2–4.7%, decode **27–48%** — the engine re-plans its CPU/stream lanes on every load, so the two-run mean is the figure |
+| Where the model lives | 10,709 of 15,360 routed experts (117.8 GB) on the CPU lane, read in place; ~31.9 / 32 GB VRAM per card |
+| Drafter | rejected by Maya's own calibration: 4.6 tok/s with drafting vs 6.8 without |
+| Runs recorded | 2 — both measured, 0 failed (plus one discarded warm-up battery) |
+
+**What the numbers say:**
+
+- **Memory-bound, not compute-bound.** The quant does not fit 64 GB of VRAM, so ~70% of the routed experts are read from NVMe and SATA per token. Prefill stays flat with depth and decode is slow but steady.
+- **`--tp 2` is in the config and does nothing here.** The engine reduces it to 1 on every start: 2,304-wide expert blocks do not halve into whole 256-value blocks. Both cards are still used — one layer group each. Source line and arithmetic in the Maya-XS folder's write-up.
+- **The peaks land at 100K, not 20K.** This engine gets faster as the expert caches warm inside a run — the reason the warm-up battery exists and is discarded.
+
+**What's in the folder:** the three raw bench records (sha256-checked copies), the CSV built from them, the posting card with the script that redraws it byte-identically, the experiment write-up, and the cycle driver, setup log and launcher with their hashes.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-Maya-S-IQ2_XXS%20-%20Project%20Maya/PROVENANCE.md)): two batteries only, so decode carries the per-load variance above; one quant; the serving JSON was rewritten on 23 Oct (vision pack, later engine) and is not archived — the args are recorded in the write-up.
+
+### DeepSeek-V4.1-Flash-1017 (Maya-XS IQ1_S) on Project Maya — 2 recorded runs, both measured
+
+Everything we have on this model file, in one place: **[`DeepSeek-V4.1-Flash-Maya-XS-IQ1_S - Project Maya/`](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/)**
+
+The same model at the smaller quant (Maya-XS IQ1_S, 276.6 GB in five shards) on **Project Maya v1.1.22**, measured **2026-10-22** at 131,072 context — one warmed load and one fresh load, three depths each, plus the head-to-head against the Maya-S run the day before. Every figure came off a real run on the box in the section above.
+
+![DeepSeek-V4.1-Flash-1017 on Maya-XS — 2x Tesla V100, 128K context](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/charts/ds4-maya-xs-128k-v100.png)
+
+![Maya-XS vs Maya-S — DeepSeek-V4.1-Flash-1017 at 128K](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/charts/ds4-maya-xs-vs-maya-s-128k-v100.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Prefill at 20K / 60K / 100K | **255.1 / 340.1 / 378.3 tok/s** (2-run means); peak **383.7 tok/s** |
+| Decode at 20K / 60K / 100K | **14.1 / 16.3 / 17.3 tok/s**; peak **20.9 tok/s** |
+| Against Maya-S (21 Oct) | **2.20x prefill, 2.49x decode** on the means (147.8 → 324.5 and 6.37 → 15.87 tok/s) |
+| What the delta spans | **two changes** — the quant (IQ2_XXS → IQ1_S) and the engine (v1.1.19 → v1.1.22). Not tensor parallel: TP was refused on both sides |
+| Why it is faster | **residency** — 7,432 of 15,360 experts in VRAM (48%) vs 4,651 (30%); the CPU lane carries 54.8 GB instead of 117.8 GB |
+| Tensor parallel | impossible on this quant on two GPUs: 2304 / 2 is not a whole number of 256-value blocks, so the engine logs `tensor parallel 2 -> 1` and runs one layer group per card |
+| Drafter | measured and rejected: 11.7 tok/s with the XS drafter (68% drafts accepted) vs 13.9 without |
+| Runs recorded | 2 — both measured, 0 failed (plus one discarded warm-up battery) |
+
+**What the numbers say:**
+
+- **Decode spread between loads is 31–98%.** The warmed load holds 19.9–20.9 tok/s right through; the fresh load starts at 7.2 and climbs to 14.6 as its caches fill. Both are plotted as the mean, and the write-up says which run was warm.
+- **The 2.2x is real but not clean.** It spans a quant change and an engine update, and Maya-S could not be re-run (its quant was deleted before the update). The mechanism is VRAM residency, not parallelism.
+
+**What's in the folder:** the three raw bench records (sha256-checked copies), the depth and comparison CSVs with the builders that regenerate them (the comparison refuses to write on a prompt mismatch), two cards with byte-identical re-render scripts, the write-up including the tensor-parallel source finding, and the three setup/bench stage scripts with their full logs.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/PROVENANCE.md)): two batteries, one of them warm — read the means, not the third significant figure; the S→XS comparison is archived-vs-today, not a single-variable pair; the serving JSON was rewritten on 23 Oct and is not archived.

@@ -1,0 +1,152 @@
+[2026-10-22T15:18:17Z] === stage 1 start ===
+[2026-10-22T15:18:17Z] maya.py pid=358297
+[2026-10-22T15:18:30Z] VRAM used after stop: 0 MiB
+[2026-10-22T15:18:30Z] --- before delete:
+166G	/mnt/nvme/maya-ds4/Maya-S
+151G	/home/eamon/maya-ds4/engram
+[2026-10-22T15:18:36Z] deleted
+/dev/sda3       437G   29G  403G   7% /
+/dev/nvme0n1p1  234G  7.5G  224G   4% /mnt/nvme
+Previous HEAD position was 3bf6867 v1.1.19
+HEAD is now at ffe2e5e v1.1.22
+[2026-10-22T15:18:37Z] tree now: v1.1.22 (ffe2e5e)
+/home/eamon/maya-ds4/engram-xs:
+total 8
+drwxrwxr-x 2 eamon eamon 4096 Oct 22 15:18 .
+drwxrwxr-x 3 eamon eamon 4096 Oct 22 15:18 ..
+
+/mnt/nvme/maya-ds4/Maya-XS:
+total 16
+drwxrwxr-x 2 eamon eamon 4096 Oct 22 15:18 .
+drwxrwxr-x 4 eamon eamon 4096 Oct 22 15:18 ..
+lrwxrwxrwx 1 eamon eamon   89 Oct 22 15:18 DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf -> /home/eamon/maya-ds4/engram-xs/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf
+lrwxrwxrwx 1 eamon eamon   89 Oct 22 15:18 DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf -> /home/eamon/maya-ds4/engram-xs/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf
+[2026-10-22T15:18:37Z] --- download start (276.6 GB total)
+[2026-10-22T15:20:37Z] progress: 1.6G nvme + 967M sata of 276.6 GB
+[2026-10-22T15:22:37Z] progress: 3.4G nvme + 1.9G sata of 276.6 GB
+[2026-10-22T15:24:37Z] progress: 5.0G nvme + 2.8G sata of 276.6 GB
+[2026-10-22T15:26:37Z] progress: 6.5G nvme + 3.9G sata of 276.6 GB
+[2026-10-22T15:28:37Z] progress: 8.0G nvme + 5.0G sata of 276.6 GB
+[2026-10-22T15:30:37Z] progress: 9.7G nvme + 6.0G sata of 276.6 GB
+[2026-10-22T15:32:37Z] progress: 12G nvme + 7.0G sata of 276.6 GB
+[2026-10-22T15:34:37Z] progress: 13G nvme + 8.1G sata of 276.6 GB
+[2026-10-22T15:36:37Z] progress: 15G nvme + 9.1G sata of 276.6 GB
+[2026-10-22T15:38:37Z] progress: 16G nvme + 11G sata of 276.6 GB
+[2026-10-22T15:40:37Z] progress: 18G nvme + 12G sata of 276.6 GB
+[2026-10-22T15:42:37Z] progress: 20G nvme + 13G sata of 276.6 GB
+[2026-10-22T15:44:37Z] progress: 21G nvme + 14G sata of 276.6 GB
+[2026-10-22T15:46:37Z] progress: 23G nvme + 15G sata of 276.6 GB
+[2026-10-22T15:48:37Z] progress: 24G nvme + 16G sata of 276.6 GB
+[2026-10-22T15:50:37Z] progress: 25G nvme + 17G sata of 276.6 GB
+[2026-10-22T15:52:37Z] progress: 27G nvme + 18G sata of 276.6 GB
+[2026-10-22T15:54:37Z] progress: 28G nvme + 19G sata of 276.6 GB
+[2026-10-22T15:56:37Z] progress: 30G nvme + 20G sata of 276.6 GB
+[2026-10-22T15:58:37Z] progress: 31G nvme + 21G sata of 276.6 GB
+[2026-10-22T16:00:37Z] progress: 33G nvme + 22G sata of 276.6 GB
+[2026-10-22T16:02:37Z] progress: 34G nvme + 24G sata of 276.6 GB
+[2026-10-22T16:04:37Z] progress: 36G nvme + 25G sata of 276.6 GB
+[2026-10-22T16:06:37Z] progress: 37G nvme + 26G sata of 276.6 GB
+[2026-10-22T16:08:37Z] progress: 39G nvme + 27G sata of 276.6 GB
+[2026-10-22T16:10:37Z] progress: 40G nvme + 28G sata of 276.6 GB
+[2026-10-22T16:12:37Z] progress: 42G nvme + 29G sata of 276.6 GB
+[2026-10-22T16:14:37Z] progress: 43G nvme + 30G sata of 276.6 GB
+[2026-10-22T16:16:37Z] progress: 45G nvme + 31G sata of 276.6 GB
+[2026-10-22T16:18:37Z] progress: 46G nvme + 32G sata of 276.6 GB
+[2026-10-22T16:20:37Z] progress: 48G nvme + 33G sata of 276.6 GB
+[2026-10-22T16:21:00Z] curl DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00003-of-00005.gguf rc=0 size=19784230848/19784230848
+[2026-10-22T16:21:03Z] OK   DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00003-of-00005.gguf (19784230848 bytes)
+[2026-10-22T16:22:37Z] progress: 49G nvme + 35G sata of 276.6 GB
+[2026-10-22T16:24:37Z] progress: 51G nvme + 36G sata of 276.6 GB
+[2026-10-22T16:26:37Z] progress: 52G nvme + 37G sata of 276.6 GB
+[2026-10-22T16:28:37Z] progress: 53G nvme + 39G sata of 276.6 GB
+[2026-10-22T16:30:37Z] progress: 54G nvme + 40G sata of 276.6 GB
+[2026-10-22T16:32:37Z] progress: 55G nvme + 41G sata of 276.6 GB
+[2026-10-22T16:34:37Z] progress: 57G nvme + 43G sata of 276.6 GB
+[2026-10-22T16:36:37Z] progress: 58G nvme + 44G sata of 276.6 GB
+[2026-10-22T16:38:37Z] progress: 59G nvme + 46G sata of 276.6 GB
+[2026-10-22T16:40:37Z] progress: 60G nvme + 47G sata of 276.6 GB
+[2026-10-22T16:42:37Z] progress: 61G nvme + 48G sata of 276.6 GB
+[2026-10-22T16:44:37Z] progress: 63G nvme + 50G sata of 276.6 GB
+[2026-10-22T16:46:37Z] progress: 64G nvme + 51G sata of 276.6 GB
+[2026-10-22T16:48:37Z] progress: 65G nvme + 52G sata of 276.6 GB
+[2026-10-22T16:50:37Z] progress: 67G nvme + 53G sata of 276.6 GB
+[2026-10-22T16:52:37Z] progress: 68G nvme + 55G sata of 276.6 GB
+[2026-10-22T16:54:37Z] progress: 69G nvme + 56G sata of 276.6 GB
+[2026-10-22T16:56:38Z] progress: 70G nvme + 58G sata of 276.6 GB
+[2026-10-22T16:58:38Z] progress: 72G nvme + 59G sata of 276.6 GB
+[2026-10-22T17:00:38Z] progress: 73G nvme + 60G sata of 276.6 GB
+[2026-10-22T17:02:38Z] progress: 74G nvme + 62G sata of 276.6 GB
+[2026-10-22T17:04:38Z] progress: 75G nvme + 63G sata of 276.6 GB
+[2026-10-22T17:06:38Z] progress: 76G nvme + 64G sata of 276.6 GB
+[2026-10-22T17:08:38Z] progress: 77G nvme + 66G sata of 276.6 GB
+[2026-10-22T17:10:38Z] progress: 78G nvme + 67G sata of 276.6 GB
+[2026-10-22T17:12:38Z] progress: 79G nvme + 68G sata of 276.6 GB
+[2026-10-22T17:14:38Z] progress: 81G nvme + 70G sata of 276.6 GB
+[2026-10-22T17:16:38Z] progress: 82G nvme + 71G sata of 276.6 GB
+[2026-10-22T17:18:38Z] progress: 83G nvme + 73G sata of 276.6 GB
+[2026-10-22T17:20:34Z] curl DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00002-of-00005.gguf rc=0 size=47775748128/47775748128
+[2026-10-22T17:20:37Z] OK   DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00002-of-00005.gguf (47775748128 bytes)
+[2026-10-22T17:20:38Z] progress: 84G nvme + 74G sata of 276.6 GB
+[2026-10-22T17:22:38Z] progress: 85G nvme + 76G sata of 276.6 GB
+[2026-10-22T17:24:38Z] progress: 85G nvme + 78G sata of 276.6 GB
+[2026-10-22T17:26:38Z] progress: 86G nvme + 80G sata of 276.6 GB
+[2026-10-22T17:28:38Z] progress: 86G nvme + 82G sata of 276.6 GB
+[2026-10-22T17:30:38Z] progress: 87G nvme + 85G sata of 276.6 GB
+[2026-10-22T17:32:38Z] progress: 87G nvme + 87G sata of 276.6 GB
+[2026-10-22T17:34:38Z] progress: 88G nvme + 89G sata of 276.6 GB
+[2026-10-22T17:36:38Z] progress: 88G nvme + 91G sata of 276.6 GB
+[2026-10-22T17:38:38Z] progress: 89G nvme + 93G sata of 276.6 GB
+[2026-10-22T17:40:38Z] progress: 89G nvme + 95G sata of 276.6 GB
+[2026-10-22T17:42:38Z] progress: 90G nvme + 97G sata of 276.6 GB
+[2026-10-22T17:44:38Z] progress: 90G nvme + 99G sata of 276.6 GB
+[2026-10-22T17:46:38Z] progress: 91G nvme + 101G sata of 276.6 GB
+[2026-10-22T17:48:38Z] progress: 91G nvme + 103G sata of 276.6 GB
+[2026-10-22T17:50:38Z] progress: 92G nvme + 105G sata of 276.6 GB
+[2026-10-22T17:52:38Z] progress: 92G nvme + 107G sata of 276.6 GB
+[2026-10-22T17:54:38Z] progress: 93G nvme + 110G sata of 276.6 GB
+[2026-10-22T17:56:38Z] progress: 94G nvme + 112G sata of 276.6 GB
+[2026-10-22T17:58:38Z] progress: 94G nvme + 114G sata of 276.6 GB
+[2026-10-22T18:00:38Z] progress: 94G nvme + 116G sata of 276.6 GB
+[2026-10-22T18:02:38Z] progress: 95G nvme + 118G sata of 276.6 GB
+[2026-10-22T18:04:38Z] progress: 95G nvme + 120G sata of 276.6 GB
+[2026-10-22T18:06:38Z] progress: 96G nvme + 122G sata of 276.6 GB
+[2026-10-22T18:08:13Z] curl DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf rc=0 size=80641295472/80641295472
+[2026-10-22T18:08:16Z] OK   DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf (80641295472 bytes)
+[2026-10-22T18:08:38Z] progress: 96G nvme + 124G sata of 276.6 GB
+[2026-10-22T18:10:38Z] progress: 98G nvme + 126G sata of 276.6 GB
+[2026-10-22T18:12:38Z] progress: 99G nvme + 127G sata of 276.6 GB
+[2026-10-22T18:14:39Z] progress: 100G nvme + 129G sata of 276.6 GB
+[2026-10-22T18:16:39Z] progress: 101G nvme + 130G sata of 276.6 GB
+[2026-10-22T18:18:39Z] progress: 102G nvme + 132G sata of 276.6 GB
+[2026-10-22T18:20:39Z] progress: 104G nvme + 133G sata of 276.6 GB
+[2026-10-22T18:22:39Z] progress: 105G nvme + 134G sata of 276.6 GB
+[2026-10-22T18:24:39Z] progress: 106G nvme + 136G sata of 276.6 GB
+[2026-10-22T18:26:39Z] progress: 107G nvme + 137G sata of 276.6 GB
+[2026-10-22T18:27:22Z] curl DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00001-of-00005.gguf rc=0 size=47781530400/47781530400
+[2026-10-22T18:27:25Z] OK   DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00001-of-00005.gguf (47781530400 bytes)
+[2026-10-22T18:28:39Z] progress: 108G nvme + 139G sata of 276.6 GB
+[2026-10-22T18:30:39Z] progress: 108G nvme + 141G sata of 276.6 GB
+[2026-10-22T18:32:39Z] progress: 108G nvme + 144G sata of 276.6 GB
+[2026-10-22T18:34:39Z] progress: 108G nvme + 146G sata of 276.6 GB
+[2026-10-22T18:36:39Z] progress: 108G nvme + 149G sata of 276.6 GB
+[2026-10-22T18:37:56Z] curl DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf rc=0 size=80643503412/80643503412
+[2026-10-22T18:37:59Z] OK   DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf (80643503412 bytes)
+[2026-10-22T18:37:59Z] download results: 0 0 0 0 0
+[2026-10-22T18:37:59Z] --- sha256 check
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00001-of-00005.gguf: OK
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00002-of-00005.gguf: OK
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00003-of-00005.gguf: OK
+sha256sum: DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00001-of-00005.gguf: No such file or directory
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00001-of-00005.gguf: FAILED open or read
+sha256sum: DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00002-of-00005.gguf: No such file or directory
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00002-of-00005.gguf: FAILED open or read
+sha256sum: DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00003-of-00005.gguf: No such file or directory
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00003-of-00005.gguf: FAILED open or read
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf: OK
+DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf: OK
+[2026-10-22T18:58:41Z] --- final sizes
+108G	/mnt/nvme/maya-ds4/Maya-XS
+151G	/home/eamon/maya-ds4/engram-xs
+/dev/sda3       437G  180G  253G  42% /
+/dev/nvme0n1p1  234G  115G  117G  50% /mnt/nvme
+[2026-10-22T18:58:41Z] ALL DONE

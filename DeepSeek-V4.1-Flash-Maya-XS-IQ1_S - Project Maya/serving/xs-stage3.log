@@ -1,0 +1,106 @@
+[2026-10-22T19:10:33Z] === stage 3 start: Maya-XS bench ===
+[2026-10-22T19:10:33Z] --- starting server
+[2026-10-22T19:11:18Z] ready after 50s
+[2026-10-22T19:11:18Z] === engine facts (load 1) ===
+ds4: CUDA1 layers [19, 39] + head: weights 4.73 GB, experts 25.37 GB (3649 of 8064 in VRAM), caches 0.07 GB, 582 MiB free
+ds4: 8559 routed experts on the CPU lane (59.2 GB, in place in the model's files), 14 threads
+ds4: tensor parallel 2 -> 1: the experts' 256-value blocks split n_ff 2304 no other way (each GPU its own layers)
+ds4: CUDA0 layers [0, 19]: weights 4.05 GB, experts 25.91 GB (3729 of 7680 in VRAM), caches 0.07 GB, 580 MiB free
+ds4: CUDA1 layers [20, 39] + head: weights 4.42 GB, experts 25.73 GB (3703 of 7680 in VRAM), caches 0.05 GB, 576 MiB free
+ds4: 7928 routed experts on the CPU lane (54.8 GB, in place in the model's files), 14 threads
+[2026-10-22T19:11:18Z] START ds4-maya-xs-128k-burn
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 272.1 tok/s, decode 7.6 tok/s, 400 gen, 126.6s
+arm 60k rep 1/1: prefill 363.7 tok/s, decode 15.4 tok/s, 400 gen, 193.2s
+arm 100k rep 1/1: prefill 384.2 tok/s, decode 17.7 tok/s, 400 gen, 282.9s
+
+# Model Bench: ds4-maya-xs-128k-burn
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-XS)
+- run: 2026-10-22T1911Z-ds4-maya-xs-128k-burn · 2026-10-22 19:11:18 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 272.1 | 7.6 | 400 | 126.6 | 1 |
+| 60k | 59983 | 363.7 | 15.4 | 400 | 193.2 | 1 |
+| 100k | 99739 | 384.2 | 17.7 | 400 | 282.9 | 1 |
+
+- prefill peak: **384.2 tok/s** at 100k
+- decode peak: **17.7 tok/s** at 100k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-22T1911Z-ds4-maya-xs-128k-burn
+[2026-10-22T19:21:44Z] DONE ds4-maya-xs-128k-burn
+[2026-10-22T19:21:44Z] START ds4-maya-xs-128k-run1
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 226.8 tok/s, decode 20.9 tok/s, 400 gen, 107.6s
+arm 60k rep 1/1: prefill 365.7 tok/s, decode 20.8 tok/s, 400 gen, 183.6s
+arm 100k rep 1/1: prefill 383.7 tok/s, decode 19.9 tok/s, 400 gen, 280.5s
+
+# Model Bench: ds4-maya-xs-128k-run1
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-XS)
+- run: 2026-10-22T1921Z-ds4-maya-xs-128k-run1 · 2026-10-22 19:21:44 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 226.8 | 20.9 | 400 | 107.6 | 1 |
+| 60k | 59983 | 365.7 | 20.8 | 400 | 183.6 | 1 |
+| 100k | 99739 | 383.7 | 19.9 | 400 | 280.5 | 1 |
+
+- prefill peak: **383.7 tok/s** at 100k
+- decode peak: **20.9 tok/s** at 20k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-22T1921Z-ds4-maya-xs-128k-run1
+[2026-10-22T19:31:36Z] DONE ds4-maya-xs-128k-run1
+[2026-10-22T19:31:36Z] --- restart for run2
+[2026-10-22T19:31:36Z] killing maya.py pid=419998
+0, 0 MiB
+1, 0 MiB
+[2026-10-22T19:32:52Z] ready after 50s
+[2026-10-22T19:32:52Z] === engine facts (load 2) ===
+ds4: tensor parallel 2 -> 1: the experts' 256-value blocks split n_ff 2304 no other way (each GPU its own layers)
+ds4: CUDA0 layers [0, 19]: weights 4.05 GB, experts 25.91 GB (3729 of 7680 in VRAM), caches 0.07 GB, 578 MiB free
+ds4: CUDA1 layers [20, 39] + head: weights 4.42 GB, experts 25.73 GB (3703 of 7680 in VRAM), caches 0.05 GB, 584 MiB free
+ds4: 7928 routed experts on the CPU lane (54.8 GB, in place in the model's files), 14 threads
+[2026-10-22T19:32:52Z] START ds4-maya-xs-128k-run2
+model-bench 0.1.0 -> http://127.0.0.1:8080
+arm 20k rep 1/1: prefill 283.4 tok/s, decode 7.2 tok/s, 400 gen, 133.3s
+arm 60k rep 1/1: prefill 314.4 tok/s, decode 11.8 tok/s, 400 gen, 229.6s
+arm 100k rep 1/1: prefill 372.9 tok/s, decode 14.6 tok/s, 400 gen, 296.3s
+
+# Model Bench: ds4-maya-xs-128k-run2
+
+- endpoint: `http://127.0.0.1:8080` (strata)
+- model: `deepseek-v4.1-flash` · ctx 131072
+- battery: depths 20k, 60k, 100k · gen 400 · reps 1 · temp 0.5 · seed 12345
+- prompts: local tokenizer (exact, gguf Maya-XS)
+- run: 2026-10-22T1932Z-ds4-maya-xs-128k-run2 · 2026-10-22 19:32:52 UTC
+
+| depth | prompt tok | prefill tok/s | decode tok/s | gen tok | wall s | reps |
+|---|---:|---:|---:|---:|---:|---:|
+| 20k | 20029 | 283.4 | 7.2 | 400 | 133.3 | 1 |
+| 60k | 59983 | 314.4 | 11.8 | 400 | 229.6 | 1 |
+| 100k | 99739 | 372.9 | 14.6 | 400 | 296.3 | 1 |
+
+- prefill peak: **372.9 tok/s** at 100k
+- decode peak: **14.6 tok/s** at 100k
+- skipped 150k: needs ctx >= 150912, server has 131072
+- skipped 200k: needs ctx >= 200912, server has 131072
+- skipped 250k: needs ctx >= 250912, server has 131072
+
+run dir: /home/eamon/model-bench/runs/2026-10-22T1932Z-ds4-maya-xs-128k-run2
+[2026-10-22T19:44:43Z] DONE ds4-maya-xs-128k-run2
+[2026-10-22T19:44:43Z] === final: server left running as served ===
+{"object": "list", "data": [{"id": "deepseek-v4.1-flash", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 131072}, "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]}}]}[2026-10-22T19:44:43Z] ALL DONE

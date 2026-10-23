@@ -1,0 +1,4 @@
+depth,book,s_prefill,xs_prefill,prefill_delta_pct,prefill_ratio,s_decode,xs_decode,decode_delta_pct,decode_ratio
+20000,frankenstein,143.7,255.1,77.5,1.775,5.45,14.05,157.8,2.578
+60000,sherlock,147.15,340.05,131.1,2.311,6.3,16.3,158.7,2.587
+100000,pride,152.55,378.3,148.0,2.48,7.35,17.25,134.7,2.347

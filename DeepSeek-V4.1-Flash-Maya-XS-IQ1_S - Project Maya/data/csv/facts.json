@@ -1,0 +1,8 @@
+{
+ "cpu_lane_experts": "7,928 of 15,360",
+ "vram": "31,988 / 32,768 MiB per card",
+ "footer1": "2 runs averaged (19:21Z, 19:32Z) \u00b7 warm-up burn excluded \u00b7 gen 400 \u00b7 temp 0.5 \u00b7 seed 12345 \u00b7 exact tokenizer",
+ "footer2": "model-bench on box .5 \u00b7 both V100s used (2-card layer split: tensor parallel 2 refused for IQ1_S blocks) \u00b7 no drafting",
+ "cmp_footer1": "Maya-XS: 2 runs today (19:21Z, 19:32Z) \u00b7 Maya-S: 2 runs 21 Oct 2026 \u00b7 gen 400 \u00b7 temp 0.5 \u00b7 seed 12345 \u00b7 exact tokenizer",
+ "cmp_footer2": "Maya-S was not re-run: its quant was deleted before the update. The delta spans the quant and v1.1.19 \u2192 v1.1.22; both ran the 2-card layer split."
+}
