@@ -27,6 +27,20 @@ Dual Xeon Motherboard - on order
 
 ## Tests
 
+Latest measured numbers, one row per model file. Every figure is a real run on box .5 — the dataset section below each row carries the method, the battery and the caveats.
+
+| model (quant) | engine | measured | context | best prefill | decode | runs |
+|---|---|---|---:|---|---|---:|
+| DeepSeek-V4.1-Flash-1017 (Maya-XS IQ1_S) | Project Maya v1.1.22 | 2026-10-22 | 131K | **383.7 tok/s** (100K) | 14.1–17.3 tok/s | 2 |
+| DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS) | Project Maya v1.1.19 | 2026-10-21 | 131K | **155.3 tok/s** (100K) | 5.5–7.3 tok/s | 2 |
+| GLM-5.3-Flash (AJ-IQ2_XXS) | Project Maya v1.1.15 | 2026-10-17 | 256K | **870 tok/s** (200K) | 22.5–24.9 tok/s | 87 |
+| GLM-5.3-Flash (Maya-S v2 IQ2_XXS) | Project Maya v1.1.11 | 2026-10-15 | 64K | **451 tok/s** (60K) | 18.7 tok/s (60K) | 66 |
+| Qwen3.8-Flash-Next (GSQ-RCO IQ3_S) | Strata 0.2.0-beta | 2026-10-19 | 256K | **2,149 tok/s** (100K) | 73.7 → 64.2 tok/s | 305 |
+| Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
+| MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
+
+Prefill is the best measured value and the depth it was measured at; decode is the per-depth range across the dataset's own depths. Where a dataset compares engine versions, the row carries the newest engine and the section quotes the pair.
+
 ### Qwen3.8-27B on llama.cpp — 284 recorded runs, 277 with measurements
 
 Everything we have on this model, in one place: **[`qwen3.8-27b-llama-cpp/`](qwen3.8-27b-llama-cpp/)**
@@ -73,44 +87,48 @@ The larger UD-Q4_K_XL file on three cards, where the DFlash2 bake-off was run:
 
 **Honest limits:** the raw per-arm files for two of the experiments (the 107-run DFlash2 bake-off and the 70-arm two-card sweep) stayed on the box and could not be copied — those tables are transcribed from the reports written from them on the day. Full detail in [`PROVENANCE.md`](qwen3.8-27b-llama-cpp/PROVENANCE.md).
 
-### Qwen3.8-Flash-Next IQ3_S on Strata — 183 recorded runs, all with measurements
+### Qwen3.8-Flash-Next IQ3_S on Strata — 305 recorded runs, all with measurements
 
 Everything we have on this model, in one place: **[`Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S - Strata/`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/)**
 
-The 125B MoE Qwen3.8-Flash-Next (base IQ3_S) served by Strata on **2x Tesla V100 32GB**, measured 2026-10-03 to 2026-10-04 — six-depth batteries, a 126-run drafting sweep, a before/after on the v0.1.39 release, a 250K-token hero run, and vision. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+The 125B MoE Qwen3.8-Flash-Next (base IQ3_S) served by Strata on **2x Tesla V100 32GB**, measured 2026-10-03 to 2026-10-19 — six-depth batteries, a 126-run drafting sweep, the whole release ladder from 0.1.32 to **0.2.0-beta** (engine 0.1.45.3), a 250K-token hero run, and vision. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
 
 **The findings:**
 
 | | |
 |---|---|
-| Decode at 20K prompt depth | **73.9 tok/s** (v0.1.39; 56.6 on 0.1.32) — the fastest config measured |
-| Decode at 250K prompt depth | **65.0 tok/s** (v0.1.39; 50.3 on 0.1.32) |
-| Best prefill | **1,973 tok/s** at 100K depth; 1,823 at 250K (v0.1.39) |
-| The v0.1.39 release, same battery, same day | **+26.9% decode / +21.5% prefill** — only the engine differs |
+| Decode at 20K prompt depth | **73.7 tok/s** (0.2.0-beta; 56.6 on 0.1.32) |
+| Decode at 250K prompt depth | **64.2 tok/s** (0.2.0-beta; 50.3 on 0.1.32) |
+| Best prefill | **2,149 tok/s** at 100K depth, 1,974 at 250K (0.2.0-beta) |
+| The 0.2.0-beta release | **+2.2% prefill / +0.8% decode** vs 0.1.44 — parity-plus, but only with the PLE shard on NVMe |
+| The PLE storage finding | 0.2.0's new 4 KiB random read path exposed the 28.8 GB n-gram shard on the SATA SSD (10,447 rows/s against the NVMe's 76,986). Moving it to NVMe recovered **+54.2% prefill** |
+| The v0.1.39 release | **+26.9% decode / +21.5% prefill** on the same battery, only the engine differs |
 | Longest single run | a 250,632-token prompt read at 1,495 tok/s, then 6,000 tokens generated at 48.8 tok/s (the engine's own line) |
-| Context | the full 256K window on both cards; ~29.3 / 31.5 GB VRAM in use at 250K depth |
+| Context | the full 256K window on both cards; ~30.7 / 31.5 GB VRAM in use at 250K depth |
 | Drafter sweep verdict (126 runs) | drafter gate **0.50** confirmed on the mean; suffix-draft default 3 and coupled-draft off both confirmed; sampler trims flat |
 | Storage rule | Strata's n-gram table must live on NVMe — the biggest lever this box has (never a spinning disk) |
 | Vision | on, GPU: an image read back exactly in 4.0 s; text prefill pays ~4.5% |
-| Runs recorded | 183 — all 183 measured, 0 failed |
+| Runs recorded | 305 — all measured, 0 failed |
 
-Two charts for the current numbers — speed at depth, and the release gain:
+Three charts for the current numbers — the 0.1.44 depth card, the 0.2.0-beta release comparison, and the PLE-location finding:
 
-![Qwen3.8-Flash-Next IQ3_S on 2x Tesla V100 — decode and prefill by depth (v0.1.39)](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-decode-depth-v0139.png)
+![Qwen3.8-Flash-Next IQ3_S on 2x Tesla V100 — decode and prefill by depth (v0.1.44, three-pass means)](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-decode-depth-v0144-mean3.png)
 
-![Strata 0.1.39 vs 0.1.32 — depth benchmark](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-0132-vs-0139.png)
+![Strata 0.1.44 vs 0.2.0-beta — depth benchmark](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-0144-vs-020beta.png)
+
+![Strata 0.2.0-beta — PLE shard on the SATA SSD vs the NVMe](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/charts/strata-v100-020-ple-location.png)
 
 **What the sweeps cost people time not to re-learn:**
 
 - The drafter gate (`--spec-min-p`) is the knob that moves decode — and it needs a full sweep to pin down. Single cells are noise: the "0.85 is best" reading from one run did not survive 126 runs (0.50 won the mean).
 - On Strata the sampler trims are **flat** — no llama.cpp-style trap. The same `top_k 40` that costs 35% there is indistinguishable from the rest here.
 - Suffix-draft default 3 and coupled-draft off: both alternatives measurably lose. Don't turn them on.
-- The n-gram table never goes on a spinning disk. The engine waits on ~80 ms random reads per token; on NVMe that's ~0.1 ms.
+- The n-gram table never goes on a spinning disk. The engine waits on ~80 ms random reads per token; on NVMe that's ~0.1 ms — and since 0.2.0 that shard is read in 4 KiB pieces, so the storage rule is now load-bearing rather than merely important.
 - Unique prefix per request and a discarded warm-up, or you are measuring the cache, not the model.
 
-**What's in the folder:** seven experiment write-ups in the order they were run; the per-arm JSONL and the drivers; every table as a CSV; four figures (three regenerate from the data); and the flag rules in `TUNING.md`.
+**What's in the folder:** thirteen experiment write-ups in the order they were run; the per-arm JSONL and the drivers; every table as a CSV; the figures with the scripts that regenerate them; and the flag rules in `TUNING.md`.
 
-**Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): one measured run per arm — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The hero card's plotting script was not retained.
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): single-rep batteries where stated — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The 0.2.0-beta side is one battery against 0.1.44's three-pass mean (the old side was not re-run). The hero card's plotting script was not retained.
 
 ### GLM-5.3-Flash (Maya-S) on Project Maya — 66 recorded runs, all with measurements
 
@@ -182,37 +200,40 @@ Tensor split changes the profile — decode up at every depth (to +22.7%), prefi
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](MiniCPM-V-4.7-35B-A3B-Q8_0%20-%20llama.cpp/PROVENANCE.md)): one measured run per depth per split mode — single cells at depth carry the usual ±5-8% run-to-run noise class (read the means and the shapes, not the third significant figure); tensor mode is upstream-experimental; one quant (Q8_0); a vision smoke test, not a vision battery.
 
-### GLM-5.3-Flash (AJ-IQ2_XXS) on Project Maya — 33 recorded runs, all with measurements
+### GLM-5.3-Flash (AJ-IQ2_XXS) on Project Maya — 87 recorded runs, all with measurements
 
 Everything we have on this model, in one place: **[`GLM-5.3-Flash-AJ-IQ2_XXS - Project Maya/`](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/)**
 
-aj9o9's hand-mixed AJ-IQ2_XXS quant of GLM-5.3-Flash (321B MoE, ~18B active — 87.35 GB, 2.23 bpw, **no MTP block**) served by Project Maya **v1.1.13** on **2x Tesla V100 32GB**, measured 2026-10-16 — a six-depth bench at the full **262,144 context** and a three-depth comparison at **131,072**, three fresh-load runs per depth. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
+aj9o9's hand-mixed AJ-IQ2_XXS quant of GLM-5.3-Flash (321B MoE, ~18B active — 87.35 GB, 2.23 bpw, **no MTP block**) served by Project Maya on **2x Tesla V100 32GB**, measured 2026-10-16 on **v1.1.13** and 2026-10-17 on **v1.1.15** — a six-depth bench at the full **262,144 context**, a three-depth comparison at **131,072**, a same-config engine pair (v1.1.13 → v1.1.15, three runs per side), and a DFlash2 drafting test. Every figure came off a real run on the box in the section above — no vendor numbers, no extrapolation.
 
 **The findings:**
 
 | | |
 |---|---|
-| Prefill @ 20K → 200K (256K ctx) | **652 → 801 tok/s** (3-run means); 792 at 250K |
-| Decode across 20K–250K (256K ctx) | **22.4–24.8 tok/s** — flat; no speculative drafting (the quant ships without its MTP block) |
+| Prefill @ 20K → 200K (256K ctx) | **714 → 870 tok/s** on v1.1.15 (3-run means); 851 at 250K. On v1.1.13 the same battery read 652 → 801 |
+| Decode across 20K–250K (256K ctx) | **22.5–24.9 tok/s** — flat; no speculative drafting (the quant ships without its MTP block) |
+| The v1.1.15 engine update | **+9.0% prefill mean** (+7.6…+10.3%, every depth positive); decode unchanged within the box's session drift. The change that pays is the V100 two-pass prompt attention |
+| DFlash2 drafting | **−29% decode** (23.8 → 16.9 tok/s mean) at every depth — slower than no drafting at all |
 | 131K vs 256K, shared depths | decode **+2.6% mean · prefill +0.3% mean** — parity; context length is free on this box |
 | Storage | the expert tiers stream off the SN730 NVMe; ~0.8–1.3 disk reads per token at the measured depths |
-| Runs recorded | 33 — all with measurements; 6 (the post-copy calibration battery) excluded from the means by design |
+| Runs recorded | 87 — all with measurements; the post-copy calibration battery (6 arms) excluded from the means by design |
 
-Three charts — the 256K card, the 131K card, and the context comparison:
+Three charts — the current 256K card, the engine pair, and the drafter test:
 
-![GLM-5.3-Flash (AJ-IQ2_XXS) on 2x Tesla V100 — decode and prefill by depth (262,144 ctx)](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-mean.png)
+![GLM-5.3-Flash (AJ-IQ2_XXS) on 2x Tesla V100 — decode and prefill by depth (262,144 ctx, engine v1.1.15)](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-v1115.png)
 
-![GLM-5.3-Flash (AJ-IQ2_XXS) on 2x Tesla V100 — decode and prefill by depth (131,072 ctx)](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-131k-mean.png)
+![Project Maya v1.1.13 vs v1.1.15 on AJ-IQ2_XXS — depth benchmark](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-v1113-vs-v1115.png)
 
-![AJ-IQ2_XXS 131K vs 256K context — depth benchmark](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-vs-131k.png)
+![AJ-IQ2_XXS — no drafting vs the DFlash2 drafter](GLM-5.3-Flash-AJ-IQ2_XXS%20-%20Project%20Maya/charts/aj-iq2xxs-256k-v1115-dflash.png)
 
 **What the numbers say:**
 
 - **Raw decode, provably**: the quant carries no NextN block (checked in the GGUF header, the tensor lists, and at runtime — 0 `glm mtp` markers, `draft_n: 0` on every arm), so there was no drafting to hide behind; these are honest single-pass rates.
+- **The engine update is the cleanest measurement in the repo**: three fresh-load runs per side, alternated, identical config — prefill up at every depth, decode flat.
+- **DFlash2 is a loss on this quant.** Maya's own start-time calibration measured 19.6 vs 23.6 tok/s and strips the flag; the harness then confirmed −29% on the means, at every depth. It is worth knowing that the start-time calibration rewrites the config when it decides against a drafter.
 - **Same file, same day, both contexts: parity.** Half the window changes prefill by +0.3% and decode by +2.6% (mean, three runs per side) — the full 256K window costs nothing measurable on this rig.
-- Cross-check, not a controlled pair: Maya-S **with** MTP drafting read 594–647 tok/s prefill / 20.1–23.1 decode at 20K–60K on 2026-10-15; AJ **without** drafting reads 652–705 / 23.3–24.8 at the same depths.
 
-**What's in the folder:** seven complete bench records, every table as a CSV, three figures with the scripts that regenerate them, and the experiment write-ups.
+**What's in the folder:** sixteen complete bench records (87 measured arms), every table as a CSV, six figures with the scripts that regenerate them, and four experiment write-ups.
 
 ### DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS) on Project Maya — 2 recorded runs, both measured
 
