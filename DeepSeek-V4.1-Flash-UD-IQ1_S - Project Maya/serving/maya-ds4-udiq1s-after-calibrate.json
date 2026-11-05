@@ -1,0 +1,86 @@
+{
+ "exe": "/home/eamon/project-maya/build/maya-ds4",
+ "args": [
+  "--pack",
+  "/mnt/nvme/ds41/DeepSeek-V4.1-Flash-1017-GGUF/UD-IQ1_S/maya-ds4-maya",
+  "--max-context",
+  "131072",
+  "--eos",
+  "1",
+  "--vision",
+  "off",
+  "--tp",
+  "2",
+  "--prefill-chunk",
+  "16384",
+  "--cpu-threads",
+  "20"
+ ],
+ "cwd": "/home/eamon/project-maya",
+ "tokenizer": "/mnt/nvme/ds41/DeepSeek-V4.1-Flash-1017-GGUF/UD-IQ1_S/maya-ds4-maya/tokenizer",
+ "model_name": "deepseek-v4.1-flash",
+ "gpu": [
+  0,
+  1
+ ],
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 1.0
+ },
+ "reasoning_effort": "high",
+ "lib_dirs": [
+  "/usr/local/cuda-12.9/lib64",
+  "/usr/local/cuda-12.9/targets/x86_64-linux/lib"
+ ],
+ "port": 8080,
+ "host": "0.0.0.0",
+ "log": "/home/eamon/project-maya/maya-ds4-udiq1s-opt.log",
+ "installer": {
+  "calibration": {
+   "date": "2026-11-04 20:33",
+   "own": {
+    "--tp": 2,
+    "--cpu-threads": 14
+   },
+   "tp_sweep": {
+    "2": {
+     "decode": [
+      10.0,
+      9.9
+     ],
+     "prompt": 557
+    }
+   },
+   "thread_sweep": {
+    "10": [
+     7.9,
+     7.9
+    ]
+   },
+   "tp_groups": {
+    "2": [
+     1,
+     1
+    ],
+    "1": [
+     1,
+     1
+    ]
+   },
+   "tp_skipped": {
+    "1": "same effective grouping as --tp 2: not compared"
+   },
+   "effective_tp": [
+    1,
+    1
+   ],
+   "confirm": {},
+   "failed": {},
+   "tok_s": 9.9,
+   "own_tok_s": 9.9,
+   "prompt_tok_s": 557,
+   "long_prompt_tokens": 15671,
+   "seconds": 672
+  }
+ }
+}

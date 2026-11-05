@@ -31,6 +31,8 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 
 | model (quant) | engine | measured | context | best prefill | decode | runs |
 |---|---|---|---:|---|---|---:|
+| DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) | Project Maya v1.1.53 | 2026-11-05 | 131K | **738.0 tok/s** (100K) | 10.7–16.4 tok/s | 4 |
+| DeepSeek-V4.1-Flash-1017 (Mia EXL3 2.9 bpw) | Project Maya v1.1.53 | 2026-11-05 | 131K | **349.7 tok/s** (100K) | 5.0–6.3 tok/s | 4 |
 | DeepSeek-V4.1-Flash-1017 (Maya-XS IQ1_S) | Project Maya v1.1.22 | 2026-10-22 | 131K | **383.7 tok/s** (100K) | 14.1–17.3 tok/s | 2 |
 | DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS) | Project Maya v1.1.19 | 2026-10-21 | 131K | **155.3 tok/s** (100K) | 5.5–7.3 tok/s | 2 |
 | GLM-5.3-Flash (AJ-IQ2_XXS) | Project Maya v1.1.15 | 2026-10-17 | 256K | **870 tok/s** (200K) | 22.5–24.9 tok/s | 87 |
@@ -296,3 +298,57 @@ The same model at the smaller quant (Maya-XS IQ1_S, 276.6 GB in five shards) on 
 **What's in the folder:** the three raw bench records (sha256-checked copies), the depth and comparison CSVs with the builders that regenerate them (the comparison refuses to write on a prompt mismatch), two cards with byte-identical re-render scripts, the write-up including the tensor-parallel source finding, and the three setup/bench stage scripts with their full logs.
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/PROVENANCE.md)): two batteries, one of them warm — read the means, not the third significant figure; the S→XS comparison is archived-vs-today, not a single-variable pair; the serving JSON was rewritten on 23 Oct and is not archived.
+
+### DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) on Project Maya — 4 recorded runs, all measured
+
+Everything we have on this model file, in one place: **[`DeepSeek-V4.1-Flash-UD-IQ1_S - Project Maya/`](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Project%20Maya/)**
+
+unsloth's **UD-IQ1_S** set (284.6 GB: 123.4 GB of weights, the 161.3 GB Q6_K Engram table alone in shard 5) on **Project Maya v1.1.53**, measured **2026-11-05** at 131,072 context — two runs per arm, two drafting arms, three depths each. Every figure came off a real run on the box above.
+
+![DeepSeek-V4.1-Flash-1017 UD-IQ1_S — 2x Tesla V100, 128K context](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Project%20Maya/charts/ds4-udiq1s-128k-v100.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Prefill at 20K / 60K / 100K | **513.8 / 727.5 / 689.2 tok/s** (2-run means); peak **738.0 tok/s** |
+| Decode at 20K / 60K / 100K | **12.00 / 16.10 / 16.05 tok/s**; peak **17.1 tok/s** |
+| Tensor parallel | refused on this quant: 2,304-wide expert planes do not halve into 256-value IQ1_S blocks, so the engine logs `tensor parallel 2 -> 1` and gives each card a layer group |
+| Drafter | measured and rejected by Maya's own calibration: 9.16 tok/s with DSpark against 11.18 without |
+| Prompt-lookup drafting | a wash: +3.9 % prefill / +2.2 % decode at 100K, +4.0 % / −11.2 % at 20K, −1.0 % / −19.9 % at 60K — all inside the load-to-load spread |
+| Residency | 6,448 of 15,360 experts in VRAM (42 %); CPU lane 8,918 experts, 67.1 GB read in place |
+| Runs recorded | 4 — all measured, 0 failed (plus four discarded warm-up batteries) |
+
+**What the numbers say:** prefill climbs steeply to 60K and then plateaus — the expert caches are warm by there and the prompt path stops paying for misses. Decode is flat within the spread. Neither drafting mode is worth turning on for speed on this box; the drafter costs and the lookup drafter does nothing measurable.
+
+**What's in the folder:** four raw bench records with `SHA256SUMS`, the CSV/JSON builders (they assert the same document is sliced at every depth before writing), the card and its re-render script, and the as-benched config with both calibration snapshots.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Project%20Maya/PROVENANCE.md)): two runs per arm on an engine whose decode varies 27–48 % between loads — read the means and the published spread, not a third significant figure; the v1.1.45 comparison in the folder is archived-vs-today, not a controlled pair.
+
+### DeepSeek-V4.1-Flash-1017 (Mia EXL3 2.9 bpw) on Project Maya — 4 recorded runs, all measured
+
+Everything we have on this model file, in one place: **[`DeepSeek-V4.1-Flash-Mia-EXL3-2.9bpw - Project Maya/`](DeepSeek-V4.1-Flash-Mia-EXL3-2.9bpw%20-%20Project%20Maya/)**
+
+Mia-AiLab's **EXL3 2.9 bpw** build (210.7 GB of trellis weights + DeepSeek's 203.1 GB FP8 Engram pair = 413.7 GB) on **Project Maya v1.1.53**, measured **2026-11-05** at 131,072 context — the same battery, the same prompts and the same engine as the UD-IQ1_S batch above.
+
+![DeepSeek-V4.1-Flash-1017 Mia EXL3 2.9 bpw — 2x Tesla V100, 128K context](DeepSeek-V4.1-Flash-Mia-EXL3-2.9bpw%20-%20Project%20Maya/charts/ds4-mia-exl3-29bpw-128k-v100.png)
+
+![UD-IQ1_S against Mia EXL3 2.9 bpw — same box, same prompts](DeepSeek-V4.1-Flash-Mia-EXL3-2.9bpw%20-%20Project%20Maya/charts/ds4-udiq1s-vs-mia-exl3-128k-v100.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Prefill at 20K / 60K / 100K | **176.8 / 297.0 / 343.6 tok/s** (2-run means); peak **349.7 tok/s** |
+| Decode at 20K / 60K / 100K | **5.50 / 6.25 / 5.90 tok/s**; peak **6.5 tok/s** |
+| Against UD-IQ1_S | **2.01x slower at reading prompts and 2.72x slower at writing** at 100K, same box and same prompts |
+| Tensor parallel | **engages for real here — 2/2 per GPU**, because EXL3's trellis tiles are 128 wide where IQ1_S blocks are 256. Worth +12 % decode and +44 % prompt read on the calibration's own test |
+| Why it is still slower | the CPU lane carries 11,525 experts — **148.0 GB in place** — against IQ1_S's 8,918 / 67.1 GB, even though EXL3 keeps slightly more experts resident (7,670 against 6,448) |
+| Drafter | 3.32 tok/s with DSpark against 4.96 without — rejected |
+| Runs recorded | 4 — all measured, 0 failed |
+
+**What the numbers say:** this is the clearest illustration on the box that tensor parallel is not the lever — the quant that gets it is half the speed of the quant that cannot have it, because what a token reads off the CPU lane matters more than how the GPUs divide the work. 2.9 bpw is simply a bigger expert matrix than 1-bit on a box with 64 GB of VRAM and 31 GB of RAM.
+
+**What's in the folder:** four raw bench records with `SHA256SUMS`, the builders and both chart scripts, the as-benched config plus both calibration snapshots, and the install record — Maya's setup pins a different repo for this model, so the pack was built with the tree's own `tools/ds4/pack.py` and its `ds4.txt` `model_dir` repointed after the set moved to the NVMe.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-Mia-EXL3-2.9bpw%20-%20Project%20Maya/PROVENANCE.md)): both sides were measured at each file's *own* calibrated setting, so the delta carries two different calibration outcomes as part of each file's optimum rather than as a controlled variable; one box, one engine version, and the CPU lane is the whole story here.

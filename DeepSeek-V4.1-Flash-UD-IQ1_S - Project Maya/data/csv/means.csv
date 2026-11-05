@@ -1,0 +1,13 @@
+side,arm,run,depth,prefill,decode,ptok,gen,book
+gguf,suf0,1,20000,507.6,11.1,20029,400,frankenstein
+gguf,suf0,1,60000,721.6,16.0,59983,400,sherlock
+gguf,suf0,1,100000,706.2,15.8,99739,400,pride
+gguf,suf0,2,20000,520.0,12.9,20029,400,frankenstein
+gguf,suf0,2,60000,733.5,16.2,59983,400,sherlock
+gguf,suf0,2,100000,672.3,16.3,99739,400,pride
+gguf,suf3,1,20000,518.0,10.0,20029,400,frankenstein
+gguf,suf3,1,60000,729.9,10.8,59983,400,sherlock
+gguf,suf3,1,100000,738.0,15.7,99739,400,pride
+gguf,suf3,2,20000,550.4,11.3,20029,400,frankenstein
+gguf,suf3,2,60000,710.0,15.0,59983,400,sherlock
+gguf,suf3,2,100000,694.7,17.1,99739,400,pride

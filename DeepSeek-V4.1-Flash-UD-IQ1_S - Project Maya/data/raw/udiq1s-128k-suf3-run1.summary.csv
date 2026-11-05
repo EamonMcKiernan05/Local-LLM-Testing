@@ -1,0 +1,4 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-11-05T0917Z-maya-ds4-udiq1s-128k-e-suf3-r10,20000,1,frankenstein,"local tokenizer (exact, gguf UD-IQ1_S)",20000,20029,400,518.0,10.0,19,7,80.0,32070,38,32058,39,
+2026-11-05T0917Z-maya-ds4-udiq1s-128k-e-suf3-r10,60000,1,sherlock,"local tokenizer (exact, gguf UD-IQ1_S)",60000,59983,400,729.9,10.8,19,7,121.3,32070,39,32058,40,
+2026-11-05T0917Z-maya-ds4-udiq1s-128k-e-suf3-r10,100000,1,pride,"local tokenizer (exact, gguf UD-IQ1_S)",100000,99739,400,738.0,15.7,15,7,161.4,32070,42,32058,44,
