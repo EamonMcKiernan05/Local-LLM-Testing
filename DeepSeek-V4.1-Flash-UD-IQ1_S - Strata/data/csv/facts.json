@@ -1,0 +1,36 @@
+{
+ "recorded_runs": 2,
+ "measured_rows": 6,
+ "failed": 0,
+ "groups": [
+  {
+   "engine": "strata",
+   "arm": "default"
+  },
+  {
+   "engine": "strata",
+   "arm": "opt"
+  }
+ ],
+ "depths": [
+  20000,
+  60000,
+  100000
+ ],
+ "runs": [
+  {
+   "engine": "strata",
+   "arm": "default",
+   "label": "strata-default",
+   "dir": "2026-10-31T1916Z-strata-dsv41-udiq1s-128k-default",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "opt",
+   "label": "strata-opt",
+   "dir": "2026-10-31T1930Z-strata-dsv41-udiq1s-128k-opt",
+   "results_rows": 7
+  }
+ ]
+}

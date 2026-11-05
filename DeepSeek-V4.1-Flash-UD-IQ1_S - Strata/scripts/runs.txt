@@ -1,0 +1,2 @@
+strata,default,strata-default,2026-10-31T1916Z-strata-dsv41-udiq1s-128k-default
+strata,opt,strata-opt,2026-10-31T1930Z-strata-dsv41-udiq1s-128k-opt

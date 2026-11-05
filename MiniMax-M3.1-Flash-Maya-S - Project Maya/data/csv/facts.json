@@ -1,0 +1,25 @@
+{
+ "recorded_runs": 1,
+ "measured_rows": 3,
+ "failed": 0,
+ "groups": [
+  {
+   "engine": "maya",
+   "arm": "run1"
+  }
+ ],
+ "depths": [
+  5000,
+  20000,
+  60000
+ ],
+ "runs": [
+  {
+   "engine": "maya",
+   "arm": "run1",
+   "label": "mm3-run1",
+   "dir": "2026-10-28T1509Z-mm3-mayas-v1135-2xv100",
+   "results_rows": 4
+  }
+ ]
+}

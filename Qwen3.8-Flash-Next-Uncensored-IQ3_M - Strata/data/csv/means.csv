@@ -1,0 +1,13 @@
+engine,arm,run,depth,prefill,decode,ptok,gen,book
+strata,run,strata-run1,20000,1098.1,67.9,20084,400,frankenstein
+strata,run,strata-run1,60000,1403.2,68.3,60084,400,sherlock
+strata,run,strata-run1,100000,1467.8,64.6,100084,400,pride
+strata,run,strata-run1,150000,1490.4,64.2,150083,400,tale2cities
+strata,run,strata-run1,200000,1458.0,62.6,200084,400,greatexp
+strata,run,strata-run1,250000,1426.6,62.1,250084,400,mobydick
+strata,run,strata-run2,20000,1093.0,72.2,20084,400,frankenstein
+strata,run,strata-run2,60000,1376.1,67.7,60084,400,sherlock
+strata,run,strata-run2,100000,1435.1,65.0,100084,400,pride
+strata,run,strata-run2,150000,1464.5,64.7,150083,400,tale2cities
+strata,run,strata-run2,200000,1465.3,62.8,200084,400,greatexp
+strata,run,strata-run2,250000,1437.3,61.4,250084,400,mobydick

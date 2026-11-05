@@ -1,0 +1,7 @@
+engine,arm,run,depth,prefill,decode,ptok,gen,book
+strata,default,strata-default,20000,361.3,10.2,20029,400,frankenstein
+strata,default,strata-default,60000,396.7,11.9,59983,400,sherlock
+strata,default,strata-default,100000,381.9,10.7,99739,400,pride
+strata,opt,strata-opt,20000,422.2,8.1,20029,400,frankenstein
+strata,opt,strata-opt,60000,552.9,8.3,59983,400,sherlock
+strata,opt,strata-opt,100000,600.8,7.9,99739,400,pride

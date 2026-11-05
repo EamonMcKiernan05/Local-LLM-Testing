@@ -1,0 +1,4 @@
+engine,arm,run,depth,prefill,decode,ptok,gen,book
+maya,run1,mm3-run1,5000,19.2,1.9,5194,200,frankenstein
+maya,run1,mm3-run1,20000,19.4,1.8,20190,200,frankenstein
+maya,run1,mm3-run1,60000,19.2,0.8,60138,200,sherlock

@@ -1,0 +1,35 @@
+{
+ "recorded_runs": 2,
+ "measured_rows": 12,
+ "failed": 0,
+ "groups": [
+  {
+   "engine": "strata",
+   "arm": "run"
+  }
+ ],
+ "depths": [
+  20000,
+  60000,
+  100000,
+  150000,
+  200000,
+  250000
+ ],
+ "runs": [
+  {
+   "engine": "strata",
+   "arm": "run",
+   "label": "strata-run1",
+   "dir": "2026-10-24T1355Z-strata-iq3m-unc-262k",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "run",
+   "label": "strata-run2",
+   "dir": "2026-10-24T1406Z-strata-iq3m-unc-262k-run2",
+   "results_rows": 7
+  }
+ ]
+}

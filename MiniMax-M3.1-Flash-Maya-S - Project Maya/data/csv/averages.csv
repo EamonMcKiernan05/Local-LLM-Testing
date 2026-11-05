@@ -1,0 +1,4 @@
+engine,arm,depth_k,runs,prefill_mean,prefill_min,prefill_max,decode_mean,decode_min,decode_max,gen,ptok
+maya,run1,5000,1,19.2,19.2,19.2,1.9,1.9,1.9,200,5194
+maya,run1,20000,1,19.4,19.4,19.4,1.8,1.8,1.8,200,20190
+maya,run1,60000,1,19.2,19.2,19.2,0.8,0.8,0.8,200,60138

@@ -1,0 +1,7 @@
+engine,arm,depth_k,runs,prefill_mean,prefill_min,prefill_max,decode_mean,decode_min,decode_max,gen,ptok
+strata,default,20000,1,361.3,361.3,361.3,10.2,10.2,10.2,400,20029
+strata,default,60000,1,396.7,396.7,396.7,11.9,11.9,11.9,400,59983
+strata,default,100000,1,381.9,381.9,381.9,10.7,10.7,10.7,400,99739
+strata,opt,20000,1,422.2,422.2,422.2,8.1,8.1,8.1,400,20029
+strata,opt,60000,1,552.9,552.9,552.9,8.3,8.3,8.3,400,59983
+strata,opt,100000,1,600.8,600.8,600.8,7.9,7.9,7.9,400,99739

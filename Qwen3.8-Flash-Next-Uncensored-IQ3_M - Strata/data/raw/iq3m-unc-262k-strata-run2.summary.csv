@@ -1,0 +1,7 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,20000,1,frankenstein,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",20000,20084,400,1093.0,72.2,294,211,24.0,32142,42,32042,45,
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,60000,1,sherlock,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",60000,60084,400,1376.1,67.7,319,211,49.7,32142,44,32044,47,
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,100000,1,pride,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",100000,100084,400,1435.1,65.0,295,198,76.0,32142,46,32044,50,
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,150000,1,tale2cities,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",150000,150083,400,1464.5,64.7,332,209,108.9,32142,47,32048,51,
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,200000,1,greatexp,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",200000,200084,400,1465.3,62.8,359,210,143.2,32142,48,32050,52,
+2026-10-24T1406Z-strata-iq3m-unc-262k-run2,250000,1,mobydick,"local tokenizer (exact, gguf Qwen3.8-Flash-Next-Uncensored-IQ3_M-GGUF)",250000,250084,400,1437.3,61.4,279,190,180.8,32142,48,32050,52,
