@@ -1,0 +1,13 @@
+# engine,arm,run_label,model-bench run dir name  (2026-11-01 Stage D battery, box .5)
+strata,dsparkon,strata-on1,2026-11-01T1502Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10
+strata,dsparkon,strata-on2,2026-11-01T1514Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10
+strata,dsparkon,strata-on3,2026-11-01T1527Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10
+strata,dsparkoff,strata-off1,2026-11-01T1539Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9
+strata,dsparkoff,strata-off2,2026-11-01T1551Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9
+strata,dsparkoff,strata-off3,2026-11-01T1603Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9
+maya,dsparkon,maya-on1,2026-11-01T1615Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11
+maya,dsparkon,maya-on2,2026-11-01T1626Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11
+maya,dsparkon,maya-on3,2026-11-01T1638Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11
+maya,dsparkoff,maya-off1,2026-11-01T1650Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9
+maya,dsparkoff,maya-off2,2026-11-01T1701Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9
+maya,dsparkoff,maya-off3,2026-11-01T1712Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9

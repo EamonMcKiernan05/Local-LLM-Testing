@@ -1,0 +1,4 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-11-01T1502Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10,20000,1,frankenstein,"local tokenizer (exact, gguf UD-IQ1_S)",20000,20029,400,369.6,7.9,224,152,102.8,32008,38,32004,40,
+2026-11-01T1502Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10,60000,1,sherlock,"local tokenizer (exact, gguf UD-IQ1_S)",60000,59983,400,495.7,8.2,239,159,168.0,32008,39,32004,41,
+2026-11-01T1502Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10,100000,1,pride,"local tokenizer (exact, gguf UD-IQ1_S)",100000,99739,400,563.5,8.0,223,150,225.9,32008,40,32004,42,

@@ -33,6 +33,7 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 |---|---|---|---:|---|---|---:|
 | DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) | Project Maya v1.1.53 | 2026-11-05 | 131K | **738.0 tok/s** (100K) | 10.7–16.4 tok/s | 4 |
 | DeepSeek-V4.1-Flash-1017 (Mia EXL3 2.9 bpw) | Project Maya v1.1.53 | 2026-11-05 | 131K | **349.7 tok/s** (100K) | 5.0–6.3 tok/s | 4 |
+| DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) | **Strata 0.2.9 vs Maya v1.1.45** (an engine pair, not one engine) | 2026-11-01 | 131K | **670.3 tok/s** (Maya, 100K) | 8.3–16.3 tok/s (Strata → Maya, per depth) | 12 |
 | DeepSeek-V4.1-Flash-1017 (Maya-XS IQ1_S) | Project Maya v1.1.22 | 2026-10-22 | 131K | **383.7 tok/s** (100K) | 14.1–17.3 tok/s | 2 |
 | DeepSeek-V4.1-Flash-1017 (Maya-S IQ2_XXS) | Project Maya v1.1.19 | 2026-10-21 | 131K | **155.3 tok/s** (100K) | 5.5–7.3 tok/s | 2 |
 | GLM-5.3-Flash (AJ-IQ2_XXS) | Project Maya v1.1.15 | 2026-10-17 | 256K | **870 tok/s** (200K) | 22.5–24.9 tok/s | 87 |
@@ -298,6 +299,34 @@ The same model at the smaller quant (Maya-XS IQ1_S, 276.6 GB in five shards) on 
 **What's in the folder:** the three raw bench records (sha256-checked copies), the depth and comparison CSVs with the builders that regenerate them (the comparison refuses to write on a prompt mismatch), two cards with byte-identical re-render scripts, the write-up including the tensor-parallel source finding, and the three setup/bench stage scripts with their full logs.
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-Maya-XS-IQ1_S%20-%20Project%20Maya/PROVENANCE.md)): two batteries, one of them warm — read the means, not the third significant figure; the S→XS comparison is archived-vs-today, not a single-variable pair; the serving JSON was rewritten on 23 Oct and is not archived.
+
+### DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) on Maya vs Strata — 12 recorded runs, all measured
+
+Everything we have on the engine pair, in one place: **[`DeepSeek-V4.1-Flash-UD-IQ1_S - Strata vs Maya/`](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Strata%20vs%20Maya/)**
+
+One model file, **two engines**: unsloth's UD-IQ1_S (284.6 GB) on **Project Maya v1.1.45** and **Strata 0.2.9**, measured **2026-11-01** at 131,072 context — three runs per arm, each engine with its drafter on and off, every run a fresh load behind a discarded 100K burn.
+
+![DeepSeek-V4.1-Flash-1017 UD-IQ1_S — Maya vs Strata, 2x Tesla V100, 128K context](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Strata%20vs%20Maya/charts/ds4-udiq1s-maya-vs-strata-128k-v100.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Maya v1.1.45, drafter off | prefill **463.6 / 643.4 / 670.3 tok/s**, decode **10.50 / 16.27 / 11.50 tok/s** at 20K / 60K / 100K |
+| Strata 0.2.9, drafter off | prefill **425.9 / 561.3 / 609.5 tok/s**, decode **7.87 / 8.07 / 8.30 tok/s** |
+| Maya vs Strata | **+8.8 % / +14.6 % / +10.0 %** prefill, **+33 % / +102 % / +39 %** decode at those depths |
+| The drafter | loses on **both** engines and at **every** depth — 66 % (Strata) and 77 % (Maya) acceptance, and it still cost 3–15 % prefill and up to 15 % decode across 12 runs |
+| Tensor parallel | refused on both: 2,304-wide expert planes do not halve into 256-value IQ1_S blocks, so both engines fall back to a layer split |
+| Why Maya wins | **residency handling, not parallelism** — both hold 6,705 of 15,360 experts in VRAM with 8,955 (67.5 GB) streaming in place; Maya's read path copes better |
+| Runs recorded | 12 — all measured, 0 failed (plus 12 discarded warm-ups) |
+
+**What the numbers say:** the engine gap is real in prefill and enormous in decode, and it is not a settings artefact — both engines ran the same tuned config and the same flags. The drafter result is the other durable finding: high acceptance does not imply a win when every accepted draft costs a verify round on a box this short of VRAM.
+
+**Supersession, stated plainly:** the 5 Nov batch above re-runs **Maya** on v1.1.53 (513.8 / 727.5 / 689.2 prefill, 12.00 / 16.10 / 16.05 decode). That supersedes this folder's Maya row for "what the box does today". **The Strata side has not been re-run** — 0.2.9 stays the last measured Strata figure for this file, so the cross-batch comparison is cross-day and cross-version and is not a controlled delta.
+
+**What's in the folder:** twelve raw bench records with `SHA256SUMS`, the run-dir mapping, the CSV/JSON builders (they assert 12 runs, 3 per arm and the same document per depth), the card and its re-render script.
+
+**Honest limits** (full detail in [the folder's `PROVENANCE.md`](DeepSeek-V4.1-Flash-UD-IQ1_S%20-%20Strata%20vs%20Maya/PROVENANCE.md)): no as-shipped arm in this battery (the earlier same-day sweep holds those and was deliberately excluded), decode spread published per run rather than smoothed, and one engine version per side.
 
 ### DeepSeek-V4.1-Flash-1017 (UD-IQ1_S) on Project Maya — 4 recorded runs, all measured
 

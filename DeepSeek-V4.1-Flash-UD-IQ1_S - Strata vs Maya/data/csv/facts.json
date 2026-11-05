@@ -1,0 +1,114 @@
+{
+ "recorded_runs": 12,
+ "measured_rows": 36,
+ "failed": 0,
+ "groups": [
+  {
+   "engine": "maya",
+   "arm": "dsparkoff"
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkon"
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkoff"
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkon"
+  }
+ ],
+ "depths": [
+  20000,
+  60000,
+  100000
+ ],
+ "runs": [
+  {
+   "engine": "strata",
+   "arm": "dsparkon",
+   "label": "strata-on1",
+   "dir": "2026-11-01T1502Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkon",
+   "label": "strata-on2",
+   "dir": "2026-11-01T1514Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkon",
+   "label": "strata-on3",
+   "dir": "2026-11-01T1527Z-strata-dsv41-udiq1s-128k-tuned-dsparkon-r10",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkoff",
+   "label": "strata-off1",
+   "dir": "2026-11-01T1539Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkoff",
+   "label": "strata-off2",
+   "dir": "2026-11-01T1551Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  },
+  {
+   "engine": "strata",
+   "arm": "dsparkoff",
+   "label": "strata-off3",
+   "dir": "2026-11-01T1603Z-strata-dsv41-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkon",
+   "label": "maya-on1",
+   "dir": "2026-11-01T1615Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkon",
+   "label": "maya-on2",
+   "dir": "2026-11-01T1626Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkon",
+   "label": "maya-on3",
+   "dir": "2026-11-01T1638Z-maya-ds4-udiq1s-128k-tuned-dsparkon-r11",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkoff",
+   "label": "maya-off1",
+   "dir": "2026-11-01T1650Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkoff",
+   "label": "maya-off2",
+   "dir": "2026-11-01T1701Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  },
+  {
+   "engine": "maya",
+   "arm": "dsparkoff",
+   "label": "maya-off3",
+   "dir": "2026-11-01T1712Z-maya-ds4-udiq1s-128k-tuned-dsparkoff-r9",
+   "results_rows": 7
+  }
+ ]
+}
