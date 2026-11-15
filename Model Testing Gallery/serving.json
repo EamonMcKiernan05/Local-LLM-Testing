@@ -5,9 +5,9 @@
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
   "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
   "harness": "DeepSeek Harness (cordis preset)",
-  "config": "dspine llama.cpp fork (~/llama-dspine @ d493f84) \u00b7 Q8_K_XL + BF16 mmproj (vision) \u00b7 393,216 ctx, one slot, YaRN 1.5 over a 262,144 base \u00b7 q8_0 K and V \u00b7 FA on \u00b7 layer split \u00b7 -t 24 \u00b7 DFlash2 Q8_0 drafter at n_max 5, p_min 0.5",
+  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/dflash2_sweep.sh, winning arm n-max 5: -md /mnt/nvme/Qwen3.8-27B/Qwen3.8-27B-DFlash2-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on",
   "measured": "33.9 tok/s decode / 867 tok/s prefill at a 15.9K prompt, 256 generated",
-  "source": "homelab/inference-backends.md (vault)"
+  "source": "launcher on .5, transcribed by Bench (paths quoted below); log ~/qwen-dflash2-q8-393216.log"
  },
  "qwen38-27b-dspine-pagoda": {
   "kind": "local",
@@ -15,9 +15,9 @@
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
   "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
   "harness": "DeepSeek Harness (cordis preset)",
-  "config": "same box and model file \u00b7 DSpine-b16-Q8_0 drafter (2.2 GB) at n_max 5 \u00b7 q8_0 KV, FA on, tensor/layer split per the arm",
-  "measured": "857 tok/s prefill / 31.4 tok/s decode on the bench prompt; the fastest arm on code in the 9 Nov battery",
-  "source": "homelab/inference-backends.md (vault)"
+  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-dspine-n5.sh: -md Qwen3.8-27B-DSpine-b16-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 262144 --cache-type-k bf16 --cache-type-v bf16 -fa on --jinja",
+  "measured": "857 tok/s prefill / 31.4 tok/s decode on the bench prompt \u2014 fastest on code in the 9 Nov battery",
+  "source": "launcher on .5, transcribed by Bench (paths quoted below); log ~/qwen-dspine-n5-server.log"
  },
  "qwen38-27b-mtp-pagoda": {
   "kind": "local",
@@ -25,9 +25,9 @@
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
   "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
   "harness": "DeepSeek Harness (cordis preset)",
-  "config": "same box and model file \u00b7 the model's own MTP head at n_max 5 \u00b7 q8_0 KV, FA on",
+  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-mtp-q8-1slot.sh: --spec-type draft-mtp --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on (no -md; the model's own blk.64.nextn head)",
   "measured": "838.4 tok/s prefill / 32.5 tok/s decode, 63.5% draft acceptance (mean accepted length 3.13)",
-  "source": "homelab/inference-backends.md (vault)"
+  "source": "launcher on .5, transcribed by Bench (paths quoted below)"
  },
  "qwen38-27b-plain-pagoda": {
   "kind": "local",
@@ -35,9 +35,10 @@
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
   "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
   "harness": "DeepSeek Harness (cordis preset)",
-  "config": "same box and model file \u00b7 speculative decoding OFF (--spec-type none) \u00b7 launched by launch-qwen-plain-q8-1slot.sh \u00b7 393,216 ctx one slot, q8_0 KV, FA on, -t 24",
-  "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K \u2014 slower decode than the drafters, faster prefill",
-  "source": "homelab/inference-backends.md (vault)"
+  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-plain-q8-1slot.sh: --spec-type none and no -md, otherwise identical to the MTP launcher \u2014 -c 393216 -np 1, YaRN 1.5 over a 262,144 base, q8_0 K and V, -fa on",
+  "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K \u2014 loses decode to the drafters, wins prefill",
+  "source": "launcher on .5, transcribed by Bench (paths quoted below)",
+  "note": "Sampling is not set at the server in any llama.cpp launcher \u2014 the harness sends it per request (temp 0.5, seed 12345 in ~/model-bench/runs/<run>/meta.json)."
  },
  "qwen4-preview-liberty": {
   "kind": "cloud",
@@ -135,7 +136,7 @@
   "model": "deepseek-v4.1-flash-1017",
   "endpoint": "cloud API",
   "harness": "",
-  "config": "No session log survives for this run, so provider and engine are unrecorded.",
+  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
   "measured": "",
   "source": "DSH session metadata (provider + model fields)"
  },
@@ -145,7 +146,7 @@
   "model": "deepseek-v4.1-flash-1017",
   "endpoint": "cloud API",
   "harness": "",
-  "config": "No session log survives for this run, so provider and engine are unrecorded.",
+  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
   "measured": "",
   "source": "DSH session metadata (provider + model fields)"
  },
@@ -175,7 +176,7 @@
   "model": "MiniMax M3.1 Flash",
   "endpoint": "cloud API",
   "harness": "",
-  "config": "Built before the session logs start; the box was serving other tiers that week, so the backend is unrecorded.",
+  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
   "measured": "",
   "source": "DSH session metadata (provider + model fields)"
  },
@@ -185,7 +186,7 @@
   "model": "MiniMax M3.1 Flash",
   "endpoint": "cloud API",
   "harness": "",
-  "config": "Built before the session logs start; the box was serving other tiers that week, so the backend is unrecorded.",
+  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
   "measured": "",
   "source": "DSH session metadata (provider + model fields)"
  }
