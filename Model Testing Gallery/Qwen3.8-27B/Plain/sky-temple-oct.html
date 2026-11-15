@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKY TEMPLE</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #05070f; }
+  canvas { display: block; }
+  #ui {
+    position: fixed; top: 20px; left: 22px; z-index: 10;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: #fff; user-select: none; pointer-events: none;
+    transition: opacity 1.2s ease;
+    text-shadow: 0 1px 10px rgba(0,0,0,0.65);
+  }
+  #ui .title { font-size: 26px; font-weight: 700; letter-spacing: 8px; }
+  #ui .hint  { font-size: 12px; opacity: 0.78; margin-top: 5px; letter-spacing: 1.5px; }
+  #ui .btns  { margin-top: 14px; display: flex; gap: 8px; }
+  #ui button {
+    pointer-events: auto;
+    font-family: inherit; font-size: 12px; letter-spacing: 1.5px;
+    color: #fff; background: rgba(16, 22, 40, 0.45);
+    border: 1px solid rgba(255,255,255,0.28);
+    padding: 7px 14px; border-radius: 20px; cursor: pointer;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    transition: background 0.25s, border-color 0.25s;
+  }
+  #ui button:hover { background: rgba(45, 58, 95, 0.65); }
+  #ui button.active { background: rgba(255, 176, 92, 0.38); border-color: rgba(255, 205, 130, 0.8); }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div class="title">SKY TEMPLE</div>
+  <div class="hint">Drag to orbit &middot; Scroll to zoom</div>
+  <div class="btns">
+    <button id="btnCine" type="button">Cinematic</button>
+    <button id="btnPause" type="button">Pause time</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ============================================================
+   Deterministic PRNG + value noise (seed 1337)
+   ============================================================ */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(1337);
+
+function makeNoise(seed) {
+  const r = mulberry32(seed);
+  const p = [];
+  for (let i = 0; i < 256; i++) p[i] = i;
+  for (let i = 255; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const tmp = p[i]; p[i] = p[j]; p[j] = tmp; }
+  const perm = new Uint8Array(512);
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+  const fade = t => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function noise2(x, y) {
+    const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+    x -= Math.floor(x); y -= Math.floor(y);
+    const u = fade(x), v = fade(y);
+    const a = perm[X + perm[Y]] / 255;
+    const b = perm[X + 1 + perm[Y]] / 255;
+    const c = perm[X + perm[Y + 1]] / 255;
+    const d = perm[X + 1 + perm[Y + 1]] / 255;
+    return lerp(lerp(a, b, u), lerp(c, d, u), v);
+  }
+  function fbm(x, y) {
+    let s = 0, amp = 0.5, f = 1;
+    for (let i = 0; i < 4; i++) { s += amp * noise2(x * f, y * f); f *= 2; amp *= 0.5; }
+    return s; // ~0..1
+  }
+  return { noise2, fbm };
+}
+const noise = makeNoise(1337);
+const fbm = noise.fbm;
+const smoothstep = (e0, e1, x) => { const t = THREE.MathUtils.clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+
+/* ============================================================
+   Renderer / scene / camera / controls
+   ============================================================ */
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xcfe8ff, 55, 300);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1200);
+camera.position.set(26, 13, 32);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 3, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 18;      // can't get inside the pagoda
+controls.maxDistance = 95;
+controls.minPolarAngle = 0.15;
+controls.maxPolarAngle = 1.52;  // can't go under the island
+controls.update();
+
+/* ============================================================
+   Lights
+   ============================================================ */
+const hemi = new THREE.HemisphereLight(0xbfd9ff, 0x8a7a66, 0.7);
+scene.add(hemi);
+
+const sunLight = new THREE.DirectionalLight(0xfff2dd, 2.0);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(2048, 2048);
+sunLight.shadow.camera.near = 20;
+sunLight.shadow.camera.far = 300;
+sunLight.shadow.camera.left = -38;
+sunLight.shadow.camera.right = 38;
+sunLight.shadow.camera.top = 38;
+sunLight.shadow.camera.bottom = -38;
+sunLight.shadow.camera.updateProjectionMatrix();
+sunLight.shadow.bias = -0.0006;
+sunLight.shadow.normalBias = 0.02;
+scene.add(sunLight);
+scene.add(sunLight.target);
+sunLight.target.position.set(0, 0, 0);
+
+const rimLight = new THREE.DirectionalLight(0xff8a3a, 0.0);
+scene.add(rimLight);
+scene.add(rimLight.target);
+rimLight.target.position.set(0, 2, 0);
+
+/* ============================================================
+   Sky dome (vertical gradient shader)
+   ============================================================ */
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  depthWrite: false,
+  fog: false,
+  uniforms: {
+    topColor:    { value: new THREE.Color(0x3f8fd6) },
+    bottomColor: { value: new THREE.Color(0xbfe3ff) }
+  },
+  vertexShader: `
+    varying vec3 vWorld;
+    void main() {
+      vec4 wp = modelMatrix * vec4(position, 1.0);
+      vWorld = wp.xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+  fragmentShader: `
+    uniform vec3 topColor;
+    uniform vec3 bottomColor;
+    varying vec3 vWorld;
+    void main() {
+      float h = normalize(vWorld).y;
+      float t = clamp(h * 0.5 + 0.5, 0.0, 1.0);
+      vec3 col = mix(bottomColor, topColor, pow(t, 0.72));
+      gl_FragColor = vec4(col, 1.0);
+    }`
+});
+const sky = new THREE.Mesh(new THREE.SphereGeometry(500, 32, 16), skyMat);
+scene.add(sky);
+
+/* ============================================================
+   Procedural canvas textures
+   ============================================================ */
+function radialTexture(stops, size = 128) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  for (const [o, col] of stops) g.addColorStop(o, col);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const sunTex = radialTexture([[0, 'rgba(255,252,240,1)'], [0.25, 'rgba(255,238,190,0.95)'], [0.55, 'rgba(255,190,110,0.35)'], [1, 'rgba(255,170,90,0)']]);
+const moonTex = radialTexture([[0, 'rgba(240,244,255,1)'], [0.3, 'rgba(215,225,250,0.9)'], [0.6, 'rgba(170,190,235,0.28)'], [1, 'rgba(150,175,230,0)']]);
+const mistTex = radialTexture([[0, 'rgba(255,255,255,0.85)'], [0.4, 'rgba(255,255,255,0.35)'], [1, 'rgba(255,255,255,0)']], 64);
+
+function cloudTexture() {
+  const size = 256;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      // tileable-ish: sample fbm on a torus via 4-octave blend of wrapped coords
+      const n = fbm(x * 0.045 + 3.7, y * 0.045 + 9.2) * 0.75 + fbm(x * 0.11 + 40.1, y * 0.11 + 17.3) * 0.25;
+      const a = smoothstep(0.42, 0.72, n);
+      const i = (y * size + x) * 4;
+      img.data[i] = 255; img.data[i + 1] = 255; img.data[i + 2] = 255;
+      img.data[i + 3] = Math.floor(a * 235);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const cloudTex = cloudTexture();
+
+function waterTexture() {
+  const size = 128;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const n = fbm(x * 0.09 + 5.5, y * 0.09 + 2.2);
+      const r = 0.5 + 0.5 * Math.sin((x + y) * 0.35 + n * 6.0);
+      const v = 0.55 + 0.45 * r * n;
+      const i = (y * size + x) * 4;
+      img.data[i] = Math.floor(150 * v + 40);
+      img.data[i + 1] = Math.floor(190 * v + 40);
+      img.data[i + 2] = Math.floor(235 * v + 30);
+      img.data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const waterTex = waterTexture();
+
+/* ============================================================
+   Sun / moon sprites
+   ============================================================ */
+const sunSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: sunTex, transparent: true, depthWrite: false, fog: false }));
+sunSprite.scale.set(70, 70, 1);
+scene.add(sunSprite);
+const moonSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: moonTex, transparent: true, depthWrite: false, fog: false }));
+moonSprite.scale.set(46, 46, 1);
+scene.add(moonSprite);
+
+/* ============================================================
+   Stars
+   ============================================================ */
+const starCount = 900;
+const starPos = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  const v = new THREE.Vector3().randomDirection();
+  if (v.y < -0.05) v.y = -v.y * 0.5;
+  v.multiplyScalar(470);
+  starPos[i * 3] = v.x; starPos[i * 3 + 1] = v.y; starPos[i * 3 + 2] = v.z;
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.8, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+const stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
+
+/* ============================================================
+   Voxel builder
+   ============================================================ */
+const R = 15;                 // island radius in voxels
+const GRID = 2 * R + 1;
+const surf = new Float32Array(GRID * GRID).fill(NaN);
+const surfIdx = (x, z) => (x + R) + (z + R) * GRID;
+function surfAt(x, z) {
+  const xi = Math.round(x), zi = Math.round(z);
+  if (xi < -R || xi > R || zi < -R || zi > R) return NaN;
+  return surf[surfIdx(xi, zi)];
+}
+
+const solidList = [];
+const glowList = [];
+function addBox(p, s, c, r = [0, 0, 0], glow = false) {
+  (glow ? glowList : solidList).push({ p, s, c, r });
+}
+
+const FEAT = {
+  pagoda:    { x: 0,  z: -6 },
+  torii:     { x: 0,  z: 12 },
+  pond:      { x: -8, z: 8 },
+  houses:    { x: 9,  z: 5 },
+  waterfall: { x: 14, z: 2 }
+};
+
+/* palette */
+const C = {
+  grassBase: 0x69a84f,
+  dirt: 0x7a5230,
+  rock: 0x8a8078,
+  stone: 0x9a9a92,
+  stoneDark: 0x77776f,
+  path: 0x8f8f88,
+  wood: 0x8a5a33,
+  woodDark: 0x5f3d22,
+  wallCream: 0xe8dcc8,
+  wallRed: 0xb03a2e,
+  roof: 0x2e3440,
+  roofDark: 0x232833,
+  gold: 0xe8b64c,
+  toriiRed: 0xc0392b,
+  trunk: 0x6b4a2b,
+  pine: 0x3f7a44,
+  cherry: 0xf2a7bd,
+  water: 0x4a7fa8
+};
+
+/* ============================================================
+   Island terrain
+   ============================================================ */
+let maxPondTop = -99;
+function buildIsland() {
+  for (let x = -R; x <= R; x++) {
+    for (let z = -R; z <= R; z++) {
+      const d = Math.hypot(x, z) / R;
+      const edgeN = fbm(x * 0.13 + 3.1, z * 0.13 + 7.7);
+      const dEff = d * (1 + (edgeN - 0.5) * 0.9);
+      if (dEff >= 1) continue;
+
+      let h = (1 - dEff * dEff) * 3.2 + (fbm(x * 0.22 + 11.3, z * 0.22 + 5.9) - 0.5) * 2.4;
+      const dp = Math.hypot(x - FEAT.pagoda.x, z - FEAT.pagoda.z);
+      h += Math.max(0, 1 - dp / 5.5) * 3.4;
+      const dw = Math.hypot(x - FEAT.pond.x, z - FEAT.pond.z);
+      if (dw < 3.4) h -= (1 - dw / 3.4) * 2.2;
+
+      const topYi = Math.floor(h);
+      const botYi = Math.floor(-6.5 * Math.pow(1 - dEff * dEff, 1.4));
+      surf[surfIdx(x, z)] = h;
+      if (dw < 3.4) maxPondTop = Math.max(maxPondTop, topYi);
+
+      for (let y = botYi; y <= topYi; y++) {
+        let c;
+        if (y === topYi) {
+          const g = fbm(x * 0.5 + 20, z * 0.5 + 30);
+          c = new THREE.Color().setHSL(0.29 + (g - 0.5) * 0.05, 0.48, 0.30 + g * 0.14);
+        } else if (y >= topYi - 2) {
+          const g = fbm(x * 0.4 + 50, z * 0.4 + 60);
+          c = new THREE.Color().setHSL(0.08, 0.42, 0.26 + g * 0.10);
+        } else {
+          const t = THREE.MathUtils.clamp((y + 6.5) / 10, 0, 1);
+          const g = fbm(x * 0.3 + 80, z * 0.3 + 90);
+          c = new THREE.Color().setHSL(0.07, 0.06 + g * 0.05, 0.20 + t * 0.20 + g * 0.06);
+        }
+        addBox([x, y, z], [1, 1, 1], c);
+      }
+    }
+  }
+}
+buildIsland();
+
+/* ============================================================
+   Pagoda (five tiers) on the high point
+   ============================================================ */
+function buildPagoda() {
+  const cx = FEAT.pagoda.x, cz = FEAT.pagoda.z;
+  const baseY = Math.floor(surfAt(cx, cz)) + 1;
+  // stone platform
+  addBox([cx, baseY - 0.5 + 0.25, cz], [6, 0.5, 6], new THREE.Color(C.stoneDark));
+  addBox([cx, baseY - 0.5 + 0.5, cz], [5.2, 0.3, 5.2], new THREE.Color(C.stone));
+
+  let y = baseY;
+  const tiers = 5;
+  for (let i = 0; i < tiers; i++) {
+    const f = 1 - i * 0.13;
+    const wallW = 3.4 * f;
+    const wallH = 1.35;
+    const wallC = (i % 2 === 0) ? new THREE.Color(C.wallCream) : new THREE.Color(C.wallRed);
+    addBox([cx, y + wallH / 2, cz], [wallW, wallH, wallW], wallC);
+    // corner posts (dark wood)
+    const po = wallW / 2;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1])
+      addBox([cx + sx * po, y + wallH / 2, cz + sz * po], [0.35, wallH, 0.35], new THREE.Color(C.woodDark));
+    // glowing windows on the four faces
+    const wy = y + wallH * 0.55;
+    const wo = wallW / 2 + 0.06;
+    addBox([cx, wy, cz - wo], [0.55, 0.6, 0.12], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+    addBox([cx, wy, cz + wo], [0.55, 0.6, 0.12], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+    addBox([cx - wo, wy, cz], [0.12, 0.6, 0.55], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+    addBox([cx + wo, wy, cz], [0.12, 0.6, 0.55], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+    y += wallH;
+    // wide dark roof
+    const roofW = wallW * 1.75;
+    const roofH = 0.45;
+    addBox([cx, y + roofH / 2, cz], [roofW, roofH, roofW], new THREE.Color(C.roof));
+    addBox([cx, y + roofH + 0.12, cz], [roofW * 0.82, 0.25, roofW * 0.82], new THREE.Color(C.roofDark));
+    // upturned corners
+    for (let s = 0; s < 4; s++) {
+      const sx = (s % 2 === 0) ? 1 : -1;
+      const sz = (s < 2) ? 1 : -1;
+      addBox([cx + sx * (roofW / 2 + 0.12), y + roofH * 0.55, cz + sz * (roofW / 2 + 0.12)],
+        [0.55, 0.3, 0.55], new THREE.Color(C.roof), [sz * 0.5, 0, -sx * 0.5]);
+    }
+    y += roofH + 0.2;
+  }
+  // gold finial
+  addBox([cx, y + 0.25, cz], [0.55, 0.5, 0.55], new THREE.Color(C.gold));
+  addBox([cx, y + 0.75, cz], [0.32, 0.4, 0.32], new THREE.Color(C.gold));
+  addBox([cx, y + 1.15, cz], [0.16, 0.35, 0.16], new THREE.Color(C.gold));
+}
+buildPagoda();
+
+/* ============================================================
+   Torii gate + stone path + lanterns
+   ============================================================ */
+function buildTorii() {
+  const cx = FEAT.torii.x, cz = FEAT.torii.z;
+  const baseY = Math.floor(surfAt(cx, cz));
+  const h = 4.2, w = 3.4;
+  const red = new THREE.Color(C.toriiRed);
+  const dark = new THREE.Color(0x8e2a20);
+  addBox([cx - w / 2, baseY + h / 2, cz], [0.55, h, 0.55], red);
+  addBox([cx + w / 2, baseY + h / 2, cz], [0.55, h, 0.55], red);
+  addBox([cx - w / 2, baseY + 0.3, cz], [1.0, 0.6, 1.0], new THREE.Color(C.stoneDark));
+  addBox([cx + w / 2, baseY + 0.3, cz], [1.0, 0.6, 1.0], new THREE.Color(C.stoneDark));
+  addBox([cx, baseY + h * 0.62, cz], [w + 0.5, 0.35, 0.45], red);
+  addBox([cx, baseY + h + 0.28, cz], [w + 1.3, 0.45, 0.7], red);
+  addBox([cx, baseY + h + 0.62, cz], [w + 1.7, 0.3, 0.5], dark);
+}
+buildTorii();
+
+function buildPath() {
+  const N = 15;
+  for (let i = 0; i <= N; i++) {
+    const f = i / N;
+    const x = Math.round(THREE.MathUtils.lerp(FEAT.torii.x, FEAT.pagoda.x, f) + (rand() - 0.5) * 0.7);
+    const z = Math.round(THREE.MathUtils.lerp(FEAT.torii.z, FEAT.pagoda.z, f));
+    const h = surfAt(x, z);
+    if (Number.isNaN(h)) continue;
+    addBox([x, Math.floor(h) + 0.18, z], [1.55, 0.32, 1.55], new THREE.Color(C.path).offsetHSL(0, 0, (rand() - 0.5) * 0.06));
+  }
+}
+buildPath();
+
+function buildLantern(cx, cz, baseY) {
+  const stone = new THREE.Color(C.stone);
+  addBox([cx, baseY + 0.25, cz], [0.75, 0.5, 0.75], stone);
+  addBox([cx, baseY + 0.95, cz], [0.32, 0.9, 0.32], stone);
+  addBox([cx, baseY + 1.55, cz], [0.6, 0.55, 0.6], new THREE.Color(0xffcf9a), [0, 0, 0], true);
+  addBox([cx, baseY + 1.95, cz], [0.85, 0.28, 0.85], stone);
+  addBox([cx, baseY + 2.18, cz], [0.22, 0.22, 0.22], stone);
+}
+function buildLanterns() {
+  const fr = [0.16, 0.4, 0.64, 0.88];
+  for (const f of fr) {
+    const side = (f < 0.5) ? -1 : 1;
+    const x = Math.round(THREE.MathUtils.lerp(FEAT.torii.x, FEAT.pagoda.x, f) + side * 2.0);
+    const z = Math.round(THREE.MathUtils.lerp(FEAT.torii.z, FEAT.pagoda.z, f) + side * 0.5);
+    const h = surfAt(x, z);
+    if (Number.isNaN(h)) continue;
+    buildLantern(x, z, Math.floor(h));
+  }
+}
+buildLanterns();
+
+/* ============================================================
+   Houses with lantern-lit windows
+   ============================================================ */
+function buildHouse(cx, cz, w, d, h, bodyC, roofC) {
+  const baseY = Math.floor(surfAt(cx, cz));
+  addBox([cx, baseY + h / 2, cz], [w, h, d], new THREE.Color(bodyC));
+  const rw = w + 0.9;
+  addBox([cx, baseY + h + 0.28, cz - d / 4 - 0.1], [rw, 0.28, d / 2 + 0.5], new THREE.Color(roofC), [0.55, 0, 0]);
+  addBox([cx, baseY + h + 0.28, cz + d / 4 + 0.1], [rw, 0.28, d / 2 + 0.5], new THREE.Color(roofC), [-0.55, 0, 0]);
+  addBox([cx, baseY + h + 0.62, cz], [rw, 0.22, 0.35], new THREE.Color(roofC));
+  // glowing windows
+  const wy = baseY + h * 0.55;
+  addBox([cx - w * 0.22, wy, cz - d / 2 - 0.05], [0.5, 0.5, 0.12], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+  addBox([cx + w * 0.22, wy, cz - d / 2 - 0.05], [0.4, 0.4, 0.12], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+  addBox([cx + w / 2 + 0.05, wy, cz], [0.12, 0.5, 0.5], new THREE.Color(0xffd9a0), [0, 0, 0], true);
+}
+function buildHouses() {
+  const spots = [
+    { x: 9,  z: 4,  w: 3.0, d: 3.0, h: 2.0, b: C.wallCream, r: C.roof },
+    { x: 12, z: 7,  w: 2.6, d: 2.6, h: 1.8, b: 0xd8c8ac,   r: C.roofDark },
+    { x: 7,  z: 8,  w: 2.8, d: 2.8, h: 2.0, b: C.wallCream, r: C.roofDark }
+  ];
+  for (const s of spots) {
+    if (Number.isNaN(surfAt(s.x, s.z))) continue;
+    buildHouse(s.x, s.z, s.w, s.d, s.h, s.b, s.r);
+  }
+}
+buildHouses();
+
+/* ============================================================
+   Pond with stone edging
+   ============================================================ */
+let pondWaterY = 0;
+function buildPond() {
+  const px = FEAT.pond.x, pz = FEAT.pond.z;
+  pondWaterY = maxPondTop + 0.55;
+  const waterMat = new THREE.MeshStandardMaterial({
+    map: waterTex, color: 0xbfe0ff, transparent: true, opacity: 0.85,
+    roughness: 0.25, metalness: 0.1, emissive: 0x1a3a55, emissiveIntensity: 0.25
+  });
+  waterTex.repeat.set(2, 2);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(3.1, 28), waterMat);
+  water.rotation.x = -Math.PI / 2;
+  water.position.set(px, pondWaterY, pz);
+  water.receiveShadow = true;
+  islandGroup.add(water);
+  pondWater = water;
+  // stone edging ring
+  const n = 18;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const x = Math.round(px + Math.cos(a) * 3.3);
+    const z = Math.round(pz + Math.sin(a) * 3.3);
+    const h = surfAt(x, z);
+    if (Number.isNaN(h)) continue;
+    addBox([x, Math.floor(h) + 0.15, z], [1.15, 0.3, 1.15], new THREE.Color(C.stone).offsetHSL(0, 0, (rand() - 0.5) * 0.08));
+  }
+}
+
+/* ============================================================
+   Vegetation: pines + cherry tree
+   ============================================================ */
+function buildPine(cx, cz, s = 1) {
+  const baseY = Math.floor(surfAt(cx, cz));
+  if (Number.isNaN(baseY)) return;
+  addBox([cx, baseY + 0.5 * s, cz], [0.4 * s, 1.0 * s, 0.4 * s], new THREE.Color(C.trunk));
+  let y = baseY + 1.0 * s;
+  let w = 1.9 * s;
+  for (let i = 0; i < 3; i++) {
+    const g = new THREE.Color(C.pine).offsetHSL((rand() - 0.5) * 0.03, 0, (rand() - 0.5) * 0.08);
+    addBox([cx, y + 0.45 * s, cz], [w, 0.95 * s, w], g);
+    y += 0.85 * s;
+    w *= 0.68;
+  }
+}
+function buildCherry(cx, cz) {
+  const baseY = Math.floor(surfAt(cx, cz));
+  if (Number.isNaN(baseY)) return;
+  addBox([cx, baseY + 0.9, cz], [0.75, 1.8, 0.75], new THREE.Color(C.trunk));
+  addBox([cx + 0.45, baseY + 2.0, cz + 0.2], [0.5, 1.2, 0.5], new THREE.Color(C.trunk), [0, 0, 0.35]);
+  addBox([cx - 0.4, baseY + 2.1, cz - 0.3], [0.45, 1.1, 0.45], new THREE.Color(C.trunk), [0, 0, -0.3]);
+  for (let i = 0; i < 30; i++) {
+    const a = rand() * Math.PI * 2;
+    const r = Math.sqrt(rand()) * 2.3;
+    const px = cx + Math.cos(a) * r;
+    const pz = cz + Math.sin(a) * r;
+    const py = baseY + 2.9 + rand() * 1.5 - Math.abs(r) * 0.35;
+    const s = 0.75 + rand() * 0.85;
+    const pink = new THREE.Color(C.cherry).offsetHSL((rand() - 0.5) * 0.02, 0, (rand() - 0.5) * 0.12);
+    addBox([px, py, pz], [s, s, s], pink);
+  }
+}
+function buildTrees() {
+  const clusters = [
+    { x: -11, z: -4, n: 4 },
+    { x: 6,   z: -10, n: 3 },
+    { x: -4,  z: 11, n: 3 },
+    { x: 12,  z: -3, n: 2 }
+  ];
+  for (const cl of clusters) {
+    for (let i = 0; i < cl.n; i++) {
+      const x = Math.round(cl.x + (rand() - 0.5) * 4);
+      const z = Math.round(cl.z + (rand() - 0.5) * 4);
+      if (Number.isNaN(surfAt(x, z))) continue;
+      // keep clear of path / pond / houses / pagoda
+      if (Math.abs(x) < 2.5 && z > -8 && z < 13) continue;
+      if (Math.hypot(x - FEAT.pond.x, z - FEAT.pond.z) < 4.5) continue;
+      if (Math.hypot(x - FEAT.houses.x, z - FEAT.houses.z) < 4) continue;
+      if (Math.hypot(x - FEAT.pagoda.x, z - FEAT.pagoda.z) < 4.5) continue;
+      buildPine(x, z, 0.85 + rand() * 0.5);
+    }
+  }
+  buildCherry(3.5, -8.5);
+}
+buildTrees();
+
+/* scattered rocks */
+function buildRocks() {
+  for (let i = 0; i < 16; i++) {
+    const a = rand() * Math.PI * 2;
+    const r = 4 + rand() * 9;
+    const x = Math.round(Math.cos(a) * r);
+    const z = Math.round(Math.sin(a) * r);
+    if (Number.isNaN(surfAt(x, z))) continue;
+    if (Math.abs(x) < 2.2 && z > -8 && z < 13) continue;
+    if (Math.hypot(x - FEAT.pond.x, z - FEAT.pond.z) < 4.2) continue;
+    const h = Math.floor(surfAt(x, z));
+    const s = 0.4 + rand() * 0.7;
+    addBox([x, h + s * 0.3, z], [s, s * 0.7, s], new THREE.Color(C.stoneDark).offsetHSL(0, 0, (rand() - 0.5) * 0.1));
+  }
+}
+buildRocks();
+
+/* ============================================================
+   Waterfall (shader sheet) + mist
+   ============================================================ */
+let waterfallMat, waterfallMeshes = [], waterfallX = FEAT.waterfall.x;
+function buildWaterfall() {
+  const wz = FEAT.waterfall.z;
+  // find the actual land edge along +x at this z
+  let wx = FEAT.waterfall.x;
+  for (let x = R; x >= 0; x--) {
+    if (!Number.isNaN(surfAt(x, wz))) { wx = x; break; }
+  }
+  waterfallX = wx;
+  const lipY = Number.isNaN(surfAt(wx, wz)) ? 0 : Math.floor(surfAt(wx, wz));
+  const topY = lipY + 0.6;          // start just above the edge voxel top
+  const bottomY = -16;
+  const height = topY - bottomY;
+  waterfallMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform float uTime;
+      varying vec2 vUv;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vnoise(vec2 p){
+        vec2 i = floor(p), f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+      }
+      void main() {
+        float n  = vnoise(vec2(vUv.x * 6.0,  vUv.y * 3.0 - uTime * 2.6));
+        float n2 = vnoise(vec2(vUv.x * 14.0, vUv.y * 7.0 - uTime * 4.2));
+        float streak = smoothstep(0.32, 0.78, n * 0.6 + n2 * 0.4);
+        float vfade = smoothstep(0.0, 0.30, vUv.y);
+        vec3 col = mix(vec3(0.62, 0.80, 0.98), vec3(0.98, 1.0, 1.0), streak);
+        float alpha = (0.30 + 0.70 * streak) * vfade * 0.92;
+        gl_FragColor = vec4(col, alpha);
+      }`
+  });
+  const geo = new THREE.PlaneGeometry(3.4, height);
+  for (let i = 0; i < 3; i++) {
+    const m = new THREE.Mesh(geo, waterfallMat);
+    m.rotation.y = Math.PI / 2;
+    m.position.set(wx + 0.9 + i * 0.45, (topY + bottomY) / 2, wz);
+    m.renderOrder = 5;
+    islandGroup.add(m);
+    waterfallMeshes.push(m);
+  }
+  // water lip where it leaves the island edge
+  addBox([wx + 0.55, lipY + 0.35, wz], [1.3, 0.5, 3.2], new THREE.Color(C.water));
+}
+
+/* mist particles at the base of the waterfall */
+const MIST_COUNT = 80;
+let mistGeo, mistMat, mistData = [];
+function buildMist() {
+  mistGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(MIST_COUNT * 3);
+  for (let i = 0; i < MIST_COUNT; i++) {
+    mistData.push({
+      x: waterfallX + (rand() - 0.5) * 5,
+      y: -16 + rand() * 5,
+      z: FEAT.waterfall.z + (rand() - 0.5) * 5,
+      vy: 0.25 + rand() * 0.5,
+      vx: (rand() - 0.5) * 0.4,
+      vz: (rand() - 0.5) * 0.4
+    });
+  }
+  mistGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  mistMat = new THREE.PointsMaterial({
+    map: mistTex, color: 0xffffff, size: 3.4, transparent: true, opacity: 0.4,
+    depthWrite: false, sizeAttenuation: true
+  });
+  const mist = new THREE.Points(mistGeo, mistMat);
+  mist.renderOrder = 6;
+  scene.add(mist);
+}
+
+/* ============================================================
+   Sea of clouds: slabs + drifting puffs
+   ============================================================ */
+const slabs = [];
+function buildCloudSlabs() {
+  const defs = [
+    { y: -14, s: 340, rep: 3, op: 0.95, speed: 0.004 },
+    { y: -19, s: 380, rep: 3, op: 0.85, speed: -0.003 },
+    { y: -25, s: 420, rep: 4, op: 0.75, speed: 0.002 }
+  ];
+  for (const d of defs) {
+    const tex = cloudTex.clone();
+    tex.needsUpdate = true;
+    tex.repeat.set(d.rep, d.rep);
+    const mat = new THREE.MeshStandardMaterial({
+      map: tex, transparent: true, depthWrite: false,
+      roughness: 1, metalness: 0, side: THREE.DoubleSide, opacity: d.op
+    });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(d.s, d.s), mat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.y = d.y;
+    m.renderOrder = 3;
+    m.userData.speed = d.speed;
+    scene.add(m);
+    slabs.push(m);
+  }
+}
+buildCloudSlabs();
+
+const PUFF_COUNT = 42;
+let puffMesh, puffData = [];
+function buildPuffs() {
+  const geo = new THREE.IcosahedronGeometry(1, 1);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 1, metalness: 0, flatShading: true,
+    transparent: true, opacity: 0.96
+  });
+  puffMesh = new THREE.InstancedMesh(geo, mat, PUFF_COUNT);
+  puffMesh.castShadow = false;
+  puffMesh.receiveShadow = false;
+  for (let i = 0; i < PUFF_COUNT; i++) {
+    const a = rand() * Math.PI * 2;
+    const r = 8 + rand() * 55;
+    puffData.push({
+      x: Math.cos(a) * r,
+      y: -12 - rand() * 12,
+      z: Math.sin(a) * r,
+      sx: 3 + rand() * 6,
+      sy: 1.2 + rand() * 1.8,
+      sz: 2 + rand() * 4,
+      drift: 0.4 + rand() * 0.8,
+      rot: rand() * Math.PI
+    });
+  }
+  scene.add(puffMesh);
+}
+buildPuffs();
+
+/* ============================================================
+   Cherry-blossom petals (instanced)
+   ============================================================ */
+const PETAL_COUNT = 260;
+let petalMesh, petalData = [];
+function buildPetals() {
+  const geo = new THREE.PlaneGeometry(0.34, 0.22);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffc9d6, side: THREE.DoubleSide, roughness: 0.7,
+    emissive: 0x552233, emissiveIntensity: 0.15
+  });
+  petalMesh = new THREE.InstancedMesh(geo, mat, PETAL_COUNT);
+  petalMesh.castShadow = false;
+  for (let i = 0; i < PETAL_COUNT; i++) {
+    petalData.push({
+      x: (rand() - 0.5) * 55,
+      y: -8 + rand() * 26,
+      z: (rand() - 0.5) * 55,
+      vy: 0.5 + rand() * 0.7,
+      sway: rand() * Math.PI * 2,
+      rx: rand() * Math.PI,
+      ry: rand() * Math.PI,
+      rz: rand() * Math.PI,
+      spin: 0.5 + rand() * 1.5
+    });
+  }
+  scene.add(petalMesh);
+}
+buildPetals();
+
+/* ============================================================
+   Birds (instanced chevron, 3 circling flocks)
+   ============================================================ */
+function birdGeometry() {
+  const g = new THREE.BufferGeometry();
+  const v = new Float32Array([
+    0, 0, 0.55,   -0.85, 0, -0.25,  0, 0, -0.35,
+    0, 0, 0.55,    0, 0, -0.35,      0.85, 0, -0.25
+  ]);
+  g.setAttribute('position', new THREE.BufferAttribute(v, 3));
+  g.computeVertexNormals();
+  return g;
+}
+const BIRD_FLOCKS = [
+  { cx: 0,   cy: 19, cz: 0,   r: 12, n: 8, speed: 0.30, dir: 1 },
+  { cx: -16, cy: 15, cz: 10,  r: 8,  n: 6, speed: 0.42, dir: -1 },
+  { cx: 18,  cy: 21, cz: -8,  r: 10, n: 6, speed: 0.34, dir: 1 }
+];
+const BIRD_COUNT = BIRD_FLOCKS.reduce((s, f) => s + f.n, 0);
+let birdMesh, birdData = [];
+function buildBirds() {
+  const geo = birdGeometry();
+  const mat = new THREE.MeshBasicMaterial({ color: 0x1c2233, side: THREE.DoubleSide });
+  birdMesh = new THREE.InstancedMesh(geo, mat, BIRD_COUNT);
+  let i = 0;
+  for (const f of BIRD_FLOCKS) {
+    for (let k = 0; k < f.n; k++) {
+      birdData.push({
+        cx: f.cx, cy: f.cy, cz: f.cz, r: f.r + (rand() - 0.5) * 2,
+        base: (k / f.n) * Math.PI * 2 + rand() * 0.4,
+        speed: f.speed * (0.9 + rand() * 0.2) * f.dir,
+        phase: rand() * Math.PI * 2
+      });
+      i++;
+    }
+  }
+  scene.add(birdMesh);
+}
+buildBirds();
+
+/* ============================================================
+   Assemble island group + instanced meshes
+   ============================================================ */
+const islandGroup = new THREE.Group();
+scene.add(islandGroup);
+
+/* Features that add voxels must run BEFORE the instanced build;
+   these also add their own scene objects (pond water, waterfall, mist). */
+let pondWater;
+buildPond();
+buildWaterfall();
+buildMist();
+
+function buildInstanced(list, material) {
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  const mesh = new THREE.InstancedMesh(geo, material, list.length);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const v = new THREE.Vector3(), sc = new THREE.Vector3();
+  for (let i = 0; i < list.length; i++) {
+    const it = list[i];
+    e.set(it.r[0], it.r[1], it.r[2]);
+    q.setFromEuler(e);
+    v.set(it.p[0], it.p[1], it.p[2]);
+    sc.set(it.s[0], it.s[1], it.s[2]);
+    m.compose(v, q, sc);
+    mesh.setMatrixAt(i, m);
+    mesh.setColorAt(i, it.c);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+const solidMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0.0 });
+const glowMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff, roughness: 0.6, metalness: 0.0,
+  emissive: new THREE.Color(0xffb060), emissiveIntensity: 0.0
+});
+islandGroup.add(buildInstanced(solidList, solidMat));
+islandGroup.add(buildInstanced(glowList, glowMat));
+
+/* warm point lights for lanterns (bob with the island) */
+const pointLights = [];
+function addPointLight(x, y, z, baseIntensity, distance) {
+  const pl = new THREE.PointLight(0xffb060, 0, distance, 2);
+  pl.position.set(x, y, z);
+  pl.userData.base = baseIntensity;
+  islandGroup.add(pl);
+  pointLights.push(pl);
+}
+addPointLight(FEAT.torii.x, Math.floor(surfAt(FEAT.torii.x, FEAT.torii.z)) + 2.2, FEAT.torii.z, 14, 16);
+addPointLight(FEAT.pagoda.x, Math.floor(surfAt(FEAT.pagoda.x, FEAT.pagoda.z)) + 3, FEAT.pagoda.z, 10, 18);
+addPointLight(FEAT.houses.x, Math.floor(surfAt(FEAT.houses.x, FEAT.houses.z)) + 2.5, FEAT.houses.z, 9, 14);
+
+/* ============================================================
+   Day / night cycle
+   ============================================================ */
+const SKY_STOPS = [
+  { t: 0.00, top: 0x070b26, bot: 0x111a3a, fog: 0x0d1530, sun: 0x22335f, amb: 0.18, star: 1.00, glow: 1.00 },
+  { t: 0.16, top: 0x141d4a, bot: 0x4a3560, fog: 0x33254a, sun: 0x7a5580, amb: 0.30, star: 0.55, glow: 0.75 },
+  { t: 0.25, top: 0x33427f, bot: 0xff9e6d, fog: 0xd98a6a, sun: 0xffb27a, amb: 0.55, star: 0.15, glow: 0.35 },
+  { t: 0.34, top: 0x3f7fc8, bot: 0xcfe8ff, fog: 0xcfe0f0, sun: 0xfff0d8, amb: 0.85, star: 0.00, glow: 0.00 },
+  { t: 0.50, top: 0x3f8fd6, bot: 0xbfe3ff, fog: 0xcfe8ff, sun: 0xfff6e6, amb: 0.95, star: 0.00, glow: 0.00 },
+  { t: 0.64, top: 0x4a7fc0, bot: 0xffd9a0, fog: 0xe8c090, sun: 0xffe0b0, amb: 0.75, star: 0.00, glow: 0.00 },
+  { t: 0.75, top: 0x3a2f70, bot: 0xff7a2d, fog: 0xe07a3a, sun: 0xff8a3a, amb: 0.50, star: 0.10, glow: 0.35 },
+  { t: 0.86, top: 0x141d4a, bot: 0x6a3f60, fog: 0x3a2548, sun: 0x8a5580, amb: 0.30, star: 0.55, glow: 0.75 },
+  { t: 1.00, top: 0x070b26, bot: 0x111a3a, fog: 0x0d1530, sun: 0x22335f, amb: 0.18, star: 1.00, glow: 1.00 }
+];
+for (const s of SKY_STOPS) {
+  s.topC = new THREE.Color(s.top); s.botC = new THREE.Color(s.bot);
+  s.fogC = new THREE.Color(s.fog); s.sunC = new THREE.Color(s.sun);
+}
+const skyState = {
+  top: new THREE.Color(), bot: new THREE.Color(), fog: new THREE.Color(), sun: new THREE.Color(),
+  amb: 0, star: 0, glow: 0
+};
+function lerpStops(t, out) {
+  let i = 0;
+  while (i < SKY_STOPS.length - 2 && t >= SKY_STOPS[i + 1].t) i++;
+  const a = SKY_STOPS[i], b = SKY_STOPS[i + 1];
+  const span = (b.t - a.t) || 1;
+  const f = THREE.MathUtils.clamp((t - a.t) / span, 0, 1);
+  out.top.lerpColors(a.topC, b.topC, f);
+  out.bot.lerpColors(a.botC, b.botC, f);
+  out.fog.lerpColors(a.fogC, b.fogC, f);
+  out.sun.lerpColors(a.sunC, b.sunC, f);
+  out.amb = THREE.MathUtils.lerp(a.amb, b.amb, f);
+  out.star = THREE.MathUtils.lerp(a.star, b.star, f);
+  out.glow = THREE.MathUtils.lerp(a.glow, b.glow, f);
+}
+
+const sunDir = new THREE.Vector3(1, 0, 0);
+const moonColor = new THREE.Color(0x3a4a7a);
+const whiteC = new THREE.Color(0xffffff);
+let time = 0.70; // start at golden hour for the hero shot
+let paused = false;
+
+function updateDayNight(t) {
+  lerpStops(t, skyState);
+  const a = t * Math.PI * 2 - Math.PI / 2;
+  sunDir.set(Math.cos(a), Math.sin(a), 0.35).normalize();
+  const elev = sunDir.y;
+  const dayF = smoothstep(-0.05, 0.3, elev);
+
+  skyMat.uniforms.topColor.value.copy(skyState.top);
+  skyMat.uniforms.bottomColor.value.copy(skyState.bot);
+  scene.fog.color.copy(skyState.fog);
+
+  sunLight.position.copy(sunDir).multiplyScalar(130);
+  sunLight.intensity = 0.15 + dayF * 1.9;
+  sunLight.color.copy(skyState.sun).lerp(moonColor, 1 - dayF);
+
+  hemi.intensity = 0.22 + dayF * 0.6;
+  hemi.color.copy(skyState.top).lerp(whiteC, 0.35);
+  hemi.groundColor.copy(skyState.fog);
+
+  starMat.opacity = skyState.star;
+  glowMat.emissiveIntensity = skyState.glow * 2.4;
+  for (const pl of pointLights) pl.intensity = skyState.glow * pl.userData.base;
+
+  sunSprite.position.copy(sunDir).multiplyScalar(420);
+  moonSprite.position.copy(sunDir).multiplyScalar(-420);
+  sunSprite.material.opacity = THREE.MathUtils.clamp(elev * 3 + 0.25, 0, 1);
+  moonSprite.material.opacity = THREE.MathUtils.clamp(-elev * 3 + 0.25, 0, 1);
+
+  const lowSun = smoothstep(0.38, 0.02, Math.abs(elev));
+  const setF = (t > 0.62 && t < 0.93) ? 1.0 : (t > 0.15 && t < 0.35 ? 0.45 : 0.0);
+  rimLight.intensity = lowSun * setF * 1.2;
+  rimLight.position.copy(sunDir).multiplyScalar(130);
+}
+
+/* ============================================================
+   Per-frame updates
+   ============================================================ */
+const dummy = new THREE.Object3D();
+
+function updatePetals(dt, elapsed) {
+  for (let i = 0; i < PETAL_COUNT; i++) {
+    const p = petalData[i];
+    p.y -= p.vy * dt;
+    p.x += (Math.sin(elapsed * 1.6 + p.sway) * 0.55 + 0.25) * dt;
+    p.z += Math.cos(elapsed * 1.3 + p.sway) * 0.55 * dt;
+    p.rx += p.spin * dt;
+    p.ry += p.spin * 0.7 * dt;
+    if (p.y < -10) {
+      p.y = 18 + rand() * 6;
+      p.x = (rand() - 0.5) * 55;
+      p.z = (rand() - 0.5) * 55;
+    }
+    dummy.position.set(p.x, p.y, p.z);
+    dummy.rotation.set(p.rx, p.ry, p.rz);
+    dummy.scale.set(1, 1, 1);
+    dummy.updateMatrix();
+    petalMesh.setMatrixAt(i, dummy.matrix);
+  }
+  petalMesh.instanceMatrix.needsUpdate = true;
+}
+
+function updateBirds(elapsed) {
+  for (let i = 0; i < BIRD_COUNT; i++) {
+    const b = birdData[i];
+    const ang = b.base + elapsed * b.speed;
+    const x = b.cx + Math.cos(ang) * b.r;
+    const z = b.cz + Math.sin(ang) * b.r;
+    const y = b.cy + Math.sin(elapsed * 5 + b.phase) * 0.35;
+    dummy.position.set(x, y, z);
+    // face along the direction of travel (geometry nose points +z)
+    dummy.rotation.set(0, b.speed > 0 ? -ang : Math.PI - ang, 0);
+    const s = 0.55 + Math.sin(elapsed * 9 + b.phase) * 0.12;
+    dummy.scale.set(s, 1, s);
+    dummy.updateMatrix();
+    birdMesh.setMatrixAt(i, dummy.matrix);
+  }
+  birdMesh.instanceMatrix.needsUpdate = true;
+}
+
+function updatePuffs(dt, elapsed) {
+  for (let i = 0; i < PUFF_COUNT; i++) {
+    const p = puffData[i];
+    p.x += p.drift * dt;
+    if (p.x > 85) p.x = -85;
+    p.rot += dt * 0.02;
+    dummy.position.set(p.x, p.y + Math.sin(elapsed * 0.3 + i) * 0.4, p.z);
+    dummy.rotation.set(0, p.rot, 0);
+    dummy.scale.set(p.sx, p.sy, p.sz);
+    dummy.updateMatrix();
+    puffMesh.setMatrixAt(i, dummy.matrix);
+  }
+  puffMesh.instanceMatrix.needsUpdate = true;
+}
+
+function updateSlabs(dt) {
+  for (const s of slabs) s.rotation.z += s.userData.speed * dt * 10;
+}
+
+function updateMist(dt) {
+  const pos = mistGeo.attributes.position.array;
+  for (let i = 0; i < MIST_COUNT; i++) {
+    const m = mistData[i];
+    m.y += m.vy * dt;
+    m.x += m.vx * dt;
+    m.z += m.vz * dt;
+    if (m.y > -9) {
+      m.y = -16 + rand() * 2;
+      m.x = waterfallX + (rand() - 0.5) * 5;
+      m.z = FEAT.waterfall.z + (rand() - 0.5) * 5;
+    }
+    pos[i * 3] = m.x; pos[i * 3 + 1] = m.y; pos[i * 3 + 2] = m.z;
+  }
+  mistGeo.attributes.position.needsUpdate = true;
+}
+
+function updateWaterfall(elapsed) {
+  if (waterfallMat) waterfallMat.uniforms.uTime.value = elapsed;
+}
+
+function updatePond(elapsed) {
+  if (pondWater) {
+    waterTex.offset.x = elapsed * 0.02;
+    waterTex.offset.y = elapsed * 0.015;
+    pondWater.material.emissiveIntensity = 0.18 + Math.sin(elapsed * 1.7) * 0.08;
+  }
+}
+
+/* ============================================================
+   Cinematic camera
+   ============================================================ */
+let cinematic = false;
+let cineT = 0;
+function updateCinematic(dt) {
+  cineT += dt * 0.055;
+  const r = 50 + Math.sin(cineT * 0.35) * 7;
+  const y = 7.5 + Math.sin(cineT * 0.22) * 3.5;
+  camera.position.set(Math.cos(cineT) * r, y, Math.sin(cineT) * r);
+  camera.lookAt(0, 4, 0);
+}
+
+/* ============================================================
+   UI wiring
+   ============================================================ */
+const ui = document.getElementById('ui');
+const btnCine = document.getElementById('btnCine');
+const btnPause = document.getElementById('btnPause');
+
+btnCine.addEventListener('click', () => {
+  cinematic = !cinematic;
+  btnCine.classList.toggle('active', cinematic);
+  controls.enabled = !cinematic;
+  if (!cinematic) controls.target.set(0, 3, 0);
+});
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.classList.toggle('active', paused);
+});
+
+let idleTimer = null;
+function wake() {
+  ui.style.opacity = '1';
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => { ui.style.opacity = '0.12'; }, 10000);
+}
+window.addEventListener('mousemove', wake);
+window.addEventListener('mousedown', wake);
+window.addEventListener('touchstart', wake);
+wake();
+
+/* ============================================================
+   Resize
+   ============================================================ */
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ============================================================
+   Main loop
+   ============================================================ */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const elapsed = clock.elapsedTime;
+
+  if (!paused) time = (time + dt / 60) % 1;
+  updateDayNight(time);
+
+  // island drift: subtle bob + tilt
+  islandGroup.position.y = Math.sin(elapsed * 0.4) * 0.6;
+  islandGroup.rotation.z = Math.sin(elapsed * 0.31) * 0.032;
+  islandGroup.rotation.x = Math.cos(elapsed * 0.23) * 0.026;
+
+  updatePetals(dt, elapsed);
+  updateBirds(elapsed);
+  updatePuffs(dt, elapsed);
+  updateSlabs(dt);
+  updateMist(dt);
+  updateWaterfall(elapsed);
+  updatePond(elapsed);
+
+  if (cinematic) updateCinematic(dt);
+  else controls.update();
+
+  renderer.render(scene, camera);
+}
+updateDayNight(time);
+animate();
+</script>
+</body>
+</html>
