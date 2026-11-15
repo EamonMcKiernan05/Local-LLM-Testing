@@ -34,4 +34,4 @@ follow-up for the Qwen and DeepSeek builds. Older builds predate the harness and
 the published bench pack instead; where a build predates the current pack revision that is noted
 on the build page.
 
-Held at [eamonmckiernan.co.uk/model testing gallery](https://eamonmckiernan.uk/gallery.html).
+Live at [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html).
