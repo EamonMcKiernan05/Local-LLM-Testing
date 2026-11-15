@@ -1,0 +1,192 @@
+{
+ "qwen38-27b-dflash2-pagoda": {
+  "kind": "local",
+  "provider": "maya",
+  "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "dspine llama.cpp fork (~/llama-dspine @ d493f84) \u00b7 Q8_K_XL + BF16 mmproj (vision) \u00b7 393,216 ctx, one slot, YaRN 1.5 over a 262,144 base \u00b7 q8_0 K and V \u00b7 FA on \u00b7 layer split \u00b7 -t 24 \u00b7 DFlash2 Q8_0 drafter at n_max 5, p_min 0.5",
+  "measured": "33.9 tok/s decode / 867 tok/s prefill at a 15.9K prompt, 256 generated",
+  "source": "homelab/inference-backends.md (vault)"
+ },
+ "qwen38-27b-dspine-pagoda": {
+  "kind": "local",
+  "provider": "maya",
+  "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "same box and model file \u00b7 DSpine-b16-Q8_0 drafter (2.2 GB) at n_max 5 \u00b7 q8_0 KV, FA on, tensor/layer split per the arm",
+  "measured": "857 tok/s prefill / 31.4 tok/s decode on the bench prompt; the fastest arm on code in the 9 Nov battery",
+  "source": "homelab/inference-backends.md (vault)"
+ },
+ "qwen38-27b-mtp-pagoda": {
+  "kind": "local",
+  "provider": "maya",
+  "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "same box and model file \u00b7 the model's own MTP head at n_max 5 \u00b7 q8_0 KV, FA on",
+  "measured": "838.4 tok/s prefill / 32.5 tok/s decode, 63.5% draft acceptance (mean accepted length 3.13)",
+  "source": "homelab/inference-backends.md (vault)"
+ },
+ "qwen38-27b-plain-pagoda": {
+  "kind": "local",
+  "provider": "maya",
+  "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "same box and model file \u00b7 speculative decoding OFF (--spec-type none) \u00b7 launched by launch-qwen-plain-q8-1slot.sh \u00b7 393,216 ctx one slot, q8_0 KV, FA on, -t 24",
+  "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K \u2014 slower decode than the drafters, faster prefill",
+  "source": "homelab/inference-backends.md (vault)"
+ },
+ "qwen4-preview-liberty": {
+  "kind": "cloud",
+  "provider": "qwen-token-plan-custom",
+  "model": "qwen4-max-preview",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen4-preview-village": {
+  "kind": "cloud",
+  "provider": "qwen-token-plan-custom",
+  "model": "qwen4-max-preview",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen4-preview-pagoda": {
+  "kind": "cloud",
+  "provider": "qwen-token-plan-custom",
+  "model": "qwen4-max-preview",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen4-preview-torchlight": {
+  "kind": "cloud",
+  "provider": "qwen-token-plan-custom",
+  "model": "qwen4-max-preview",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen-code-sky-temple": {
+  "kind": "cloud",
+  "provider": "qwencloud-token-plan",
+  "model": "qwen4.0-max-preview",
+  "endpoint": "cloud API",
+  "harness": "Qwen Code CLI",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen-code-village": {
+  "kind": "cloud",
+  "provider": "qwencloud-token-plan",
+  "model": "qwen4.0-max-preview",
+  "endpoint": "cloud API",
+  "harness": "Qwen Code CLI",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen-code-liberty": {
+  "kind": "cloud",
+  "provider": "qwencloud-token-plan",
+  "model": "qwen4.0-max-preview",
+  "endpoint": "cloud API",
+  "harness": "Qwen Code CLI",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "qwen-code-liberty-baseline": {
+  "kind": "cloud",
+  "provider": "qwencloud-token-plan",
+  "model": "qwen4.0-max-preview",
+  "endpoint": "cloud API",
+  "harness": "Qwen Code CLI",
+  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "deepseek-v41-castle": {
+  "kind": "cloud",
+  "provider": "deepseek-account",
+  "model": "deepseek-flash",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud DeepSeek account \u2014 not served on this hardware.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "deepseek-v41-sky-temple": {
+  "kind": "unknown",
+  "provider": "not recorded",
+  "model": "deepseek-v4.1-flash-1017",
+  "endpoint": "cloud API",
+  "harness": "",
+  "config": "No session log survives for this run, so provider and engine are unrecorded.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "deepseek-v41-nightfall": {
+  "kind": "unknown",
+  "provider": "not recorded",
+  "model": "deepseek-v4.1-flash-1017",
+  "endpoint": "cloud API",
+  "harness": "",
+  "config": "No session log survives for this run, so provider and engine are unrecorded.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "hy4-castle": {
+  "kind": "cloud",
+  "provider": "nous-portal",
+  "model": "hy4",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Nous Portal \u2014 not served on this hardware.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "longcat-25-sky-temple": {
+  "kind": "cloud",
+  "provider": "nous-portal",
+  "model": "longcat-2.5:free",
+  "endpoint": "cloud API",
+  "harness": "DeepSeek Harness (cordis preset)",
+  "config": "Cloud Nous Portal free tier \u2014 not served on this hardware.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "minimax-m31-sky-temple": {
+  "kind": "unknown",
+  "provider": "not recorded",
+  "model": "MiniMax M3.1 Flash",
+  "endpoint": "cloud API",
+  "harness": "",
+  "config": "Built before the session logs start; the box was serving other tiers that week, so the backend is unrecorded.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ },
+ "minimax-m31-dusk-cityline": {
+  "kind": "unknown",
+  "provider": "not recorded",
+  "model": "MiniMax M3.1 Flash",
+  "endpoint": "cloud API",
+  "harness": "",
+  "config": "Built before the session logs start; the box was serving other tiers that week, so the backend is unrecorded.",
+  "measured": "",
+  "source": "DSH session metadata (provider + model fields)"
+ }
+}
