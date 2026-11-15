@@ -78,12 +78,6 @@
   "harness": "Qwen Code",
   "model": "qwen4.0-max-preview"
  },
- "qwen-code-liberty-baseline": {
-  "kind": "cloud",
-  "provider": "Qwen Cloud token plan",
-  "harness": "Qwen Code",
-  "model": "qwen4.0-max-preview"
- },
  "deepseek-v41-castle": {
   "kind": "cloud",
   "provider": "DeepSeek API",
