@@ -1,8 +1,3 @@
-# Village — one-shot prompt
-
-Captured from the DeepSeek Harness session log. Verbatim, as sent.
-
-```text
 Create an interactive 3D scene in Three.js: a medieval village at golden hour.
 
 Rules:
@@ -18,4 +13,3 @@ An orbital camera (mouse/trackpad) with a slow automatic tour until the user int
 Assume a powerful machine: thousands of instanced vegetation elements, 4K shadows, and dense geometry. Do not economize on detail; visual impact is an evaluation criterion.
 Invest in art direction: a coherent palette, a believable village composition, and an appealing horizon silhouette.
 You must test the actual rendered output in a **local headed Chromium**, using the browser MCP/Playwright tools. Do not rely on code inspection or unit tests. Do not claim a feature works unless you have seen it. Zero console errors.
-```

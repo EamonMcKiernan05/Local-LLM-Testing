@@ -1,8 +1,3 @@
-# Liberty — one-shot prompt
-
-Captured from the DeepSeek Harness session log. Verbatim, as sent.
-
-```text
 Build a single self-contained HTML file (three.js r160 from cdn.jsdelivr via importmap) that renders a detailed voxel diorama: "Liberty Island & New York, autumn 1886 — dedication day of the Statue of Liberty", as a floating island in a warm hazy sky.
 
 STYLE
@@ -31,4 +26,3 @@ CAMERA & OUTPUT
 TESTING PROTOCOL
 
 You must test the actual rendered output in a **local headed Chromium**, using the browser MCP/Playwright tools. Do not rely on code inspection or unit tests. Do not claim a feature works unless you have seen it.
-```

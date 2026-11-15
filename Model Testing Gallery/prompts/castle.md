@@ -1,8 +1,3 @@
-# Castle — one-shot prompt
-
-Captured from the DeepSeek Harness session log. Verbatim, as sent.
-
-```text
 Create one complete, self-contained HTML file for THE CASTLE, a photorealistic real-time 3D TINY WORLD in three.js: a stone castle and its courtyard on a chunk of land floating on a plain white page, in warm late-afternoon sun, as a self-running scene with no interaction.
 
 THE FRAMING, the tiny world:
@@ -45,4 +40,3 @@ THE LOOP: one seamless loop of about 24 seconds. Every motion is built from the 
 Make it fill the window, resize cleanly, run smoothly at 60 fps and start with zero console errors. Draw everything in code; never fetch or hotlink an image, texture or model. Deliver it as a single self-contained HTML file; any libraries are allowed.
 
 Add sound: a gentle original music track that suits the scene plus ambient sound and sound effects for the action, all synthesized in code, with a small 'click for sound' hint, starting on the first click. Log audio events to the console to confirm they fire, since you can't hear them.
-```

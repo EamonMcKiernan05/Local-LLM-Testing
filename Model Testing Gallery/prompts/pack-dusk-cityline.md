@@ -1,8 +1,3 @@
-# Dusk Cityline (CSS 3D, DOM only) — bench pack v3.4 prompt
-
-From the one-shot demo bench pack. Verbatim.
-
-```text
 Build one self-contained HTML file: a city skyline at dusk, built as real 3D geometry with CSS 3D transforms. No canvas, no WebGL, no libraries — DOM and CSS only. The buildings are true 3D boxes with six faces seen in real perspective, not flat layered silhouettes.
 
 THE FRAME at t=0: a low viewpoint across the river toward the skyline, camera looking slightly up. The stage has perspective: 1200px and transform-style: preserve-3d, inherited by everything inside it. River fills the bottom third, skyline across the middle, deep blue-violet sky above with an amber band at the horizon. A suspension bridge crosses the river on the right third. Title "DUSK CITYLINE" bottom left in small, wide-tracked capitals.
@@ -38,4 +33,3 @@ TECHNICAL — hard rules
 DO NOT: a flat layered skyline with a fake perspective scale; a purple gradient sky; one face per building; evenly spaced windows; a static backdrop.
 
 OUTPUT: return only the complete HTML file, no commentary. If you have file tools, write it as dusk-cityline-<model>.html and reply DONE.
-```

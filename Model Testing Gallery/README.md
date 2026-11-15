@@ -1,37 +1,38 @@
 # Model Testing Gallery
 
-One-shot browser demos written by local models on my own hardware — one prompt, one
-self-contained HTML file, no follow-up fixes. Every build here is real output, published
-unedited, defects and all.
+The builds behind [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html) —
+22 self-contained browser demos written by AI models, published unedited, defects and all.
 
-Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbatim.
+This repo mirrors the website exactly: a build or a prompt is here only if it is on the page.
+Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbatim, typos included.
 
 ## Builds
 
 | Model | Builds | Prompt |
 |---|---|---|
-| Qwen3.8-27B (Q8_K_XL, four serving configs) | `Qwen3.8-27B/DFlash2/pagoda.html`, `DSpine/THE-PAGODA.html`, `MTP/sky-temple.html`, `Plain/pagoda.html` | `prompts/pagoda.md` |
-| Qwen 4 Preview | `Qwen 4 Preview/{liberty-1886,medieval-village,the-pagoda,torchlight-depths}.html` | `prompts/liberty.md`, `village.md`, `pagoda.md`, `torchlight.md` |
-| Qwen Code (Qwen 4 Max Preview) | `QwenCode/{sky-temple,medieval-village,liberty-1886}.html`, `QwenCode/lbuild/baseline-gap.html` | `prompts/pagoda.md`, `village.md`, `liberty.md` |
-| DeepSeek V4.1 Flash | `DeepSeek-V4.1-Flash-1017/{THE-CASTLE,sky-temple-…,test1-…}.html` | `prompts/castle.md`, `prompts/bench-pack-sky-temple.md` |
-| MiniMax M3.1 Flash | `MiniMax M3.1-Flash Tests/{sky-temple-minimax-m3-1-flash,dusk-cityline-minimax-m3.1-flash}.html` | `prompts/bench-pack-sky-temple.md`, `bench-pack-dusk-cityline.md` |
+| Qwen3.8 Flash-Next (Strata) | `Qwen3.8 Flash-Next/{sky-temple,sky-temple-agent,living-city,neon-drift,pulse-engine,cloth-lab}.html` | `prompts/legacy-*.md` |
+| Qwen3.8-27B (llama.cpp, four serving configs) | `Qwen3.8-27B/{DFlash2/pagoda,DSpine/THE-PAGODA,MTP/sky-temple,Plain/pagoda}.html` | `prompts/pagoda.md` |
+| Qwen 4 Preview — DeepSeek Harness | `Qwen 4 Preview/{liberty-1886,medieval-village,the-pagoda,torchlight-depths}.html` | `prompts/{liberty,village,pagoda,torchlight}.md` |
+| Qwen 4 Preview — Qwen Code | `QwenCode/{sky-temple,medieval-village,liberty-1886}.html` | `prompts/{pagoda,village,liberty}.md` |
+| DeepSeek V4.1 Flash | `DeepSeek-V4.1-Flash-1017/THE-CASTLE.html` | `prompts/castle.md` |
+| MiniMax M3.1 Flash | `MiniMax M3.1-Flash Tests/{sky-temple-minimax-m3-1-flash,dusk-cityline-minimax-m3.1-flash}.html` | `prompts/pack-sky-temple.md`, `pack-dusk-cityline.md` |
 | HY4 | `HY4/THE-CASTLE.html` | `prompts/castle.md` |
 | LongCat 2.5 | `LongCat-2.5/sky-temple.html` | `prompts/pagoda.md` |
 
+`serving.json` holds the per-build provenance the page shows — provider, harness, model, and the
+serving config where one was recorded. Builds with no recorded provider are not shipped.
+
 ## Method
 
-- **One shot.** One message, no human fixes. Follow-up counts are recorded per build where the
-  session log has them; Qwen3.8-27B restarted sessions on its context limit and those are marked
-  as follow-ups rather than fresh runs.
-- **Self-contained.** Each file must open by double-click with no network access, except the
-  three.js import map where the prompt allowed it.
+- **One-shot, mostly.** One message and one file, with follow-ups only where the session log
+  records them. Qwen3.8-27B restarted sessions on its context limit; those count as follow-ups.
+- **Self-contained.** Each file opens by double-click with no network access, except three.js
+  import maps where the prompt allowed it.
 - **Judged in a real browser** at 1920×1080 from `file://`. A 2D canvas faking depth is a failure.
 
 ## Provenance
 
 DeepSeek Harness sessions (`C:\Users\Eamon\.dsh\sessions`) hold the first prompt and every
-follow-up for the Qwen and DeepSeek builds. Older builds predate the harness and are matched to
-the published bench pack instead; where a build predates the current pack revision that is noted
-on the build page.
-
-Live at [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html).
+follow-up for the Qwen and DeepSeek builds. The Qwen3.8 Flash-Next prompts were recovered from
+the earlier prompt-indexed pages of the site; the two MiniMax prompts come from the v3.4 bench
+pack. Nothing here was reconstructed by guesswork.

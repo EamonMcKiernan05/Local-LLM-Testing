@@ -1,0 +1,31 @@
+Build one complete, self-contained web demo: a playable synthwave racer — NEON DRIFT. You chase-cam a hovercraft down an endless, procedurally curving neon highway at dusk. It must be fun within five seconds, with real game feel.
+
+DELIVERABLE
+A single HTML file, self-contained: all HTML, CSS and JavaScript inline. Three.js r160 via importmap from unpkg — "three": https://unpkg.com/three@0.160.0/build/three.module.js and "three/addons/": https://unpkg.com/three@0.160.0/examples/jsm/ — ES modules. No assets: every visual generated in code (canvas-generated textures fine), all sound synthesized with WebAudio — no audio files. No build step, no TypeScript, no npm. Zero console errors.
+
+TRACK & WORLD
+1. Endless procedural track: segments that curve left/right and rise/fall, generated ahead of the player and recycled — it never ends. Seeded (mulberry32, seed 1337) so the course is the same every run.
+2. Road: dark asphalt with glowing edge lines and centre dashes; neon pylons or arches passing overhead at intervals; side barriers.
+3. Environment: giant striped sun on the horizon, grid ground plane, silhouetted mountain ranges, starfield, occasional neon palm. Violet/magenta fog.
+
+GAMEPLAY
+- Controls: left/right arrows or A/D to steer (speed-sensitive steering), Space or Shift to boost with a heat/cooldown meter, R to restart after a crash. Auto-accelerate; top speed increases the longer you survive.
+- Hazards: slow rival cars (glowing blocks with tail lights) to dodge; hitting one wrecks you. Near-misses (passing within a small margin) give bonus points with a brief slow-mo flash.
+- Scoring: distance plus near-miss bonuses; small "+50 NEAR MISS" popups. Crash: hovercraft bursts into particles, slight camera pull-back, "WRECKED — press R" overlay, best score kept for the session.
+
+GAME FEEL (this is a game-feel test — get it right)
+- Camera lags smoothly behind the craft; FOV widens during boost; subtle screen shake on crash and near-miss.
+- The craft banks into turns, hovers with a gentle bob; thruster exhaust particles scale with speed.
+- Boost adds speed lines in the starfield and a colour shift. Track curvature must telegraph — you can read the next curve before entering it.
+
+AUDIO (WebAudio, synthesized, no files)
+- Engine hum whose pitch follows speed; whoosh on near-miss; explosion noise on crash; a simple looping synthwave bass/arp underneath. Audio starts on first click (autoplay policy); M mutes.
+
+HUD
+Speed, score, best, boost meter. Title card "NEON DRIFT" with a "Press any key to drive" prompt; instructions live on the title card only.
+
+PERFORMANCE
+- 60fps at 1080p: instancing for pylons and particles, recycled objects (no unbounded arrays), pixel ratio capped at 2, resize handled.
+
+OUTPUT
+Return the complete file as one HTML code block. No explanations, no commentary.

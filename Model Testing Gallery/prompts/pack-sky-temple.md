@@ -1,8 +1,3 @@
-# Sky Temple (raw WebGL, voxel geometry) — bench pack v3.4 prompt
-
-From the one-shot demo bench pack. Verbatim.
-
-```text
 Build one self-contained HTML file: a floating Japanese temple island in the sky, built from voxel cubes in real 3D with raw WebGL. No libraries, no images, no external anything — you write the matrices, the buffers and the shaders.
 
 THE FRAME at t=0: golden hour. Perspective camera at (16, 11, 20) looking at (0, 3.4, 0), vertical fov 34°. The island sits slightly right of centre, entirely inside the frame with at least 8% empty margin on every edge, against a warm amber-to-rose sky. A five-tier pagoda on the highest ground is the silhouette anchor. Overlay the title "SKY TEMPLE" in the lower left with one line of hint text under it, as HTML on top of the canvas.
@@ -51,4 +46,3 @@ TECHNICAL — hard rules
 DO NOT: draw the scene with Canvas 2D and call it 3D; use an orthographic camera and call it isometric; a pagoda that is five stacked boxes; one flat colour per face; painter-sort polygons instead of using the depth buffer; clouds that never appear in frame; a day/night cycle that only recolours the sky and leaves the light static; camera controls that are just a zoom.
 
 OUTPUT: return only the complete HTML file, no commentary. If you have file tools, write it as sky-temple-<model>.html on the desktop and reply DONE.
-```

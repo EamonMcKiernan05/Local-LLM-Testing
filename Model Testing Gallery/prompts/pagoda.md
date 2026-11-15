@@ -1,8 +1,3 @@
-# Pagoda — one-shot prompt
-
-Captured from the DeepSeek Harness session log. Verbatim, as sent.
-
-```text
 Create one complete, self-contained HTML file for THE PAGODA, a photorealistic real-time 3D TINY WORLD in three.js: a Japanese-stye pagoda tower, with smaller and its courtyard on a chunk of land floating on a plain white page, in warm late-afternoon sun, as a self-running scene with no interaction, only camera movements.
 
 THE FRAMING, the tiny world:
@@ -59,4 +54,3 @@ UI
 TESTING PROTOCOL
 
 You must test the actual rendered output in a **local headed Chromium**, using the browser MCP/Playwright tools. Do not rely on code inspection or unit tests. Do not claim a feature works unless you have seen it.
-```
