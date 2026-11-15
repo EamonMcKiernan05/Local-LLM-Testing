@@ -96,18 +96,6 @@
   "harness": "DeepSeek Harness",
   "model": "longcat-2.5:free"
  },
- "deepseek-v41-sky-temple": {
-  "kind": "unknown",
-  "provider": "Not recorded",
-  "harness": "",
-  "model": ""
- },
- "deepseek-v41-nightfall": {
-  "kind": "unknown",
-  "provider": "Not recorded",
-  "harness": "",
-  "model": ""
- },
  "minimax-m31-sky-temple": {
   "kind": "unknown",
   "provider": "Not recorded",
