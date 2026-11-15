@@ -1,193 +1,129 @@
 {
  "qwen38-27b-dflash2-pagoda": {
   "kind": "local",
-  "provider": "maya",
+  "provider": "llama.cpp",
+  "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/dflash2_sweep.sh, winning arm n-max 5: -md /mnt/nvme/Qwen3.8-27B/Qwen3.8-27B-DFlash2-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on",
-  "measured": "33.9 tok/s decode / 867 tok/s prefill at a 15.9K prompt, 256 generated",
-  "source": "launcher on .5, transcribed by Bench (paths quoted below); log ~/qwen-dflash2-q8-393216.log"
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/dflash2_sweep.sh, winning arm n-max 5: -md Qwen3.8-27B-DFlash2-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on",
+  "measured": "33.9 tok/s decode / 867 tok/s prefill at a 15.9K prompt, 256 generated"
  },
  "qwen38-27b-dspine-pagoda": {
   "kind": "local",
-  "provider": "maya",
+  "provider": "llama.cpp",
+  "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-dspine-n5.sh: -md Qwen3.8-27B-DSpine-b16-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 262144 --cache-type-k bf16 --cache-type-v bf16 -fa on --jinja",
-  "measured": "857 tok/s prefill / 31.4 tok/s decode on the bench prompt \u2014 fastest on code in the 9 Nov battery",
-  "source": "launcher on .5, transcribed by Bench (paths quoted below); log ~/qwen-dspine-n5-server.log"
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-dspine-n5.sh: -md Qwen3.8-27B-DSpine-b16-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 262144 --cache-type-k bf16 --cache-type-v bf16 -fa on --jinja",
+  "measured": "857 tok/s prefill / 31.4 tok/s decode \u2014 the fastest arm on code in the 9 Nov battery"
  },
  "qwen38-27b-mtp-pagoda": {
   "kind": "local",
-  "provider": "maya",
+  "provider": "llama.cpp",
+  "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-mtp-q8-1slot.sh: --spec-type draft-mtp --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on (no -md; the model's own blk.64.nextn head)",
-  "measured": "838.4 tok/s prefill / 32.5 tok/s decode, 63.5% draft acceptance (mean accepted length 3.13)",
-  "source": "launcher on .5, transcribed by Bench (paths quoted below)"
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-mtp-q8-1slot.sh: --spec-type draft-mtp --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on (no -md; the model's own nextn head)",
+  "measured": "838.4 tok/s prefill / 32.5 tok/s decode, 63.5% draft acceptance"
  },
  "qwen38-27b-plain-pagoda": {
   "kind": "local",
-  "provider": "maya",
+  "provider": "llama.cpp",
+  "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB), :8080",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Mainline llama.cpp fork with DSpine draft support (~/llama-dspine @ d493f84) \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024 \u00b7 port 8080\n~/launch-qwen-plain-q8-1slot.sh: --spec-type none and no -md, otherwise identical to the MTP launcher \u2014 -c 393216 -np 1, YaRN 1.5 over a 262,144 base, q8_0 K and V, -fa on",
-  "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K \u2014 loses decode to the drafters, wins prefill",
-  "source": "launcher on .5, transcribed by Bench (paths quoted below)",
-  "note": "Sampling is not set at the server in any llama.cpp launcher \u2014 the harness sends it per request (temp 0.5, seed 12345 in ~/model-bench/runs/<run>/meta.json)."
+  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-plain-q8-1slot.sh: --spec-type none, no -md, otherwise identical to the MTP launcher \u2014 -c 393216 -np 1, YaRN 1.5 over a 262,144 base, q8_0 K and V, -fa on",
+  "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K",
+  "note": "Sampling is not set at the server \u2014 the harness sends it per request (temp 0.5, seed 12345)."
  },
  "qwen4-preview-liberty": {
   "kind": "cloud",
-  "provider": "qwen-token-plan-custom",
-  "model": "qwen4-max-preview",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max-preview"
  },
  "qwen4-preview-village": {
   "kind": "cloud",
-  "provider": "qwen-token-plan-custom",
-  "model": "qwen4-max-preview",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max-preview"
  },
  "qwen4-preview-pagoda": {
   "kind": "cloud",
-  "provider": "qwen-token-plan-custom",
-  "model": "qwen4-max-preview",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max-preview"
  },
  "qwen4-preview-torchlight": {
   "kind": "cloud",
-  "provider": "qwen-token-plan-custom",
-  "model": "qwen4-max-preview",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Session log records only provider and model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max-preview"
  },
  "qwen-code-sky-temple": {
   "kind": "cloud",
-  "provider": "qwencloud-token-plan",
-  "model": "qwen4.0-max-preview",
-  "endpoint": "cloud API",
-  "harness": "Qwen Code CLI",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "Qwen Code",
+  "model": "qwen4.0-max-preview"
  },
  "qwen-code-village": {
   "kind": "cloud",
-  "provider": "qwencloud-token-plan",
-  "model": "qwen4.0-max-preview",
-  "endpoint": "cloud API",
-  "harness": "Qwen Code CLI",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "Qwen Code",
+  "model": "qwen4.0-max-preview"
  },
  "qwen-code-liberty": {
   "kind": "cloud",
-  "provider": "qwencloud-token-plan",
-  "model": "qwen4.0-max-preview",
-  "endpoint": "cloud API",
-  "harness": "Qwen Code CLI",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "Qwen Code",
+  "model": "qwen4.0-max-preview"
  },
  "qwen-code-liberty-baseline": {
   "kind": "cloud",
-  "provider": "qwencloud-token-plan",
-  "model": "qwen4.0-max-preview",
-  "endpoint": "cloud API",
-  "harness": "Qwen Code CLI",
-  "config": "Cloud Qwen token plan \u2014 not served on this hardware. Qwen Code CLI session records only the model id.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Qwen Cloud token plan",
+  "harness": "Qwen Code",
+  "model": "qwen4.0-max-preview"
  },
  "deepseek-v41-castle": {
   "kind": "cloud",
-  "provider": "deepseek-account",
-  "model": "deepseek-flash",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud DeepSeek account \u2014 not served on this hardware.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
- },
- "deepseek-v41-sky-temple": {
-  "kind": "unknown",
-  "provider": "not recorded",
-  "model": "deepseek-v4.1-flash-1017",
-  "endpoint": "cloud API",
-  "harness": "",
-  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
- },
- "deepseek-v41-nightfall": {
-  "kind": "unknown",
-  "provider": "not recorded",
-  "model": "deepseek-v4.1-flash-1017",
-  "endpoint": "cloud API",
-  "harness": "",
-  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "DeepSeek API",
+  "harness": "DeepSeek Harness",
+  "model": "deepseek-flash"
  },
  "hy4-castle": {
   "kind": "cloud",
-  "provider": "nous-portal",
-  "model": "hy4",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Nous Portal \u2014 not served on this hardware.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Nous Portal",
+  "harness": "DeepSeek Harness",
+  "model": "hy4"
  },
  "longcat-25-sky-temple": {
   "kind": "cloud",
-  "provider": "nous-portal",
-  "model": "longcat-2.5:free",
-  "endpoint": "cloud API",
-  "harness": "DeepSeek Harness (cordis preset)",
-  "config": "Cloud Nous Portal free tier \u2014 not served on this hardware.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "provider": "Nous Portal",
+  "harness": "DeepSeek Harness",
+  "model": "longcat-2.5:free"
+ },
+ "deepseek-v41-sky-temple": {
+  "kind": "unknown",
+  "provider": "Not recorded",
+  "harness": "",
+  "model": ""
+ },
+ "deepseek-v41-nightfall": {
+  "kind": "unknown",
+  "provider": "Not recorded",
+  "harness": "",
+  "model": ""
  },
  "minimax-m31-sky-temple": {
   "kind": "unknown",
-  "provider": "not recorded",
-  "model": "MiniMax M3.1 Flash",
-  "endpoint": "cloud API",
+  "provider": "Not recorded",
   "harness": "",
-  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "model": ""
  },
  "minimax-m31-dusk-cityline": {
   "kind": "unknown",
-  "provider": "not recorded",
-  "model": "MiniMax M3.1 Flash",
-  "endpoint": "cloud API",
+  "provider": "Not recorded",
   "harness": "",
-  "config": "No session log and no launcher record for this run. Bench checked .5: the Maya DeepSeek and MiniMax launchers on disk both date from after these builds, so neither is the config behind them.",
-  "measured": "",
-  "source": "DSH session metadata (provider + model fields)"
+  "model": ""
  }
 }
