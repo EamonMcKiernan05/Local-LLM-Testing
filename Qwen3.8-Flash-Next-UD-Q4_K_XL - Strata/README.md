@@ -63,10 +63,11 @@ tokenise differently and it is the real x-axis.
   `HTTP 400 … request exceeds the context window`. The books ladder fits the same nominal depth
   because prose tokenises less densely.
 
-## The BF16 n-gram table cannot be used with Strata
+## The BF16 n-gram table works — after a 192-byte header stamp
 
 The request was to serve this file with Unsloth's standalone BF16 engram table (102.4 GB) in place
-of the bundled IQ4_NL shard. Strata's loader refuses it in all three arrangements:
+of the bundled IQ4_NL shard. Out of the box the engine refuses it, and the first three attempts
+here did too:
 
 1. `--ple-gguf <BF16 file>` with the bundled shard still in place →
    `native dense: additional shard must match the architecture-validated first shard's split metadata`
@@ -75,9 +76,50 @@ of the bundled IQ4_NL shard. Strata's loader refuses it in all three arrangement
 3. BF16 file put in the shard-4 filename →
    `…-00004-of-00004.gguf does not declare itself shard 4 of 4 of this model (split.count / split.no / split.tensors.count)`
 
-The `engram/*.gguf_file` files are standalone GGUFs, not members of the model's split, and Strata
-requires every shard of the split to be present and split-consistent. `--ple-gguf` is not
-exposed by `setup.sh` either, so this is a hard limit of the engine, not of the install. These
-numbers are therefore on the bundled IQ4_NL table.
+The cause is in Strata's own source, and it is documented in **Strata issue #6013**: the engine
+treats a `--ple-gguf` file as a table-only file only when its header carries
+`general.architecture = "strata-ple"`. Unsloth's `engram/*.gguf_file` files have **no
+`general.architecture` key at all**, so they are routed into the dense-shard loader, which is
+right to reject them. `split.tensors.count` already matches (1224); the split keys are a red
+herring, which is why re-stamping them alone (Unsloth's `set_split.py`) still fails.
+
+The fix is a header-only rewrite: add `general.architecture = "strata-ple"`, drop the `split.*`
+keys, pad so `data_start` keeps its exact offset, and the 102.4 GB of tensor data is never
+touched. The script is in #6013 verbatim; it reported `n_kv 3->2, tensor-info end 173->192,
+data_start stays 192`, and the engine then started with:
+
+```
+strata generate: PLE direct read probe: 77201 rows/s (fine)
+strata generate: PLE on, table 320001536 rows of …/engram/Qwen3.8-Flash-Next-engram-BF16.gguf_file
+```
+
+Feature request for doing this natively is **Strata #5248** (open); the engine kernels already
+read BF16/Q8_0/Q5_1/IQ4_NL, so only the installer/pinning layer is missing.
+
+### What the lossless table costs
+
+Same file, same config, only `--ple-gguf` differs. Two depths per corpus.
+
+| corpus | depth | IQ4_NL prefill | BF16 prefill | IQ4_NL decode | BF16 decode |
+|---|---:|---:|---:|---:|---:|
+| books | 20K | 248.9 | 292.4 | 38.4 | 32.9 |
+| books | 100K | 695.4 | 448.9 | 54.0 | 54.2 |
+| code | 20K | 440.8 | 505.3 | 34.0 | 27.7 |
+| code | 100K | 567.6 | 436.3 | 55.1 | 45.2 |
+
+Decode is roughly a wash on prose (54.2 vs 54.0 at 100K) and −18 % on code (45.2 vs 55.1).
+Prefill pays consistently: **−23 % to −35 %**, because prefill streams the table hard and BF16's
+rows are 320 bytes against IQ4_NL's 90.
+
+## Flags, not the file: what did *not* explain the gap to the older numbers
+
+The earlier GSQ-RCO IQ3_S run on this box (2,148.8 tok/s prefill, 69.1 decode at 100K) used a
+different flag set. Re-running **this** file with those flags (`--mmap-experts
+--vram-reserve-mib 700 --remote-expert-opt`, no `--resident-budget-gib`) gave
+**538.3 / 38.2** at 100K — worse than the shipped config's 695.4 / 54.0. The gap is the file size
+(82.53 GB of weights against IQ3_S's 54.8) and 32 GB of RAM against 111 GB of files: the engine
+log for a 100K request shows 493 GB read from storage, page cache holding 54 %, and a 0 MB/window
+read-ahead budget.
 
 Method note: the Strata option for an 8-bit cache is `--kv int8`; there is no `q8_0` choice.
+

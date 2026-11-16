@@ -37,6 +37,7 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 | GLM-5.3-Flash (Maya-S v2 IQ2_XXS) | Project Maya v1.1.11 | 2026-10-15 | 64K | **451 tok/s** (60K) | 18.7 tok/s (60K) | 66 |
 | Qwen3.8-Flash-Next (GSQ-RCO IQ3_S) | Strata 0.2.0-beta | 2026-10-19 | 256K | **2,149 tok/s** (100K) | 73.7 → 64.2 tok/s | 305 |
 | Qwen3.8-Flash-Next (UD-Q4_K_XL) | Strata 0.2.14.1 | 2026-11-16 | 262K | **695.4 tok/s** (86K) | 38.4 → 62.2 tok/s | 11 |
+| Qwen3.8-Flash-Next (UD-Q4_K_XL + BF16 table) | Strata 0.2.14.1 | 2026-11-16 | 262K | **505.3 tok/s** (21K) | 27.7 → 54.2 tok/s | 4 |
 | Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
 | MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
 
@@ -148,7 +149,7 @@ The same 125B MoE, this time Unsloth's UD-Q4_K_XL (82.5 GB) rather than the IQ3_
 | Draft acceptance | 63–83 %, holding to 250K |
 | Load | 110 s to a ready API, layers 0–23 / 24–47 across the two cards |
 | Failed arm | code 250K: 265,110 tokens against the 262,144 window, HTTP 400 — recorded, not smoothed over |
-| BF16 n-gram table | **refused by the engine** — its loader requires split-consistent shards, so this file runs on the bundled IQ4_NL table; the three errors are in the folder README |
+| BF16 n-gram table | **works** after a 192-byte header stamp (`general.architecture = "strata-ple"`, recipe in Strata issue #6013); no native support yet (#5248 open). Costs −23 to −35 % prefill, decode ~flat |
 
 ### GLM-5.3-Flash (Maya-S) on Project Maya — 66 recorded runs, all with measurements
 

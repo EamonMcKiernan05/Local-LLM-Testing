@@ -1,0 +1,3 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-11-16T0937Z-flashnext-q4kxl-bf16table-code,20000,1,code_src,ratio estimate,,20645,256,505.3,27.7,165,146,50.9,31910,38,31816,40,
+2026-11-16T0937Z-flashnext-q4kxl-bf16table-code,100000,1,code_common,ratio estimate,,90823,256,436.3,45.2,191,127,217.9,31910,38,31816,40,
