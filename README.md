@@ -36,6 +36,7 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 | GLM-5.3-Flash (AJ-IQ2_XXS) | Project Maya v1.1.15 | 2026-10-17 | 256K | **870 tok/s** (200K) | 22.5–24.9 tok/s | 87 |
 | GLM-5.3-Flash (Maya-S v2 IQ2_XXS) | Project Maya v1.1.11 | 2026-10-15 | 64K | **451 tok/s** (60K) | 18.7 tok/s (60K) | 66 |
 | Qwen3.8-Flash-Next (GSQ-RCO IQ3_S) | Strata 0.2.0-beta | 2026-10-19 | 256K | **2,149 tok/s** (100K) | 73.7 → 64.2 tok/s | 305 |
+| Qwen3.8-Flash-Next (UD-Q4_K_XL) | Strata 0.2.14.1 | 2026-11-16 | 262K | **695.4 tok/s** (86K) | 38.4 → 62.2 tok/s | 11 |
 | Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
 | MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
 
@@ -129,6 +130,25 @@ Three charts for the current numbers — the 0.1.44 depth card, the 0.2.0-beta r
 **What's in the folder:** thirteen experiment write-ups in the order they were run; the per-arm JSONL and the drivers; every table as a CSV; the figures with the scripts that regenerate them; and the flag rules in `TUNING.md`.
 
 **Honest limits** (full detail in [the folder's `PROVENANCE.md`](Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S%20-%20Strata/PROVENANCE.md)): single-rep batteries where stated — single cells at depth carry ±5-8% noise, and the gate is only settled on means. The 0.2.0-beta side is one battery against 0.1.44's three-pass mean (the old side was not re-run). The hero card's plotting script was not retained.
+
+### Qwen3.8-Flash-Next UD-Q4_K_XL on Strata — 11 recorded runs
+
+Everything we have on this file, in one place: **[`Qwen3.8-Flash-Next-UD-Q4_K_XL - Strata/`](Qwen3.8-Flash-Next-UD-Q4_K_XL%20-%20Strata/)**
+
+The same 125B MoE, this time Unsloth's UD-Q4_K_XL (82.5 GB) rather than the IQ3_S, served by Strata **v0.2.14.1 (engine 0.1.60.1)** on 2x Tesla V100 32GB at the full **262,144** context with an 8-bit KV cache, an 8 GiB resident expert budget and MTP drafting. One battery each on prose and code, 2026-11-16.
+
+![Qwen3.8-Flash-Next UD-Q4_K_XL on Strata — decode and prefill by prompt depth](Qwen3.8-Flash-Next-UD-Q4_K_XL%20-%20Strata/charts/flashnext-q4kxl-strata-262k.png)
+
+**The findings:**
+
+| | |
+|---|---|
+| Best prefill | **695.4 tok/s** at 86K prompt tokens (books) |
+| Decode | **38.4 → 55.9 tok/s** books, **34.0 → 62.2 tok/s** code — rises with depth, no decay |
+| Draft acceptance | 63–83 %, holding to 250K |
+| Load | 110 s to a ready API, layers 0–23 / 24–47 across the two cards |
+| Failed arm | code 250K: 265,110 tokens against the 262,144 window, HTTP 400 — recorded, not smoothed over |
+| BF16 n-gram table | **refused by the engine** — its loader requires split-consistent shards, so this file runs on the bundled IQ4_NL table; the three errors are in the folder README |
 
 ### GLM-5.3-Flash (Maya-S) on Project Maya — 66 recorded runs, all with measurements
 

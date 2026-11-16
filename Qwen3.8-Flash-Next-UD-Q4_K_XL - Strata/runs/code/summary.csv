@@ -1,0 +1,7 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,20000,1,code_src,ratio estimate,,20645,256,440.8,34.0,173,143,55.7,31910,37,31816,40,
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,60000,1,code_server,ratio estimate,,56005,256,645.5,45.6,169,113,93.1,31910,39,31816,42,
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,100000,1,code_common,ratio estimate,,90823,256,567.6,55.1,191,128,165.4,31910,39,31816,42,
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,150000,1,code_cuda,ratio estimate,,182935,256,614.3,62.2,178,125,302.5,31910,40,31816,44,
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,200000,1,code_tests,ratio estimate,,248622,256,599.9,56.0,191,138,420.2,31910,39,31816,43,
+2026-11-16T0231Z-flashnext-q4kxl-iq4nl-code,250000,1,code_py,ratio estimate,,,,,,,,2.6,31910,39,31816,42,"HTTP 400 from http://127.0.0.1:8080/v1/chat/completions: {""error"": {""type"": ""invalid_request_error"", ""message"": ""request exceeds the context window: prompt (265110 tokens) leaves no room to answer in the context (262144); requests are never truncated""}}"
