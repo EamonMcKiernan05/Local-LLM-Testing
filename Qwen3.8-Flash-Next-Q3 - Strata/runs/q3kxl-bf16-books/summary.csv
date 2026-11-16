@@ -1,0 +1,3 @@
+run_id,depth_k,rep,book,method,sliced_tokens,ptok,gen,prefill_tps,decode_tps,draft_n,draft_acc,wall_s,gpu0_used_mib,gpu0_temp_c,gpu1_used_mib,gpu1_temp_c,error
+2026-11-16T1129Z-flashnext-ud-q3-k-xl-bf16-books,20000,1,frankenstein,ratio estimate,,16793,256,1426.4,72.8,185,138,16.3,31882,37,31784,40,
+2026-11-16T1129Z-flashnext-ud-q3-k-xl-bf16-books,100000,1,pride,ratio estimate,,86341,256,2034.3,66.5,197,125,46.8,31882,44,31784,47,

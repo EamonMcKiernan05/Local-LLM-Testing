@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-11-16T1130Z-flashnext-ud-q3-k-xl-bf16-code",
+  "tool": "model-bench 0.1.0",
+  "label": "flashnext-ud-q3-k-xl-bf16-code",
+  "endpoint": "http://127.0.0.1:8080",
+  "backend": "strata",
+  "detected": {
+    "endpoint": "http://127.0.0.1:8080",
+    "backend": "strata",
+    "model": "qwen3.8-flash-next-unsloth-ud-q3_k_xl",
+    "ctx": 262144
+  },
+  "corpus": "code",
+  "battery": {
+    "depths_k": [
+      20000,
+      100000
+    ],
+    "gen": 256,
+    "reps": 1,
+    "temp": 0.5,
+    "seed": 12345,
+    "instruction": "[{tag}] Write a detailed technical explanation of lighthouse optics for an engineering audience. Aim for at least 400 words. ",
+    "skipped": []
+  },
+  "host": {
+    "hostname": "eamon-ai",
+    "gpus": [
+      {
+        "idx": 0,
+        "name": "Tesla V100-PCIE-32GB",
+        "used_mib": 31882,
+        "total_mib": 32768,
+        "temp_c": 43
+      },
+      {
+        "idx": 1,
+        "name": "Tesla V100-PCIE-32GB",
+        "used_mib": 31784,
+        "total_mib": 32768,
+        "temp_c": 47
+      }
+    ]
+  },
+  "started_utc": "2026-11-16 11:30:45",
+  "finished_utc": "2026-11-16 11:31:52",
+  "rows": 3,
+  "error_count": 0,
+  "aborted": false
+}

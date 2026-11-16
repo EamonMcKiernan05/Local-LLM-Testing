@@ -38,6 +38,8 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 | Qwen3.8-Flash-Next (GSQ-RCO IQ3_S) | Strata 0.2.0-beta | 2026-10-19 | 256K | **2,149 tok/s** (100K) | 73.7 → 64.2 tok/s | 305 |
 | Qwen3.8-Flash-Next (UD-Q4_K_XL) | Strata 0.2.14.1 | 2026-11-16 | 262K | **695.4 tok/s** (86K) | 38.4 → 62.2 tok/s | 11 |
 | Qwen3.8-Flash-Next (UD-Q4_K_XL + BF16 table) | Strata 0.2.14.1 | 2026-11-16 | 262K | **505.3 tok/s** (21K) | 27.7 → 54.2 tok/s | 4 |
+| Qwen3.8-Flash-Next (UD-Q3_K_XL) | Strata 0.2.14.1 | 2026-11-16 | 262K | **2,081.8 tok/s** (91K) | 64.3 → 79.1 tok/s | 4 |
+| Qwen3.8-Flash-Next (UD-IQ3_XXS) | Strata 0.2.14.1 | 2026-11-16 | 262K | **2,083.0 tok/s** (91K) | 68.7 → 79.7 tok/s | 4 |
 | Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
 | MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
 
