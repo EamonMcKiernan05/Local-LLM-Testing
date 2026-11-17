@@ -74,10 +74,12 @@ Native support for swap-in tables is Strata issue #5248 (open).
 
 ## Chart
 
-`charts/flashnext-q3-ngram-lines.png` — prefill and decode against measured prompt tokens, one line per
-quant/table pair, with UD-Q4_K_XL bundled as a dotted reference clipped to 100K depth. The four Q3 lines sit
-inside 2 % of each other on prefill, which is the finding; the Q4 reference line sits more than an order of
-magnitude lower. `charts/flashnext-q3-ngram-comparison.png` is the same data as paired bars.
+`charts/flashnext-q3-code-ngram-lines.png` — the current card: code corpus only, one panel per quant, two
+lines per panel (bundled IQ4_NL vs BF16 table) against measured prompt tokens. Q3_K_XL prefill 2,082 →
+2,132 (+2.4 %), IQ3_XXS 2,083 → 2,080 (−0.1 %); decode moves ±10 % with draft acceptance, not with the table.
+
+Earlier versions kept for reference: `charts/flashnext-q3-ngram-lines.png` (both corpora, with the UD-Q4_K_XL
+bundled reference) and `charts/flashnext-q3-ngram-comparison.png` (paired bars).
 
 ## Files
 
