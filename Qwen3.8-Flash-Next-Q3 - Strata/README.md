@@ -71,6 +71,14 @@ Q3_K_XL bf16:    PLE on, table 320001536 rows of …/engram/Qwen3.8-Flash-Next-e
 
 Native support for swap-in tables is Strata issue #5248 (open).
 
+
+## Chart
+
+`charts/flashnext-q3-ngram-lines.png` — prefill and decode against measured prompt tokens, one line per
+quant/table pair, with UD-Q4_K_XL bundled as a dotted reference clipped to 100K depth. The four Q3 lines sit
+inside 2 % of each other on prefill, which is the finding; the Q4 reference line sits more than an order of
+magnitude lower. `charts/flashnext-q3-ngram-comparison.png` is the same data as paired bars.
+
 ## Files
 
 `runs/<cell>/` holds `results.jsonl` (raw per-arm records incl. GPU state and draft acceptance),
