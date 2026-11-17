@@ -1,7 +1,7 @@
 # Model Testing Gallery
 
 The builds behind [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html) —
-22 self-contained browser demos written by AI models, published unedited, defects and all.
+47 self-contained browser demos written by AI models, published unedited, defects and all.
 
 This repo mirrors the website exactly: a build or a prompt is here only if it is on the page.
 Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbatim, typos included.
@@ -10,7 +10,9 @@ Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbati
 
 | Model | Builds | Prompt |
 |---|---|---|
-| Qwen3.8 Flash-Next (Strata) | `Qwen3.8 Flash-Next/{sky-temple,sky-temple-agent,living-city,neon-drift,pulse-engine,cloth-lab}.html` | `prompts/legacy-*.md` |
+| Qwen 4 Max — DeepSeek Harness | `Qwen 4 Max/{basalt-organ,blue-hour-dry-dock,glass-tide,mangrove-after-dark,medieval-village,rain-cathedral,salt-mirror,the-castle,the-last-light,the-pagoda,torchlight-depths}.html` | `prompts/{the-basalt-organ,blue-hour-dry-dock,the-glass-tide,mangrove-after-dark,medieval-village,the-rain-cathedral,salt-mirror,the-castle,the-last-light,the-pagoda,torchlight-depths}.md` |
+| Hy4 Flash — DeepSeek Harness | `Hy4 Flash/{BLUE_HOUR_DRY_DOCK,MANGROVE_AFTER_DARK,SALT_MIRROR,THE_BASALT_ORGAN,THE_GLASS_TIDE,THE_LAST_LIGHT,THE_RAIN_CATHEDRAL,castle,medieval-village,pagoda}.html` | same briefs as Qwen 4 Max, quoted in `prompts/` |
+| Qwen3.8 Flash-Next (Strata) | `Qwen3.8 Flash-Next/{sky-temple,sky-temple-agent,living-city,neon-drift,pulse-engine,cloth-lab,basalt-organ,mangrove-after-dark,rain_cathedral,sky_temple}.html` | `prompts/legacy-*.md` |
 | Qwen3.8-27B (llama.cpp, four serving configs) | `Qwen3.8-27B/{DFlash2/pagoda,DSpine/THE-PAGODA,MTP/sky-temple,Plain/pagoda}.html` | `prompts/pagoda.md` |
 | Qwen 4 Preview — DeepSeek Harness | `Qwen 4 Preview/{liberty-1886,medieval-village,the-pagoda,torchlight-depths}.html` | `prompts/{liberty,village,pagoda,torchlight}.md` |
 | Qwen 4 Preview — Qwen Code | `QwenCode/{sky-temple,medieval-village,liberty-1886}.html` | `prompts/{pagoda,village,liberty}.md` |

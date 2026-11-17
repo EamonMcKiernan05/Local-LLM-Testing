@@ -4,8 +4,8 @@
   "provider": "llama.cpp",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
-  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/dflash2_sweep.sh, winning arm n-max 5: -md Qwen3.8-27B-DFlash2-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 · -ngl 99 · --split-mode layer · -t 24 · port 8080 · Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/dflash2_sweep.sh, winning arm n-max 5: -md Qwen3.8-27B-DFlash2-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on",
   "measured": "33.9 tok/s decode / 867 tok/s prefill at a 15.9K prompt, 256 generated"
  },
  "qwen38-27b-dspine-pagoda": {
@@ -13,17 +13,17 @@
   "provider": "llama.cpp",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
-  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-dspine-n5.sh: -md Qwen3.8-27B-DSpine-b16-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 262144 --cache-type-k bf16 --cache-type-v bf16 -fa on --jinja",
-  "measured": "857 tok/s prefill / 31.4 tok/s decode \u2014 the fastest arm on code in the 9 Nov battery"
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 · -ngl 99 · --split-mode layer · -t 24 · port 8080 · Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-dspine-n5.sh: -md Qwen3.8-27B-DSpine-b16-Q8_0.gguf --spec-type draft-dflash --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 262144 --cache-type-k bf16 --cache-type-v bf16 -fa on --jinja",
+  "measured": "857 tok/s prefill / 31.4 tok/s decode — the fastest arm on code in the 9 Nov battery"
  },
  "qwen38-27b-mtp-pagoda": {
   "kind": "local",
   "provider": "llama.cpp",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
-  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-mtp-q8-1slot.sh: --spec-type draft-mtp --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on (no -md; the model's own nextn head)",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 · -ngl 99 · --split-mode layer · -t 24 · port 8080 · Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-mtp-q8-1slot.sh: --spec-type draft-mtp --spec-draft-n-max 5 --spec-draft-p-min 0.5 -c 393216 -np 1 --rope-scaling yarn --rope-scale 1.5 --yarn-orig-ctx 262144 --cache-type-k q8_0 --cache-type-v q8_0 -fa on (no -md; the model's own nextn head)",
   "measured": "838.4 tok/s prefill / 32.5 tok/s decode, 63.5% draft acceptance"
  },
  "qwen38-27b-plain-pagoda": {
@@ -31,10 +31,10 @@
   "provider": "llama.cpp",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-27B-UD-Q8_K_XL.gguf (Q8_K_XL, 31.5 GB)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
-  "config": "~/llama-dspine @ d493f84 \u00b7 -ngl 99 \u00b7 --split-mode layer \u00b7 -t 24 \u00b7 port 8080 \u00b7 Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-plain-q8-1slot.sh: --spec-type none, no -md, otherwise identical to the MTP launcher \u2014 -c 393216 -np 1, YaRN 1.5 over a 262,144 base, q8_0 K and V, -fa on",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
+  "config": "~/llama-dspine @ d493f84 · -ngl 99 · --split-mode layer · -t 24 · port 8080 · Qwen3.8-27B-UD-Q8_K_XL.gguf + BF16 mmproj, --image-min-tokens 1024\n~/launch-qwen-plain-q8-1slot.sh: --spec-type none, no -md, otherwise identical to the MTP launcher — -c 393216 -np 1, YaRN 1.5 over a 262,144 base, q8_0 K and V, -fa on",
   "measured": "20.5 tok/s decode / 1,048 tok/s prefill at 15.9K",
-  "note": "Sampling is not set at the server \u2014 the harness sends it per request (temp 0.5, seed 12345)."
+  "note": "Sampling is not set at the server — the harness sends it per request (temp 0.5, seed 12345)."
  },
  "qwen4-preview-liberty": {
   "kind": "cloud",
@@ -113,7 +113,7 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
  },
@@ -122,7 +122,7 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
  },
@@ -131,7 +131,7 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
  },
@@ -140,7 +140,7 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
  },
@@ -149,7 +149,7 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
  },
@@ -158,8 +158,183 @@
   "provider": "Strata",
   "harness": "DeepSeek Harness",
   "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S (2 shards + BF16 mmproj)",
-  "endpoint": ".5 (eamon-ai, 2\u00d7 V100 32GB) :8080",
+  "endpoint": ".5 (eamon-ai, 2× V100 32GB) :8080",
   "config": "--native .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf --ple-gguf .../Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00002-of-00002.gguf --expert-profile data/expert-profile.bin --expert-cache auto --prefill auto --spec 4 --spec-min-p 0.5 --mtp /mnt/models/Strata-data/mtp/rt --max-context 262144 --kv int8 --mmap-experts --vision --vram-reserve-mib 700 --remote-expert-opt",
   "note": "Config as it sits in ~/Strata/strata-iq3_s.json now; these builds are from early October, so an earlier shape of the same config is possible."
+ },
+ "qwen-4-max-basalt-organ": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-blue-hour-dry-dock": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-glass-tide": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-mangrove-after-dark": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-medieval-village": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-rain-cathedral": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-salt-mirror": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-the-castle": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-the-last-light": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-the-pagoda": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen-4-max-torchlight-depths": {
+  "kind": "cloud",
+  "provider": "Qwen token plan",
+  "harness": "DeepSeek Harness",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-blue-hour-dry-dock": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-mangrove-after-dark": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-salt-mirror": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-the-basalt-organ": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-the-glass-tide": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-the-last-light": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-the-rain-cathedral": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-castle": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-medieval-village": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "hy4-flash-pagoda": {
+  "kind": "cloud",
+  "provider": "Nous portal",
+  "harness": "DeepSeek Harness",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen3-8-flash-next-basalt-organ": {
+  "kind": "local",
+  "provider": "llama.cpp (maya)",
+  "harness": "DeepSeek Harness",
+  "model": "qwen3.8-flash-next-unsloth-ud",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen3-8-flash-next-mangrove-after-dark": {
+  "kind": "local",
+  "provider": "llama.cpp (maya)",
+  "harness": "DeepSeek Harness",
+  "model": "qwen3.8-flash-next-unsloth-ud",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen3-8-flash-next-rain-cathedral": {
+  "kind": "local",
+  "provider": "llama.cpp (maya)",
+  "harness": "DeepSeek Harness",
+  "model": "qwen3.8-flash-next-unsloth-ud",
+  "note": "Session captured from DeepSeek Harness."
+ },
+ "qwen3-8-flash-next-sky-temple": {
+  "kind": "local",
+  "provider": "llama.cpp (maya)",
+  "harness": "DeepSeek Harness",
+  "model": "qwen3.8-flash-next-unsloth-ud",
+  "note": "Session captured from DeepSeek Harness."
  }
 }

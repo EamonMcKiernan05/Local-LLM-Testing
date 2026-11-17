@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MANGROVE AFTER DARK</title>
+<style>
+  :root{
+    --ink:#bfe6df; --dim:#5d8a84; --line:rgba(140,220,205,.22);
+    --bg:rgba(5,13,15,.55); --accent:#59e8c9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#020507}
+  body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+  #scene{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
+  #scene:active{cursor:grabbing}
+  #vignette{position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(0,2,4,.42) 100%)}
+  #overlay{position:fixed;inset:0;pointer-events:none;transition:opacity .9s ease;opacity:1}
+  #overlay.idle{opacity:0}
+  #overlay.idle *{pointer-events:none!important}
+  .title{position:absolute;left:22px;bottom:20px;pointer-events:none;user-select:none}
+  .title h1{font-size:13px;font-weight:600;letter-spacing:.38em;text-transform:uppercase;color:var(--ink);
+    text-shadow:0 1px 8px rgba(0,0,0,.8)}
+  .title .rule{width:64px;height:1px;background:linear-gradient(90deg,var(--accent),transparent);margin:8px 0 7px;opacity:.7}
+  .title p{font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+  .controls{position:absolute;right:20px;bottom:20px;display:flex;gap:8px;pointer-events:auto}
+  .controls button{
+    pointer-events:auto;appearance:none;font:600 10px/1 inherit;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:3px;
+    padding:8px 12px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    transition:border-color .25s,color .25s,background .25s}
+  .controls button:hover{border-color:rgba(140,220,205,.55);color:#eafff9}
+  .controls button:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+  .controls button[aria-pressed="true"]{color:#04110e;background:var(--accent);border-color:var(--accent)}
+  #fade{position:fixed;inset:0;background:#000;pointer-events:none;transition:opacity 2s ease;opacity:1}
+  #err{position:fixed;inset:auto 0 0 0;padding:10px 16px;font-size:11px;color:#ffb3a0;background:rgba(20,5,5,.85);
+    display:none;letter-spacing:.05em}
+  @media (max-width:640px){
+    .title{left:14px;bottom:14px}.title h1{font-size:11px;letter-spacing:.28em}
+    .controls{right:12px;bottom:12px;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
+    .controls button{padding:7px 9px;font-size:9px}
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="vignette"></div>
+<div id="overlay">
+  <div class="title">
+    <h1>Mangrove After Dark</h1>
+    <div class="rule"></div>
+    <p>bioluminescent creek &middot; drag to orbit &middot; scroll to zoom</p>
+  </div>
+  <div class="controls" role="toolbar" aria-label="Scene controls">
+    <button id="btnCine" aria-pressed="true" title="Return to the drifting cinematic shot (C)">Cinematic</button>
+    <button id="btnReset" aria-pressed="false" title="Restore the opening framing (R)">Reset View</button>
+    <button id="btnPause" aria-pressed="false" title="Freeze scene time; camera stays live (Space)">Pause</button>
+    <button id="btnSound" aria-pressed="false" title="Toggle synthesized night ambience (M)">Sound: Off</button>
+  </div>
+</div>
+<div id="fade"></div>
+<div id="err"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ================= deterministic rng ================= */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng = mulberry32(1337);
+const R = (a=1,b)=> b===undefined ? rng()*a : a+rng()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function h2(x,y){const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);}
+function n2(x,y){
+  const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy;
+  const sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);
+  const a=h2(ix,iy),b=h2(ix+1,iy),c=h2(ix,iy+1),d=h2(ix+1,iy+1);
+  return lerp(lerp(a,b,sx),lerp(c,d,sx),sy);
+}
+
+/* ================= renderer / scene ================= */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+let DPR = Math.min(window.devicePixelRatio||1, 1.5);
+renderer.setPixelRatio(DPR);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.85;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x04090e, 0.045);
+const camera = new THREE.PerspectiveCamera(58, window.innerWidth/window.innerHeight, 0.05, 400);
+const uTime = {value:0};
+const MOON_DIR = new THREE.Vector3(0.10,0.16,-0.98).normalize();
+
+/* lights */
+const moon = new THREE.DirectionalLight(0x9fc6ea, 0.55);
+moon.position.copy(MOON_DIR).multiplyScalar(38);
+moon.castShadow = true;
+moon.shadow.mapSize.set(1024,1024);
+moon.shadow.camera.left=-11; moon.shadow.camera.right=11;
+moon.shadow.camera.top=11; moon.shadow.camera.bottom=-11;
+moon.shadow.camera.near=5; moon.shadow.camera.far=75;
+moon.shadow.bias=-0.0004; moon.shadow.normalBias=0.02;
+scene.add(moon); scene.add(moon.target); moon.target.position.set(0,0,-2);
+scene.add(new THREE.HemisphereLight(0x1c3247, 0x05070a, 0.12));
+const bioLightFish = new THREE.PointLight(0x2fe8c6, 0.6, 4.2, 2); scene.add(bioLightFish);
+const bioLightPulse = new THREE.PointLight(0x35f0d0, 0.0, 5.0, 2); bioLightPulse.position.set(0.6,0.18,-1.5); scene.add(bioLightPulse);
+const bioLightDrop = new THREE.PointLight(0x4ad9ff, 0.0, 2.6, 2); scene.add(bioLightDrop);
+
+/* ================= procedural textures ================= */
+function canvasTex(size, fn, srgb=true){
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  fn(c.getContext('2d'), size);
+  const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  if(srgb) t.colorSpace=THREE.SRGBColorSpace;
+  t.anisotropy=4;
+  return t;
+}
+const barkTex = canvasTex(256,(g,s)=>{
+  g.fillStyle='#37302a'; g.fillRect(0,0,s,s);
+  for(let i=0;i<340;i++){
+    const x=R(s), w=R(1,4), l=R(30,150), y=R(s);
+    const v=R(); g.fillStyle=`rgba(${v<0.5?18:70},${v<0.5?15:60},${v<0.5?12:50},${R(0.12,0.4)})`;
+    g.fillRect(x,y,w,l);
+  }
+  for(let i=0;i<90;i++){
+    g.strokeStyle=`rgba(10,9,7,${R(0.2,0.5)})`; g.lineWidth=R(0.5,1.5);
+    const x=R(s),y=R(s); g.beginPath(); g.moveTo(x,y); g.lineTo(x+R(-6,6),y+R(8,30)); g.stroke();
+  }
+  for(let i=0;i<60;i++){ g.fillStyle=`rgba(84,96,70,${R(0.04,0.12)})`; g.fillRect(R(s),R(s),R(2,9),R(2,9)); }
+});
+const barkBump = canvasTex(256,(g,s)=>{
+  g.fillStyle='#808080'; g.fillRect(0,0,s,s);
+  for(let i=0;i<380;i++){
+    const v=R(40,200)|0; g.fillStyle=`rgba(${v},${v},${v},${R(0.2,0.55)})`;
+    g.fillRect(R(s),R(s),R(1,4),R(24,150));
+  }
+},false);
+const mudTex = canvasTex(512,(g,s)=>{
+  g.fillStyle='#241d15'; g.fillRect(0,0,s,s);
+  for(let i=0;i<2600;i++){
+    const v=R(); g.fillStyle=`rgba(${v<0.6?14:58},${v<0.6?11:48},${v<0.6?8:36},${R(0.08,0.3)})`;
+    g.beginPath(); g.arc(R(s),R(s),R(1,7),0,7); g.fill();
+  }
+  for(let i=0;i<70;i++){
+    g.strokeStyle=`rgba(64,54,40,${R(0.08,0.2)})`; g.lineWidth=R(1,3);
+    const y=R(s); g.beginPath(); g.moveTo(0,y);
+    for(let x=0;x<=s;x+=32) g.lineTo(x,y+Math.sin(x*0.05+i)*6);
+    g.stroke();
+  }
+});
+const mudBump = canvasTex(256,(g,s)=>{
+  g.fillStyle='#7a7a7a'; g.fillRect(0,0,s,s);
+  for(let i=0;i<1600;i++){ const v=R(30,220)|0; g.fillStyle=`rgba(${v},${v},${v},0.35)`;
+    g.beginPath(); g.arc(R(s),R(s),R(1,5),0,7); g.fill(); }
+},false);
+const crabBump = canvasTex(128,(g,s)=>{
+  g.fillStyle='#8a8a8a'; g.fillRect(0,0,s,s);
+  for(let i=0;i<500;i++){ const v=R(50,210)|0; g.fillStyle=`rgba(${v},${v},${v},0.5)`;
+    g.beginPath(); g.arc(R(s),R(s),R(0.5,2.5),0,7); g.fill(); }
+},false);
+const mistTex = canvasTex(128,(g,s)=>{
+  const gr=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  gr.addColorStop(0,'rgba(255,255,255,0.85)');
+  gr.addColorStop(0.5,'rgba(255,255,255,0.28)');
+  gr.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=gr; g.fillRect(0,0,s,s);
+});
+
+/* wet-surface injection shared by bark / mud / shell materials */
+function wetify(mat, level, rough=0.16){
+  mat.onBeforeCompile = (sh)=>{
+    sh.uniforms.uWet={value:level};
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>','#include <common>\nvarying float vWorldY;')
+      .replace('#include <begin_vertex>',`#include <begin_vertex>
+        vWorldY=(modelMatrix*vec4(transformed,1.0)).y;`);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>','#include <common>\nvarying float vWorldY;\nuniform float uWet;')
+      .replace('#include <color_fragment>',`#include <color_fragment>
+        float wetA=1.0-smoothstep(uWet-0.10,uWet+0.22,vWorldY);
+        diffuseColor.rgb*=mix(vec3(1.0),vec3(0.44,0.50,0.47),wetA);`)
+      .replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
+        float wetB=1.0-smoothstep(uWet-0.10,uWet+0.22,vWorldY);
+        roughnessFactor=mix(roughnessFactor,${rough.toFixed(3)},wetB*0.9);`);
+  };
+  mat.customProgramCacheKey=()=>'wet'+level+rough;
+}
+
+/* ================= terrain ================= */
+function mudHeight(x,z){
+  const hw=1.9+0.45*Math.sin(z*0.23+1.7)+0.25*n2(x*0.3+4,z*0.3);
+  let h=-0.55;
+  h+=sstep(hw,hw+1.7,Math.abs(x))*(0.8+0.25*n2(x*0.5+9,z*0.5));
+  const shelf=Math.exp(-((x-1.35)*(x-1.35))/0.55)*(1-sstep(0,1.5,z))*sstep(-5.5,-4,z);
+  h+=shelf*0.62 + shelf*0.035*Math.sin(z*6.5+x*2.0);
+  h+=0.05*n2(x*1.2,z*1.2)+0.02*n2(x*4+7,z*4);
+  return h;
+}
+{
+  const g=new THREE.PlaneGeometry(70,70,140,140);
+  g.rotateX(-Math.PI/2);
+  const p=g.attributes.position;
+  for(let i=0;i<p.count;i++){ p.setY(i, mudHeight(p.getX(i), p.getZ(i))); }
+  g.computeVertexNormals();
+  const m=new THREE.MeshStandardMaterial({map:mudTex,bumpMap:mudBump,bumpScale:0.6,roughness:0.94,metalness:0.0,color:0x9a8f7c});
+  mudTex.repeat.set(9,9); mudBump.repeat.set(9,9);
+  wetify(m,0.06,0.34);
+  const mud=new THREE.Mesh(g,m); mud.receiveShadow=true; scene.add(mud);
+}
+
+/* ================= sky ================= */
+const GLSL_NOISE=`
+float hash21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float vnoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+float a=hash21(i),b=hash21(i+vec2(1,0)),c=hash21(i+vec2(0,1)),d=hash21(i+vec2(1,1));
+return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
+`;
+const skyMat=new THREE.ShaderMaterial({
+  side:THREE.BackSide, depthWrite:false, fog:false,
+  uniforms:{uTime, uMoonDir:{value:MOON_DIR}},
+  vertexShader:`varying vec3 vDir;void main(){vDir=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:GLSL_NOISE+`
+    varying vec3 vDir;uniform float uTime;uniform vec3 uMoonDir;
+    void main(){
+      vec3 d=normalize(vDir);
+      float h=d.y;
+      vec3 col=mix(vec3(0.004,0.010,0.017),vec3(0.0008,0.0025,0.007),smoothstep(-0.05,0.55,h));
+      col=mix(col,vec3(0.003,0.008,0.012),1.0-smoothstep(-0.08,0.14,h));
+      if(h>0.02){
+        vec3 sd=d*260.0;vec3 cell=floor(sd);
+        float sh=hash21(cell.xy+cell.z*7.7);
+        float star=step(0.9982,sh);
+        float tw=0.55+0.45*sin(uTime*1.7+sh*95.0);
+        vec3 f=fract(sd)-0.5;
+        float sp=1.0-smoothstep(0.0,0.13,length(f));
+        col+=vec3(0.7,0.8,1.0)*star*sp*tw*0.8*smoothstep(0.02,0.22,h);
+      }
+      float ang=acos(clamp(dot(d,uMoonDir),-1.0,1.0));
+      float disc=1.0-smoothstep(0.017,0.020,ang);
+      vec3 md2=normalize(uMoonDir+vec3(0.013,0.009,0.0));
+      float ang2=acos(clamp(dot(d,md2),-1.0,1.0));
+      float disc2=1.0-smoothstep(0.016,0.019,ang2);
+      float cres=disc*(1.0-disc2*0.97);
+      col+=vec3(0.86,0.93,1.0)*cres*2.6;
+      col+=vec3(0.32,0.48,0.68)*exp(-ang*22.0)*0.03;
+      gl_FragColor=vec4(col,1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(220,32,20), skyMat));
+
+/* ================= bark geometry helpers ================= */
+const barkGeos=[];
+function taperedTube(curve,segs,radial,r0,r1,flare=0,noiseAmt=0.07){
+  const frames=curve.computeFrenetFrames(segs,false);
+  const pos=[],nor=[],uv=[],idx=[];
+  const len=curve.getLength();
+  for(let i=0;i<=segs;i++){
+    const t=i/segs;
+    const c=curve.getPointAt(t);
+    let r=lerp(r0,r1,Math.pow(t,0.9));
+    r*=1+noiseAmt*Math.sin(t*37+r0*900)+noiseAmt*0.6*Math.sin(t*83);
+    if(flare>0) r*=1+flare*sstep(0.82,1.0,t);
+    const N=frames.normals[i],B=frames.binormals[i];
+    for(let j=0;j<=radial;j++){
+      const a=j/radial*Math.PI*2;
+      const nx=Math.cos(a),ny=Math.sin(a);
+      const nrm=new THREE.Vector3().addScaledVector(N,nx).addScaledVector(B,ny).normalize();
+      pos.push(c.x+nrm.x*r,c.y+nrm.y*r,c.z+nrm.z*r);
+      nor.push(nrm.x,nrm.y,nrm.z);
+      uv.push(j/radial*2, t*len*1.6);
+    }
+  }
+  for(let i=0;i<segs;i++)for(let j=0;j<radial;j++){
+    const a=i*(radial+1)+j,b=a+radial+1;
+    idx.push(a,b,a+1,b,b+1,a+1);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);
+  return g;
+}
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const leafTips=[]; const dripPoints=[]; const oysterSpots=[];
+
+function makeTree(x,z,scale,hero){
+  const baseY=mudHeight(x,z)-0.06;
+  const H=R(2.3,3.5)*scale;
+  const leanA=R(Math.PI*2), lean=R(0.1,0.45)*scale;
+  const pts=[];
+  for(let i=0;i<=4;i++){
+    const t=i/4;
+    pts.push(V3(
+      x+Math.cos(leanA)*lean*t*t+R(-0.06,0.06),
+      baseY+H*t,
+      z+Math.sin(leanA)*lean*t*t+R(-0.06,0.06)));
+  }
+  const trunk=new THREE.CatmullRomCurve3(pts);
+  barkGeos.push(taperedTube(trunk,14,7,0.15*scale,0.05*scale,0.5));
+  /* branches */
+  const nb=3+Math.floor(R(3));
+  for(let b=0;b<nb;b++){
+    const t=R(0.55,0.92);
+    const st=trunk.getPointAt(t);
+    const az=R(Math.PI*2);
+    const dir=V3(Math.cos(az),0,Math.sin(az));
+    const len=R(0.8,1.7)*scale;
+    const end=st.clone().addScaledVector(dir,len).add(V3(0,R(-0.05,0.4)*scale,0));
+    const mid=st.clone().addScaledVector(dir,len*0.5).add(V3(0,0.16*scale,0));
+    const bc=new THREE.CatmullRomCurve3([st,mid,end]);
+    barkGeos.push(taperedTube(bc,8,5,0.036*scale,0.011*scale,0,0.1));
+    leafTips.push({p:end,s:scale});
+    leafTips.push({p:mid,s:scale*0.85});
+    const tw=end.clone().add(V3(R(-0.3,0.3),R(0.05,0.3),R(-0.3,0.3)).multiplyScalar(scale));
+    barkGeos.push(taperedTube(new THREE.CatmullRomCurve3([end,tw]),4,4,0.011*scale,0.005*scale,0,0.12));
+    leafTips.push({p:tw,s:scale});
+  }
+  /* stilt roots */
+  const nr=5+Math.floor(R(4))+(hero?2:0);
+  for(let rI=0;rI<nr;rI++){
+    const t=R(0.06,0.42);
+    const st=trunk.getPointAt(t);
+    let az;
+    if(hero) az=Math.atan2(-z*0.1-Math.sign(x)*0.9, -Math.sign(x)*1.4)+R(-0.7,0.7);
+    else az=R(Math.PI*2);
+    const reach=R(0.7,1.5)*scale*(hero&&rI<2?1.9:1);
+    const dir=V3(Math.cos(az),0,Math.sin(az));
+    const ex=st.x+dir.x*reach, ez=st.z+dir.z*reach;
+    const ey=mudHeight(ex,ez)+0.03;
+    const p1=st.clone().addScaledVector(dir,reach*0.32).add(V3(0,0.06,0));
+    const p2=st.clone().addScaledVector(dir,reach*0.68);
+    p2.y=lerp(st.y,ey,0.5)+0.14*scale;
+    const end=V3(ex,ey,ez);
+    const rc=new THREE.CatmullRomCurve3([st,p1,p2,end]);
+    barkGeos.push(taperedTube(rc,12,6,0.05*scale,0.022*scale,0.45,0.09));
+    if(hero){
+      const dm=rc.getPointAt(0.42);
+      if(dm.y>0.55) dripPoints.push(dm.clone());
+      const dm2=rc.getPointAt(0.62);
+      if(dm2.y>0.5) dripPoints.push(dm2.clone());
+    }
+    for(let k=0;k<5;k++){
+      const op=rc.getPointAt(0.55+k*0.09);
+      if(op.y>0.0&&op.y<0.34) oysterSpots.push(op.clone());
+    }
+  }
+}
+/* hero trees framing the opening shot */
+makeTree( 2.55, 5.3, 1.15, true);
+makeTree(-2.75, 4.7, 1.05, true);
+/* channel banks */
+makeTree( 3.15, 1.6, 1.0, false);
+makeTree(-3.25, 0.4, 1.1, false);
+makeTree( 2.75,-3.6, 0.95,false);
+makeTree(-2.85,-5.0, 1.05,false);
+makeTree( 3.35,-7.6, 1.0, false);
+makeTree(-3.45,-9.2, 0.9, false);
+makeTree( 2.95,-11.5,0.95,false);
+makeTree(-3.1,-13.0, 1.0, false);
+/* distant silhouettes */
+makeTree( 3.9,-16.5, 1.2, false);
+makeTree(-4.1,-18.0, 1.15,false);
+makeTree( 4.4,-22.0, 1.3, false);
+makeTree(-4.6,-24.0, 1.25,false);
+
+/* half-submerged fallen branch across the right side */
+const branchCurve=new THREE.CatmullRomCurve3([
+  V3( 2.35, 0.16,-2.85),
+  V3( 1.30, 0.02,-2.25),
+  V3( 0.30,-0.16,-1.60),
+  V3(-0.55,-0.30,-0.95),
+  V3(-1.05,-0.34,-0.55)
+]);
+barkGeos.push(taperedTube(branchCurve,20,8,0.095,0.05,0,0.08));
+{
+  const b1=branchCurve.getPointAt(0.3);
+  barkGeos.push(taperedTube(new THREE.CatmullRomCurve3([b1,b1.clone().add(V3(0.1,0.34,0.06)),b1.clone().add(V3(0.16,0.52,0.1))]),6,5,0.028,0.012,0,0.12));
+  const b2=branchCurve.getPointAt(0.62);
+  barkGeos.push(taperedTube(new THREE.CatmullRomCurve3([b2,b2.clone().add(V3(-0.06,0.2,-0.1)),b2.clone().add(V3(-0.1,0.34,-0.16))]),5,5,0.022,0.01,0,0.12));
+}
+const barkMat=new THREE.MeshStandardMaterial({map:barkTex,bumpMap:barkBump,bumpScale:0.9,roughness:0.82,metalness:0.0,color:0x948a7a});
+wetify(barkMat,0.30,0.15);
+const barkMesh=new THREE.Mesh(mergeGeometries(barkGeos,false),barkMat);
+barkMesh.castShadow=true; barkMesh.receiveShadow=true;
+scene.add(barkMesh);
+
+/* ================= leaves ================= */
+const leafShape=new THREE.Shape();
+leafShape.moveTo(0,0);
+leafShape.quadraticCurveTo(0.034,0.032,0.021,0.078);
+leafShape.quadraticCurveTo(0.009,0.106,0,0.118);
+leafShape.quadraticCurveTo(-0.009,0.106,-0.021,0.078);
+leafShape.quadraticCurveTo(-0.034,0.032,0,0);
+const leafGeo=new THREE.ShapeGeometry(leafShape,5);
+{
+  const p=leafGeo.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i);
+    p.setZ(i, 0.02*Math.sin(Math.PI*y/0.118)+x*x*1.4);
+  }
+  leafGeo.computeVertexNormals();
+}
+const leafMat=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.42,metalness:0,clearcoat:0.55,clearcoatRoughness:0.38,side:THREE.DoubleSide});
+leafMat.onBeforeCompile=(sh)=>{
+  sh.uniforms.uTime=uTime;
+  sh.vertexShader=sh.vertexShader
+    .replace('#include <common>','#include <common>\nuniform float uTime;\nattribute float aPhase;')
+    .replace('#include <begin_vertex>',`#include <begin_vertex>
+      float sway=sin(uTime*1.25+aPhase)*0.02+sin(uTime*2.63+aPhase*1.7)*0.008;
+      transformed+=vec3(sway,sway*0.3,sway*0.5)*uv.y;`);
+};
+const LEAF_MAX=4200;
+const leaves=new THREE.InstancedMesh(leafGeo,leafMat,LEAF_MAX);
+leaves.castShadow=true;
+{
+  const m=new THREE.Matrix4(),q=new THREE.Quaternion(),qr=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3();
+  const up=V3(0,1,0),dir=new THREE.Vector3(),col=new THREE.Color();
+  const phases=new Float32Array(LEAF_MAX);
+  let n=0;
+  const put=(tip)=>{
+    if(n>=LEAF_MAX) return;
+    const cnt=20+Math.floor(R(8));
+    for(let k=0;k<cnt&&n<LEAF_MAX;k++){
+      p.copy(tip.p).add(V3(R(-0.17,0.17),R(-0.13,0.15),R(-0.17,0.17)).multiplyScalar(tip.s));
+      const yaw=R(Math.PI*2), pitch=R(0.35,1.25);
+      dir.set(Math.cos(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.sin(yaw)*Math.cos(pitch)).normalize();
+      q.setFromUnitVectors(up,dir);
+      qr.setFromAxisAngle(dir,R(Math.PI*2));
+      q.premultiply(qr);
+      const sc=R(1.1,1.8)*tip.s;
+      s.set(sc,sc,sc);
+      m.compose(p,q,s);
+      leaves.setMatrixAt(n,m);
+      const g=R();
+      col.setRGB(lerp(0.06,0.15,g),lerp(0.19,0.36,g),lerp(0.09,0.17,g));
+      leaves.setColorAt(n,col);
+      phases[n]=R(Math.PI*2);
+      n++;
+    }
+  };
+  leafTips.forEach(put);
+  leaves.count=n;
+  leafGeo.setAttribute('aPhase',new THREE.InstancedBufferAttribute(phases,1));
+  leaves.instanceMatrix.needsUpdate=true;
+  if(leaves.instanceColor) leaves.instanceColor.needsUpdate=true;
+}
+scene.add(leaves);
+
+/* ================= oysters ================= */
+const oysterGeo=new THREE.IcosahedronGeometry(0.05,1);
+{
+  const p=oysterGeo.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+    const d=1+0.28*(h2(x*40,z*40)-0.5);
+    p.setXYZ(i,x*d,y*0.55*d,z*0.85*d);
+  }
+  oysterGeo.computeVertexNormals();
+}
+const oysterMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.88,bumpMap:crabBump,bumpScale:0.4});
+wetify(oysterMat,0.34,0.3);
+const OYS_MAX=170;
+const oysters=new THREE.InstancedMesh(oysterGeo,oysterMat,OYS_MAX);
+oysters.castShadow=true;
+{
+  const m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),s=new THREE.Vector3(),col=new THREE.Color();
+  let n=0;
+  for(const spot of oysterSpots){
+    if(n>=OYS_MAX-10) break;
+    if(R()<0.45) continue;
+    const cnt=4+Math.floor(R(6));
+    for(let k=0;k<cnt&&n<OYS_MAX;k++){
+      const p=spot.clone().add(V3(R(-0.09,0.09),R(-0.05,0.07),R(-0.09,0.09)));
+      e.set(R(-0.5,0.5),R(Math.PI*2),R(-0.5,0.5));
+      q.setFromEuler(e);
+      const sc=R(0.55,1.5);
+      s.set(sc,sc*R(0.7,1.1),sc);
+      m.compose(p,q,s);
+      oysters.setMatrixAt(n,m);
+      const g=R();
+      col.setRGB(lerp(0.28,0.45,g),lerp(0.27,0.42,g),lerp(0.24,0.38,g));
+      oysters.setColorAt(n,col);
+      n++;
+    }
+  }
+  oysters.count=n;
+  oysters.instanceMatrix.needsUpdate=true;
+  if(oysters.instanceColor) oysters.instanceColor.needsUpdate=true;
+}
+scene.add(oysters);
+
+/* ================= horseshoe crab ================= */
+const crab=new THREE.Group();
+{
+  const shellMat=new THREE.MeshStandardMaterial({color:0x4a4636,roughness:0.52,bumpMap:crabBump,bumpScale:0.5});
+  wetify(shellMat,0.28,0.22);
+  const prosoma=new THREE.SphereGeometry(0.13,24,14,0,Math.PI*2,0,Math.PI/2);
+  prosoma.scale(1.0,0.5,0.9);
+  const pm=new THREE.Mesh(prosoma,shellMat); pm.position.set(0,0,0.05); pm.castShadow=true;
+  const opistho=new THREE.SphereGeometry(0.085,18,12,0,Math.PI*2,0,Math.PI/2);
+  opistho.scale(0.95,0.42,0.8);
+  const om=new THREE.Mesh(opistho,shellMat); om.position.set(0,0.005,-0.1); om.castShadow=true;
+  const telson=new THREE.ConeGeometry(0.011,0.24,8);
+  telson.rotateX(-Math.PI/2-0.12);
+  const tm=new THREE.Mesh(telson,shellMat); tm.position.set(0,0.02,-0.27); tm.castShadow=true;
+  crab.add(pm,om,tm);
+}
+scene.add(crab);
+const crabState={z:-3.3,dir:1,yaw:0,x:1.42};
+
+/* ================= fish ================= */
+const fishCurve=new THREE.CatmullRomCurve3([
+  V3( 0.25,-0.13, 5.0), V3(-0.75,-0.16, 2.4), V3(-0.95,-0.14,-0.8),
+  V3(-0.50,-0.18,-3.6), V3( 0.35,-0.15,-6.6), V3( 0.65,-0.13,-8.6),
+  V3(-0.20,-0.16,-6.0), V3(-0.60,-0.14,-2.6), V3(-0.30,-0.15, 1.0),
+  V3( 0.50,-0.13, 3.4)
+],true,'catmullrom',0.5);
+const fishLoopLen=fishCurve.getLength();
+const FISH_N=14;
+const fishGeo=(()=>{
+  const prof=[];
+  for(let i=0;i<=10;i++){
+    const t=i/10, y=lerp(-0.11,0.11,t);
+    const r=0.034*Math.sin(Math.PI*Math.pow(t,0.72))*(1-0.25*t)+0.0015;
+    prof.push(new THREE.Vector2(Math.max(r,0.0015),y));
+  }
+  const body=new THREE.LatheGeometry(prof,10);
+  body.rotateX(Math.PI/2);
+  const fin=new THREE.BufferGeometry();
+  fin.setAttribute('position',new THREE.Float32BufferAttribute([
+    0,0,-0.095,  0,0.036,-0.16,  0,-0.004,-0.145,
+    0,0,-0.095,  0,-0.004,-0.145, 0,-0.032,-0.158
+  ],3));
+  fin.setAttribute('normal',new THREE.Float32BufferAttribute([1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],3));
+  fin.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,1,1,0,0,1,1,0,1],2));
+  return mergeGeometries([body.toNonIndexed(),fin],false);
+})();
+const fishMat=new THREE.MeshStandardMaterial({color:0x6a7a84,roughness:0.38,metalness:0.25,emissive:0x14424c,emissiveIntensity:0.8,side:THREE.DoubleSide});
+fishMat.onBeforeCompile=(sh)=>{
+  sh.uniforms.uTime=uTime;
+  sh.vertexShader=sh.vertexShader
+    .replace('#include <common>','#include <common>\nuniform float uTime;\nattribute float aPhase;')
+    .replace('#include <begin_vertex>',`#include <begin_vertex>
+      float tw=1.0-smoothstep(-0.12,0.03,transformed.z);
+      transformed.x+=sin(uTime*8.5+aPhase+transformed.z*16.0)*0.014*tw;`);
+};
+const fish=new THREE.InstancedMesh(fishGeo,fishMat,FISH_N);
+fish.frustumCulled=false;
+{
+  const ph=new Float32Array(FISH_N);
+  for(let i=0;i<FISH_N;i++) ph[i]=R(Math.PI*2);
+  fishGeo.setAttribute('aPhase',new THREE.InstancedBufferAttribute(ph,1));
+}
+scene.add(fish);
+const fishState=[];
+for(let i=0;i<FISH_N;i++){
+  fishState.push({
+    u:(i/FISH_N+R(-0.012,0.012)+1)%1,
+    speed:R(0.45,0.72),
+    lat:R(-0.17,0.17),
+    depth:R(-0.05,0.04),
+    pos:new THREE.Vector3(), tan:new THREE.Vector3()
+  });
+}
+
+/* ================= water: reflection + disturbance ================= */
+const reflScale=0.4;
+const reflRT=new THREE.WebGLRenderTarget(
+  Math.floor(window.innerWidth*reflScale),Math.floor(window.innerHeight*reflScale),
+  {minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:true});
+const virtualCam=new THREE.PerspectiveCamera();
+const texMatrix=new THREE.Matrix4();
+const clipPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0.001);
+const _fwd=new THREE.Vector3(),_tgt=new THREE.Vector3();
+
+const DIST_RES=512, DIST_MIN_X=-8, DIST_MIN_Z=-10, DIST_SIZE=16;
+const distRT=[0,1].map(()=>new THREE.WebGLRenderTarget(DIST_RES,DIST_RES,{
+  type:THREE.HalfFloatType,format:THREE.RGBAFormat,
+  minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false}));
+let distRead=0;
+const orthoCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+const quadGeo=new THREE.PlaneGeometry(2,2);
+const decayMat=new THREE.ShaderMaterial({
+  depthTest:false,depthWrite:false,toneMapped:false,
+  uniforms:{tPrev:{value:null},uDecay:{value:1},uPx:{value:1/DIST_RES}},
+  vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`,
+  fragmentShader:`
+    varying vec2 vUv;uniform sampler2D tPrev;uniform float uDecay,uPx;
+    void main(){
+      vec3 c=texture2D(tPrev,vUv).rgb;
+      vec3 b=(texture2D(tPrev,vUv+vec2(uPx,0.0)).rgb+texture2D(tPrev,vUv-vec2(uPx,0.0)).rgb
+             +texture2D(tPrev,vUv+vec2(0.0,uPx)).rgb+texture2D(tPrev,vUv-vec2(0.0,uPx)).rgb)*0.25;
+      c=mix(c,b,0.10)*uDecay;
+      c=max(c-0.0004,0.0);
+      gl_FragColor=vec4(c,1.0);
+    }`
+});
+const decayScene=new THREE.Scene(); decayScene.add(new THREE.Mesh(quadGeo,decayMat));
+
+const SPLAT_MAX=220;
+const splatGeo=new THREE.InstancedBufferGeometry();
+{
+  const base=new THREE.PlaneGeometry(1,1);
+  splatGeo.index=base.index;
+  splatGeo.attributes.position=base.attributes.position;
+  splatGeo.attributes.uv=base.attributes.uv;
+}
+const splatPos=new Float32Array(SPLAT_MAX*2);
+const splatRad=new Float32Array(SPLAT_MAX);
+const splatInt=new Float32Array(SPLAT_MAX);
+const splatRing=new Float32Array(SPLAT_MAX);
+const attrPos=new THREE.InstancedBufferAttribute(splatPos,2).setUsage(THREE.DynamicDrawUsage);
+const attrRad=new THREE.InstancedBufferAttribute(splatRad,1).setUsage(THREE.DynamicDrawUsage);
+const attrInt=new THREE.InstancedBufferAttribute(splatInt,1).setUsage(THREE.DynamicDrawUsage);
+const attrRing=new THREE.InstancedBufferAttribute(splatRing,1).setUsage(THREE.DynamicDrawUsage);
+splatGeo.setAttribute('iPos',attrPos);
+splatGeo.setAttribute('iRad',attrRad);
+splatGeo.setAttribute('iInt',attrInt);
+splatGeo.setAttribute('iRing',attrRing);
+const splatMat=new THREE.ShaderMaterial({
+  depthTest:false,depthWrite:false,transparent:true,blending:THREE.AdditiveBlending,toneMapped:false,
+  vertexShader:`
+    attribute vec2 iPos;attribute float iRad,iInt,iRing;
+    varying vec2 vUv;varying float vInt,vRing;
+    void main(){
+      vUv=uv;vInt=iInt;vRing=iRing;
+      vec2 p=iPos*2.0-1.0+position.xy*iRad*4.0;
+      gl_Position=vec4(p,0.0,1.0);
+    }`,
+  fragmentShader:`
+    varying vec2 vUv;varying float vInt,vRing;
+    void main(){
+      float d=length(vUv-0.5)*2.0;
+      float g=exp(-d*d*5.0);
+      float ring=smoothstep(0.45,0.75,d)*(1.0-smoothstep(0.8,1.0,d));
+      float prof=mix(g,ring,vRing);
+      float a=vInt*prof*(1.0-step(1.0,d));
+      gl_FragColor=vec4(a,a*0.55,0.0,1.0);
+    }`
+});
+const splatMesh=new THREE.Mesh(splatGeo,splatMat);
+splatMesh.frustumCulled=false;
+const splatScene=new THREE.Scene(); splatScene.add(splatMesh);
+const splatQueue=[];
+function pushSplat(x,z,rad,intensity,ring=0){
+  if(splatQueue.length>=SPLAT_MAX) return;
+  const u=(x-DIST_MIN_X)/DIST_SIZE, v=(z-DIST_MIN_Z)/DIST_SIZE;
+  if(u<0.02||u>0.98||v<0.02||v>0.98) return;
+  splatQueue.push({u,v,rad:rad/DIST_SIZE,intensity,ring});
+}
+
+const waterUniforms={
+  tReflect:{value:reflRT.texture},
+  tDisturb:{value:distRT[1].texture},
+  uTexMatrix:{value:texMatrix},
+  uTime,
+  uMoonDir:{value:MOON_DIR}
+};
+const waterMat=new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, toneMapped:false,
+  uniforms:waterUniforms,
+  vertexShader:`
+    varying vec3 vWorld;varying vec4 vReflUv;varying vec2 vDistUv;
+    uniform mat4 uTexMatrix;
+    void main(){
+      vec4 wp=modelMatrix*vec4(position,1.0);
+      vWorld=wp.xyz;
+      vReflUv=uTexMatrix*wp;
+      vDistUv=(wp.xz-vec2(${DIST_MIN_X.toFixed(1)},${DIST_MIN_Z.toFixed(1)}))/${DIST_SIZE.toFixed(1)};
+      gl_Position=projectionMatrix*viewMatrix*wp;
+    }`,
+  fragmentShader:GLSL_NOISE+`
+    varying vec3 vWorld;varying vec4 vReflUv;varying vec2 vDistUv;
+    uniform sampler2D tReflect,tDisturb;
+    uniform float uTime;uniform vec3 uMoonDir;
+    void main(){
+      vec2 p=vWorld.xz;float t=uTime;
+      vec3 n=vec3(0.0,1.0,0.0);
+      vec2 d1=vec2(0.8,0.6),d2=vec2(-0.6,0.8),d3=vec2(0.2,-1.0),d4=vec2(1.0,0.1);
+      n.x-=0.028*0.9*cos(dot(p,d1)*0.9+t*0.6)*d1.x; n.z-=0.028*0.9*cos(dot(p,d1)*0.9+t*0.6)*d1.y;
+      n.x-=0.020*1.7*cos(dot(p,d2)*1.7+t*0.9)*d2.x; n.z-=0.020*1.7*cos(dot(p,d2)*1.7+t*0.9)*d2.y;
+      n.x-=0.012*3.1*cos(dot(p,d3)*3.1+t*1.3)*d3.x; n.z-=0.012*3.1*cos(dot(p,d3)*3.1+t*1.3)*d3.y;
+      n.x-=0.008*5.3*cos(dot(p,d4)*5.3+t*1.7)*d4.x; n.z-=0.008*5.3*cos(dot(p,d4)*5.3+t*1.7)*d4.y;
+      float e=0.004;
+      float dc=texture2D(tDisturb,vDistUv).r;
+      float dx=texture2D(tDisturb,vDistUv+vec2(e,0.0)).r-texture2D(tDisturb,vDistUv-vec2(e,0.0)).r;
+      float dz=texture2D(tDisturb,vDistUv+vec2(0.0,e)).r-texture2D(tDisturb,vDistUv-vec2(0.0,e)).r;
+      n.x-=dx*2.2; n.z-=dz*2.2;
+      n=normalize(n);
+      vec3 V=normalize(cameraPosition-vWorld);
+      float F=0.02+0.98*pow(1.0-clamp(dot(V,n),0.0,1.0),5.0);
+      vec2 ruv=vReflUv.xy/vReflUv.w+n.xz*0.025;
+      vec3 refl=texture2D(tReflect,clamp(ruv,0.002,0.998)).rgb;
+      vec3 deep=vec3(0.002,0.005,0.007);
+      vec3 col=mix(deep,refl*0.75,clamp(F*0.92+0.06,0.0,1.0));
+      vec3 Rr=reflect(-V,n);
+      float sp=pow(clamp(dot(Rr,uMoonDir),0.0,1.0),600.0);
+      col+=vec3(0.75,0.85,1.0)*sp*0.35;
+      float det=vnoise(p*7.0-t*0.25)*0.6+vnoise(p*23.0+t*0.4)*0.4;
+      float bio=clamp(dc,0.0,1.6)*(0.5+0.5*det);
+      col+=vec3(0.06,0.85,0.72)*bio*0.85+vec3(0.10,0.45,0.95)*bio*bio*0.35;
+      float sm=exp(-pow((vWorld.x-1.35)/0.85,2.0))*(1.0-smoothstep(0.0,1.5,vWorld.z))*smoothstep(-5.5,-4.0,vWorld.z);
+      float alpha=mix(0.78,0.55,sm);
+      float dist=length(cameraPosition-vWorld);
+      float fog=1.0-exp(-pow(dist*0.045,2.0));
+      col=mix(col,vec3(0.004,0.010,0.016),fog);
+      gl_FragColor=vec4(col,alpha);
+      #include <colorspace_fragment>
+    }`
+});
+const water=new THREE.Mesh(new THREE.PlaneGeometry(9,90),waterMat);
+water.rotation.x=-Math.PI/2;
+water.position.z=-5;
+water.renderOrder=2;
+scene.add(water);
+
+/* ================= droplets / splash particles ================= */
+const PART_MAX=240;
+const partPos=new Float32Array(PART_MAX*3);
+const partSize=new Float32Array(PART_MAX);
+const partAlpha=new Float32Array(PART_MAX);
+const parts=[];
+for(let i=0;i<PART_MAX;i++) parts.push({active:false,x:0,y:-10,z:0,vx:0,vy:0,vz:0,life:0,maxLife:1,size:0.01,kind:0});
+const partGeo=new THREE.BufferGeometry();
+partGeo.setAttribute('position',new THREE.BufferAttribute(partPos,3).setUsage(THREE.DynamicDrawUsage));
+partGeo.setAttribute('aSize',new THREE.BufferAttribute(partSize,1).setUsage(THREE.DynamicDrawUsage));
+partGeo.setAttribute('aAlpha',new THREE.BufferAttribute(partAlpha,1).setUsage(THREE.DynamicDrawUsage));
+const partMat=new THREE.ShaderMaterial({
+  transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false,
+  uniforms:{uScale:{value:1}},
+  vertexShader:`
+    attribute float aSize,aAlpha;varying float vA;uniform float uScale;
+    void main(){
+      vA=aAlpha;
+      vec4 mv=modelViewMatrix*vec4(position,1.0);
+      gl_PointSize=aSize*uScale/max(0.1,-mv.z);
+      gl_Position=projectionMatrix*mv;
+    }`,
+  fragmentShader:`
+    varying float vA;
+    void main(){
+      float d=length(gl_PointCoord-0.5)*2.0;
+      float a=(1.0-smoothstep(0.3,1.0,d))*vA;
+      gl_FragColor=vec4(vec3(0.62,0.85,0.9)*a,a);
+      #include <colorspace_fragment>
+    }`
+});
+const partPoints=new THREE.Points(partGeo,partMat);
+partPoints.frustumCulled=false;
+partPoints.renderOrder=3;
+scene.add(partPoints);
+function spawnPart(x,y,z,vx,vy,vz,life,size,kind){
+  for(const p of parts){
+    if(!p.active){
+      p.active=true;p.x=x;p.y=y;p.z=z;p.vx=vx;p.vy=vy;p.vz=vz;
+      p.life=life;p.maxLife=life;p.size=size;p.kind=kind;
+      return p;
+    }
+  }
+  return null;
+}
+
+/* mist billboards */
+const mists=[];
+{
+  const mm=new THREE.MeshBasicMaterial({map:mistTex,color:0x2a4a52,transparent:true,opacity:0.07,
+    depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+  [[0,-6.5,7,2.4],[-1.2,-11,9,3],[0.8,1.8,6,2]].forEach(([x,z,w,h])=>{
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mm.clone());
+    m.position.set(x,0.55,z);
+    m.renderOrder=4;
+    m.userData.baseX=x;
+    scene.add(m); mists.push(m);
+  });
+}
+
+/* ================= rings, eddies, pulse ================= */
+const rings=[];
+for(let i=0;i<12;i++) rings.push({active:false,x:0,z:0,age:0,life:2,maxR:0.4,int:0.8});
+function spawnRing(x,z){
+  for(const r of rings){
+    if(!r.active){ r.active=true;r.x=x;r.z=z;r.age=0;r.life=R(1.8,2.6);r.maxR=R(0.3,0.5);r.int=R(0.7,1.0); return; }
+  }
+}
+/* branching eddy network around the fallen branch */
+const eddyPts=[];
+{
+  const perp=V3(0.55,0,0.83).normalize();
+  const mainN=26;
+  for(let i=0;i<mainN;i++){
+    const t=i/(mainN-1);
+    const p=branchCurve.getPointAt(t).clone().addScaledVector(perp,0.16+0.05*Math.sin(t*9));
+    p.y=0;
+    eddyPts.push({x:p.x,z:p.z,s:t*3.4});
+  }
+  let sBase=0;
+  for(let b=0;b<6;b++){
+    const t0=0.12+b*0.15;
+    const root=branchCurve.getPointAt(t0).clone().addScaledVector(perp,0.16);
+    const side=b%2?1:-1;
+    const curl=V3(perp.z*side,0,-perp.x*side);
+    const n=9;
+    for(let k=1;k<=n;k++){
+      const f=k/n;
+      const ang=f*2.4;
+      const p=root.clone()
+        .addScaledVector(curl,0.12+f*0.5)
+        .addScaledVector(perp,Math.sin(ang)*0.14*f);
+      eddyPts.push({x:p.x,z:p.z,s:t0*3.4+f*0.85});
+    }
+    sBase=Math.max(sBase,t0*3.4+0.85);
+  }
+}
+const netLen=3.6;
+const pulse={active:false,t:0,dur:4.6,next:5.0};
+let nextDrip=1.2, nextLap=0.8, dropFlash=0;
+
+/* ================= audio ================= */
+const audio={ctx:null,on:false,master:null,verb:null,nextChirp:0};
+function buildAudio(){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const master=ctx.createGain(); master.gain.value=0;
+  const comp=ctx.createDynamicsCompressor();
+  comp.threshold.value=-20; comp.ratio.value=4; comp.attack.value=0.004; comp.release.value=0.25;
+  master.connect(comp); comp.connect(ctx.destination);
+  const verb=ctx.createConvolver();
+  const irLen=Math.floor(ctx.sampleRate*1.3);
+  const ir=ctx.createBuffer(2,irLen,ctx.sampleRate);
+  for(let ch=0;ch<2;ch++){
+    const d=ir.getChannelData(ch);
+    for(let i=0;i<irLen;i++){
+      const t=i/irLen;
+      d[i]=(rng()*2-1)*Math.pow(1-t,2.6)*0.5;
+    }
+  }
+  verb.buffer=ir;
+  const wet=ctx.createGain(); wet.gain.value=0.22;
+  verb.connect(wet); wet.connect(master);
+  /* water bed: looped brown noise */
+  const nb=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);
+  const nd=nb.getChannelData(0);
+  let last=0;
+  for(let i=0;i<nd.length;i++){ last=(last+0.02*(rng()*2-1))/1.02; nd[i]=last*3.2; }
+  const src=ctx.createBufferSource(); src.buffer=nb; src.loop=true;
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=340; lp.Q.value=0.4;
+  const bedGain=ctx.createGain(); bedGain.gain.value=0.05;
+  const lfo=ctx.createOscillator(); lfo.frequency.value=0.13;
+  const lfoG=ctx.createGain(); lfoG.gain.value=0.022;
+  lfo.connect(lfoG); lfoG.connect(bedGain.gain);
+  src.connect(lp); lp.connect(bedGain); bedGain.connect(master); bedGain.connect(verb);
+  src.start(); lfo.start();
+  audio.ctx=ctx; audio.master=master; audio.verb=verb;
+}
+function panNode(x){
+  const p=audio.ctx.createStereoPanner();
+  p.pan.value=clamp(x/4,-0.85,0.85);
+  p.connect(audio.master); p.connect(audio.verb);
+  return p;
+}
+function chirp(){
+  const ctx=audio.ctx,t=ctx.currentTime;
+  const f=R(3600,4700), dur=R(0.35,1.1), pan=panNode(R(-3,3));
+  const car=ctx.createOscillator(); car.type='sine'; car.frequency.value=f;
+  const am=ctx.createGain(); am.gain.value=0.5;
+  const amOsc=ctx.createOscillator(); amOsc.frequency.value=R(22,34);
+  const amG=ctx.createGain(); amG.gain.value=0.5;
+  amOsc.connect(amG); amG.connect(am.gain);
+  const env=ctx.createGain(); env.gain.value=0;
+  env.gain.setValueAtTime(0,t);
+  env.gain.linearRampToValueAtTime(0.013,t+0.06);
+  env.gain.setValueAtTime(0.013,t+dur-0.08);
+  env.gain.linearRampToValueAtTime(0,t+dur);
+  car.connect(am); am.connect(env); env.connect(pan);
+  car.start(t); amOsc.start(t);
+  car.stop(t+dur+0.05); amOsc.stop(t+dur+0.05);
+}
+function plink(x){
+  const ctx=audio.ctx,t=ctx.currentTime,pan=panNode(x);
+  const o=ctx.createOscillator(); o.type='sine';
+  o.frequency.setValueAtTime(R(680,900),t);
+  o.frequency.exponentialRampToValueAtTime(R(220,300),t+0.09);
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(0.085,t+0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+  o.connect(g); g.connect(pan);
+  o.start(t); o.stop(t+0.2);
+}
+function whoosh(){
+  const ctx=audio.ctx,t=ctx.currentTime;
+  const nb=ctx.createBuffer(1,ctx.sampleRate*3,ctx.sampleRate);
+  const nd=nb.getChannelData(0);
+  for(let i=0;i<nd.length;i++) nd[i]=rng()*2-1;
+  const src=ctx.createBufferSource(); src.buffer=nb;
+  const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=1.2;
+  bp.frequency.setValueAtTime(220,t);
+  bp.frequency.linearRampToValueAtTime(620,t+1.6);
+  bp.frequency.linearRampToValueAtTime(240,t+3.4);
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(0.035,t+0.8);
+  g.gain.linearRampToValueAtTime(0,t+3.6);
+  src.connect(bp); bp.connect(g); g.connect(audio.master); g.connect(audio.verb);
+  src.start(t); src.stop(t+3.7);
+}
+function setSound(on){
+  audio.on=on;
+  if(on&&!audio.ctx) buildAudio();
+  if(!audio.ctx) return;
+  if(on){
+    audio.ctx.resume();
+    audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
+    audio.master.gain.setTargetAtTime(0.55,audio.ctx.currentTime,0.4);
+    audio.nextChirp=simTime+0.3;
+  }else{
+    audio.master.gain.setTargetAtTime(0,audio.ctx.currentTime,0.15);
+  }
+}
+
+/* ================= simulation ================= */
+const STEP=1/60;
+let simTime=0, acc=0, paused=false;
+const _m=new THREE.Matrix4(),_q=new THREE.Quaternion(),_q2=new THREE.Quaternion(),_s=V3(1,1,1),_z=V3(0,0,1);
+const _perp=new THREE.Vector3();
+const fishCentroid=new THREE.Vector3();
+
+function step(dt){
+  /* fish */
+  fishCentroid.set(0,0,0);
+  for(let i=0;i<FISH_N;i++){
+    const f=fishState[i];
+    const spd=f.speed*(1+0.25*Math.sin(simTime*0.6+i*2.1));
+    f.u=(f.u+spd*dt/fishLoopLen)%1;
+    fishCurve.getPointAt(f.u,f.pos);
+    fishCurve.getTangentAt(f.u,f.tan);
+    _perp.set(-f.tan.z,0,f.tan.x).normalize();
+    const lat=f.lat+Math.sin(simTime*0.7+i*1.3)*0.06;
+    f.pos.addScaledVector(_perp,lat);
+    f.pos.y=-0.10+f.depth+0.03*Math.sin(simTime*0.9+i*1.7);
+    fishCentroid.add(f.pos);
+    pushSplat(f.pos.x,f.pos.z,0.075,(2.6+1.6*(spd/0.6))*dt);
+  }
+  fishCentroid.multiplyScalar(1/FISH_N);
+  /* crab */
+  const cs=crabState;
+  cs.z+=cs.dir*0.022*dt;
+  if(cs.z>0.2){cs.z=0.2;cs.dir=-1;}
+  if(cs.z<-3.4){cs.z=-3.4;cs.dir=1;}
+  cs.x=1.42+0.1*Math.sin(cs.z*2.0);
+  const targetYaw=cs.dir>0?0:Math.PI;
+  let dy=targetYaw-cs.yaw;
+  while(dy>Math.PI)dy-=Math.PI*2; while(dy<-Math.PI)dy+=Math.PI*2;
+  cs.yaw+=dy*Math.min(1,dt*1.2);
+  if(Math.floor(simTime*8)!==Math.floor((simTime-dt)*8)) pushSplat(cs.x,cs.z,0.09,0.02);
+  /* droplets */
+  if(simTime>=nextDrip&&dripPoints.length){
+    const dp=dripPoints[Math.floor(R(dripPoints.length))];
+    spawnPart(dp.x,dp.y,dp.z,0,0,0,4,0.013,0);
+    nextDrip=simTime+R(1.4,3.6);
+  }
+  for(const p of parts){
+    if(!p.active) continue;
+    if(p.kind===0){
+      p.vy-=9.8*dt;
+      p.y+=p.vy*dt;
+      if(p.y<=0.03){
+        p.active=false;
+        spawnRing(p.x,p.z);
+        for(let k=0;k<5;k++)
+          spawnPart(p.x,0.04,p.z,R(-0.25,0.25),R(0.3,0.75),R(-0.25,0.25),R(0.3,0.55),0.009,1);
+        dropFlash=1; bioLightDrop.position.set(p.x,0.1,p.z);
+        if(audio.on&&!paused) plink(p.x);
+      }
+    }else{
+      p.vy-=6.5*dt;
+      p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;
+      p.life-=dt;
+      if(p.life<=0||p.y<0.01) p.active=false;
+    }
+  }
+  /* rings */
+  for(const r of rings){ if(r.active){ r.age+=dt; if(r.age>=r.life) r.active=false; } }
+  /* current pulse */
+  if(!pulse.active&&simTime>=pulse.next){
+    pulse.active=true;pulse.t=0;pulse.next=simTime+13;
+    if(audio.on&&!paused) whoosh();
+  }
+  if(pulse.active){
+    pulse.t+=dt;
+    const head=pulse.t/pulse.dur*netLen;
+    for(const e of eddyPts){
+      const s=head-e.s;
+      if(s>0&&s<1.3){
+        pushSplat(e.x,e.z,0.08,Math.sin(Math.PI*s/1.3)*0.55*dt);
+      }
+    }
+    if(pulse.t>=pulse.dur) pulse.active=false;
+  }
+  /* ambient lapping */
+  if(simTime>=nextLap){
+    const z=R(-8,5), side=R()<0.5?-1:1;
+    const x=side*(1.7+R(0.4));
+    pushSplat(x,z,0.13,0.16);
+    nextLap=simTime+R(0.5,1.1);
+  }
+  /* insect scheduler */
+  if(audio.on&&!paused&&simTime>=audio.nextChirp){
+    chirp();
+    audio.nextChirp=simTime+R(0.25,1.7);
+  }
+  dropFlash*=Math.exp(-dt*4.5);
+}
+
+/* ================= camera ================= */
+const cinePath=new THREE.CatmullRomCurve3([
+  V3( 0.15,0.52, 6.4), V3(-0.50,0.44, 3.6), V3( 0.35,0.56, 0.8),
+  V3(-0.30,0.47,-2.2), V3( 0.20,0.52,-4.6), V3( 0.55,0.60,-1.5),
+  V3( 0.70,0.50, 2.4), V3( 0.40,0.64, 5.2)
+],true,'catmullrom',0.5);
+const CINE_PERIOD=70;
+const _cp=new THREE.Vector3(),_ct=new THREE.Vector3(),_focus=V3(0,0.12,-7);
+function cinePose(t,posOut,tgtOut){
+  const u=((t/CINE_PERIOD)%1+1)%1;
+  cinePath.getPointAt(u,posOut);
+  cinePath.getPointAt((u+0.045)%1,tgtOut);
+  tgtOut.lerp(_focus,0.6);
+  tgtOut.y+=Math.sin(t*0.3)*0.03;
+  posOut.y+=Math.sin(t*0.23)*0.02;
+}
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.07;
+controls.enablePan=false;
+controls.rotateSpeed=0.55; controls.zoomSpeed=0.6;
+controls.minDistance=1.0; controls.maxDistance=10;
+controls.minPolarAngle=0.35; controls.maxPolarAngle=1.52;
+let mode='cinematic';
+const lookTarget=new THREE.Vector3();
+const blendFromP=new THREE.Vector3(),blendFromT=new THREE.Vector3();
+let blendT=0,blendDur=2.2,blendNext='cinematic';
+cinePose(0,camera.position,lookTarget);
+camera.lookAt(lookTarget);
+controls.target.copy(lookTarget);
+function startBlend(next,dur){
+  blendFromP.copy(camera.position);
+  blendFromT.copy(controls.target);
+  blendT=0;blendDur=dur;blendNext=next;mode='blend';
+  syncButtons();
+}
+controls.addEventListener('start',()=>{
+  if(mode!=='manual'){
+    mode='manual';
+    controls.target.copy(lookTarget);
+    syncButtons();
+  }
+});
+function clampCamera(){
+  camera.position.y=Math.max(0.14,camera.position.y);
+  controls.target.x=clamp(controls.target.x,-3.5,3.5);
+  controls.target.y=clamp(controls.target.y,-0.1,1.6);
+  controls.target.z=clamp(controls.target.z,-10,7);
+}
+
+/* ================= UI ================= */
+const overlay=document.getElementById('overlay');
+const btnCine=document.getElementById('btnCine');
+const btnReset=document.getElementById('btnReset');
+const btnPause=document.getElementById('btnPause');
+const btnSound=document.getElementById('btnSound');
+function syncButtons(){
+  btnCine.setAttribute('aria-pressed',mode==='cinematic'?'true':'false');
+  btnPause.setAttribute('aria-pressed',paused?'true':'false');
+  btnPause.textContent=paused?'Resume':'Pause';
+  btnSound.setAttribute('aria-pressed',audio.on?'true':'false');
+  btnSound.textContent=audio.on?'Sound: On':'Sound: Off';
+}
+btnCine.addEventListener('click',()=>{ if(mode!=='cinematic') startBlend('cinematic',2.4); wake(); });
+btnReset.addEventListener('click',()=>{ startBlend('reset',1.8); wake(); });
+btnPause.addEventListener('click',()=>{ paused=!paused; syncButtons(); wake(); });
+btnSound.addEventListener('click',()=>{ setSound(!audio.on); syncButtons(); wake(); });
+window.addEventListener('keydown',(e)=>{
+  if(e.code==='Space'){e.preventDefault();paused=!paused;syncButtons();}
+  else if(e.code==='KeyC'){ if(mode!=='cinematic') startBlend('cinematic',2.4); }
+  else if(e.code==='KeyR'){ startBlend('reset',1.8); }
+  else if(e.code==='KeyM'){ setSound(!audio.on); syncButtons(); }
+  wake();
+});
+let lastActive=performance.now();
+function wake(){ lastActive=performance.now(); overlay.classList.remove('idle'); }
+['pointermove','pointerdown','wheel','touchstart','focusin'].forEach(ev=>
+  window.addEventListener(ev,wake,{passive:true}));
+
+/* ================= resize ================= */
+function onResize(){
+  const w=window.innerWidth,h=window.innerHeight;
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w,h);
+  reflRT.setSize(Math.max(2,Math.floor(w*reflScale)),Math.max(2,Math.floor(h*reflScale)));
+  partMat.uniforms.uScale.value=h*0.5/Math.tan(THREE.MathUtils.degToRad(camera.fov*0.5))*DPR;
+}
+window.addEventListener('resize',onResize);
+onResize();
+
+/* ================= frame ================= */
+const _tmpP=new THREE.Vector3(),_tmpT=new THREE.Vector3();
+let lastT=performance.now(), emaDt=1/60, slowTime=0, degraded=false;
+let firstFrame=true;
+
+function updateDisturbance(simDt){
+  if(simDt<=0) return;
+  const write=1-distRead;
+  decayMat.uniforms.tPrev.value=distRT[distRead].texture;
+  decayMat.uniforms.uDecay.value=Math.exp(-simDt/1.1);
+  renderer.setRenderTarget(distRT[write]);
+  renderer.render(decayScene,orthoCam);
+  /* splats */
+  let n=0;
+  for(const s of splatQueue){
+    if(n>=SPLAT_MAX) break;
+    splatPos[n*2]=s.u; splatPos[n*2+1]=s.v;
+    splatRad[n]=s.rad; splatInt[n]=s.intensity; splatRing[n]=s.ring;
+    n++;
+  }
+  for(const r of rings){
+    if(!r.active||n>=SPLAT_MAX) continue;
+    const f=r.age/r.life;
+    splatPos[n*2]=(r.x-DIST_MIN_X)/DIST_SIZE;
+    splatPos[n*2+1]=(r.z-DIST_MIN_Z)/DIST_SIZE;
+    splatRad[n]=r.maxR*Math.pow(f,0.55)/DIST_SIZE;
+    splatInt[n]=r.int*Math.pow(1-f,1.6)*1.1*simDt;
+    splatRing[n]=1;
+    n++;
+  }
+  splatQueue.length=0;
+  if(n>0){
+    splatGeo.instanceCount=n;
+    attrPos.needsUpdate=true;attrRad.needsUpdate=true;attrInt.needsUpdate=true;attrRing.needsUpdate=true;
+    const ac=renderer.autoClear; renderer.autoClear=false;
+    renderer.render(splatScene,orthoCam);
+    renderer.autoClear=ac;
+  }
+  renderer.setRenderTarget(null);
+  distRead=write;
+  waterUniforms.tDisturb.value=distRT[distRead].texture;
+}
+
+function renderReflection(){
+  water.visible=false; fish.visible=false; partPoints.visible=false;
+  for(const m of mists) m.visible=false;
+  virtualCam.copy(camera);
+  virtualCam.position.y*=-1;
+  virtualCam.up.set(0,-1,0);
+  camera.getWorldDirection(_fwd);
+  _tgt.copy(camera.position).addScaledVector(_fwd,10);
+  _tgt.y*=-1;
+  virtualCam.lookAt(_tgt);
+  virtualCam.updateMatrixWorld();
+  virtualCam.projectionMatrix.copy(camera.projectionMatrix);
+  texMatrix.set(0.5,0,0,0.5, 0,0.5,0,0.5, 0,0,0.5,0.5, 0,0,0,1);
+  texMatrix.multiply(virtualCam.projectionMatrix);
+  texMatrix.multiply(virtualCam.matrixWorldInverse);
+  const savedPlanes=renderer.clippingPlanes;
+  renderer.clippingPlanes=[clipPlane];
+  renderer.setRenderTarget(reflRT);
+  renderer.render(scene,virtualCam);
+  renderer.setRenderTarget(null);
+  renderer.clippingPlanes=savedPlanes;
+  water.visible=true; fish.visible=true; partPoints.visible=true;
+  for(const m of mists) m.visible=true;
+}
+
+function frame(now){
+  requestAnimationFrame(frame);
+  let dtReal=(now-lastT)/1000; lastT=now;
+  dtReal=clamp(dtReal,0,0.05);
+  emaDt=emaDt*0.95+dtReal*0.05;
+  if(!degraded&&emaDt>0.036){ slowTime+=dtReal; if(slowTime>2.5){ degraded=true; DPR=1; renderer.setPixelRatio(1); onResize(); } }
+  else slowTime=Math.max(0,slowTime-dtReal);
+
+  let simDt=0;
+  if(!paused){
+    acc+=dtReal;
+    let n=0;
+    while(acc>=STEP&&n<4){ step(STEP); simTime+=STEP; acc-=STEP; simDt+=STEP; n++; }
+    if(n===4) acc=0;
+  }
+  uTime.value=simTime;
+
+  /* fish instances */
+  for(let i=0;i<FISH_N;i++){
+    const f=fishState[i];
+    _q.setFromUnitVectors(_z,f.tan.clone().normalize());
+    _m.compose(f.pos,_q,_s);
+    fish.setMatrixAt(i,_m);
+  }
+  fish.instanceMatrix.needsUpdate=true;
+
+  /* crab pose */
+  crab.position.set(crabState.x,mudHeight(crabState.x,crabState.z)+0.045+0.004*Math.sin(simTime*3),crabState.z);
+  crab.rotation.y=crabState.yaw;
+
+  /* particles -> buffers */
+  let pn=0;
+  for(const p of parts){
+    if(!p.active) continue;
+    partPos[pn*3]=p.x;partPos[pn*3+1]=p.y;partPos[pn*3+2]=p.z;
+    partSize[pn]=p.size;
+    partAlpha[pn]=p.kind===0?0.8:clamp(p.life/p.maxLife,0,1)*0.9;
+    pn++;
+  }
+  partGeo.setDrawRange(0,pn);
+  partGeo.attributes.position.needsUpdate=true;
+  partGeo.attributes.aSize.needsUpdate=true;
+  partGeo.attributes.aAlpha.needsUpdate=true;
+
+  /* bio lights */
+  bioLightFish.position.set(fishCentroid.x,0.06,fishCentroid.z);
+  bioLightFish.intensity=0.32+0.1*Math.sin(simTime*2.3);
+  const pulseEnv=pulse.active?Math.sin(Math.PI*clamp(pulse.t/pulse.dur,0,1)):0;
+  bioLightPulse.intensity=lerp(bioLightPulse.intensity,pulseEnv*1.6,Math.min(1,dtReal*4));
+  bioLightDrop.intensity=dropFlash*0.6;
+
+  /* mist drift + billboard */
+  for(let i=0;i<mists.length;i++){
+    const m=mists[i];
+    m.position.x=m.userData.baseX+Math.sin(simTime*0.05+i*2.2)*0.6;
+    m.quaternion.copy(camera.quaternion);
+    m.material.opacity=0.05+0.025*Math.sin(simTime*0.11+i);
+  }
+
+  /* camera */
+  if(mode==='cinematic'){
+    cinePose(simTime,_tmpP,_tmpT);
+    camera.position.copy(_tmpP);
+    lookTarget.copy(_tmpT);
+    camera.lookAt(lookTarget);
+    controls.target.copy(lookTarget);
+  }else if(mode==='blend'){
+    blendT+=dtReal;
+    const a=sstep(0,1,clamp(blendT/blendDur,0,1));
+    if(blendNext==='cinematic') cinePose(simTime,_tmpP,_tmpT);
+    else cinePose(0,_tmpP,_tmpT);
+    camera.position.lerpVectors(blendFromP,_tmpP,a);
+    lookTarget.lerpVectors(blendFromT,_tmpT,a);
+    camera.lookAt(lookTarget);
+    controls.target.copy(lookTarget);
+    if(blendT>=blendDur){
+      mode=blendNext==='cinematic'?'cinematic':'manual';
+      syncButtons();
+    }
+  }else{
+    controls.update();
+    lookTarget.copy(controls.target);
+    clampCamera();
+  }
+
+  /* overlay idle fade */
+  if(now-lastActive>3500) overlay.classList.add('idle');
+
+  updateDisturbance(simDt);
+  renderReflection();
+  renderer.render(scene,camera);
+
+  if(firstFrame){
+    firstFrame=false;
+    const f=document.getElementById('fade');
+    requestAnimationFrame(()=>{ f.style.opacity='0'; setTimeout(()=>f.remove(),2200); });
+  }
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
