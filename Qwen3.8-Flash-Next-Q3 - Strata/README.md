@@ -74,7 +74,7 @@ Native support for swap-in tables is Strata issue #5248 (open).
 
 ## Chart
 
-`charts/flashnext-q3-code-ngram-lines.png` — the current card: code corpus only, one panel per quant, two
+`charts/flashnext-q3-code-ngram-lines.png` — the current card: timed on real source files only, one panel per quant, two
 lines per panel (bundled IQ4_NL vs BF16 table) against measured prompt tokens. Q3_K_XL prefill 2,082 →
 2,132 (+2.4 %), IQ3_XXS 2,083 → 2,080 (−0.1 %); decode moves ±10 % with draft acceptance, not with the table.
 
