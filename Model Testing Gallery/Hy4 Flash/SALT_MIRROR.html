@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>SALT MIRROR</title>
+<link rel="icon" href="data:," />
+<style>
+  :root { --ink:#f4eee2; --dim:rgba(244,238,226,.62); --edge:rgba(244,238,226,.26); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#9fa9a6; }
+  body { font-family:Georgia,'Times New Roman',serif; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  #scene { position:fixed; inset:0; display:block; width:100%; height:100%; touch-action:none; cursor:grab; }
+  #scene.dragging { cursor:grabbing; }
+  #vignette { position:fixed; inset:0; pointer-events:none; z-index:2;
+    background:radial-gradient(ellipse at 52% 44%, rgba(0,0,0,0) 46%, rgba(18,24,24,.34) 100%); }
+  #grain { position:fixed; inset:0; pointer-events:none; z-index:3; opacity:.032; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  #ui { position:fixed; inset:0; z-index:5; pointer-events:none; transition:opacity 1.1s ease; }
+  #ui.hidden { opacity:0; }
+  #ui.hidden .btn { pointer-events:none; }
+  .titleblock { position:absolute; left:clamp(20px,4vw,62px); bottom:clamp(22px,5vh,58px); text-shadow:0 2px 24px rgba(8,14,16,.6); }
+  .kicker { font-family:Arial,Helvetica,sans-serif; font-size:10px; letter-spacing:.40em; text-transform:uppercase;
+    color:var(--dim); margin-bottom:11px; }
+  .title { font-size:clamp(32px,5.4vw,76px); line-height:.96; font-weight:400; letter-spacing:.055em; margin:0; }
+  .subtitle { font-style:italic; font-size:clamp(12px,1.25vw,16px); color:var(--dim); margin-top:12px; letter-spacing:.02em; }
+  .hint { font-family:Arial,Helvetica,sans-serif; font-size:10px; letter-spacing:.18em; color:rgba(244,238,226,.42);
+    margin-top:18px; text-transform:uppercase; }
+  .controls { position:absolute; right:clamp(16px,3.4vw,52px); bottom:clamp(22px,5vh,58px);
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; font-family:Arial,Helvetica,sans-serif; }
+  .btn { pointer-events:auto; appearance:none; border:1px solid var(--edge);
+    background:rgba(12,18,20,.30); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    color:var(--ink); font-size:9px; letter-spacing:.19em; text-transform:uppercase;
+    padding:10px 12px; border-radius:2px; cursor:pointer; transition:background .25s,border-color .25s,color .25s; }
+  .btn:hover { background:rgba(244,238,226,.14); border-color:rgba(244,238,226,.55); }
+  .btn:active { background:rgba(244,238,226,.2); }
+  .btn.active { color:#101618; background:rgba(244,238,226,.84); border-color:rgba(244,238,226,.92); }
+  #note { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:8; color:var(--ink);
+    font-family:Arial,Helvetica,sans-serif; font-size:12px; letter-spacing:.2em; text-align:center; display:none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="vignette"></div><div id="grain"></div>
+<div id="ui">
+  <div class="titleblock">
+    <div class="kicker">004 / Coastal Saltworks</div>
+    <h1 class="title">SALT MIRROR</h1>
+    <div class="subtitle">Where the clouds open, the water remembers the sky.</div>
+    <div class="hint">Drag to orbit &nbsp;·&nbsp; Wheel or pinch to zoom</div>
+  </div>
+  <div class="controls">
+    <button class="btn active" id="bCine">Cinematic</button>
+    <button class="btn" id="bReset">Reset view</button>
+    <button class="btn" id="bPause">Pause</button>
+    <button class="btn" id="bSound">Sound: off</button>
+  </div>
+</div>
+<div id="note">WEBGL UNAVAILABLE</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ================= deterministic core ================= */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const R = mulberry32(1337);
+const rnd=(a=0,b=1)=>a+(b-a)*R();
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const smooth=(a,b,x)=>{ const t=clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
+
+/* ================= renderer / scene ================= */
+const canvas = document.getElementById('scene');
+let renderer;
+try { renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance',alpha:false}); }
+catch(e){ document.getElementById('note').style.display='block'; throw e; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
+renderer.setSize(innerWidth,innerHeight,false);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.5,1800);
+camera.position.set(52,30,66);
+
+const SKY_TOP=new THREE.Color(0x82a9bc), SKY_HOR=new THREE.Color(0xe8dfc9), FOG=new THREE.Color(0xc2c8bd);
+scene.fog=new THREE.FogExp2(FOG.getHex(),0.0050);
+scene.background=FOG.clone();
+
+const SUN_DIR=new THREE.Vector3(-0.62,0.36,-0.55).normalize();
+const SUN_COL=new THREE.Color(0xffe6bd);
+
+/* ================= procedural textures (generated once) ================= */
+function makeCloudTexture(){
+  const N=256, cv=document.createElement('canvas'); cv.width=cv.height=N;
+  const ctx=cv.getContext('2d'), img=ctx.createImageData(N,N);
+  const r=mulberry32(90210), perm=new Uint8Array(512);
+  for(let i=0;i<256;i++)perm[i]=i;
+  for(let i=255;i>0;i--){ const j=Math.floor(r()*(i+1)); const t=perm[i]; perm[i]=perm[j]; perm[j]=t; }
+  for(let i=0;i<256;i++)perm[i+256]=perm[i];
+  function vn(x,y){
+    const xi=Math.floor(x)&255, yi=Math.floor(y)&255, xf=x-Math.floor(x), yf=y-Math.floor(y);
+    const u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+    const a=perm[(perm[xi]+yi)&255]/255, b=perm[(perm[xi+1]+yi)&255]/255;
+    const c=perm[(perm[xi]+yi+1)&255]/255, d=perm[(perm[xi+1]+yi+1)&255]/255;
+    return (a*(1-u)+b*u)*(1-v)+(c*(1-u)+d*u)*v;
+  }
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    let f=0,amp=.55,fr=.030;
+    for(let o=0;o<5;o++){ f+=vn(x*fr,y*fr)*amp; amp*=.52; fr*=2.03; }
+    f=clamp((f-.20)*2.05,0,1);
+    const v=Math.round(f*255), k=(y*N+x)*4;
+    img.data[k]=v; img.data[k+1]=v; img.data[k+2]=v; img.data[k+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  const tex=new THREE.CanvasTexture(cv);
+  tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.minFilter=THREE.LinearFilter;
+  tex.magFilter=THREE.LinearFilter; tex.generateMipmaps=false; tex.colorSpace=THREE.NoColorSpace;
+  return tex;
+}
+function makeGranularTexture(){
+  const N=256, cv=document.createElement('canvas'); cv.width=cv.height=N;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#bab3a5'; ctx.fillRect(0,0,N,N);
+  for(let i=0;i<26000;i++){
+    const g=Math.floor(rnd(95,215)), w=rnd()<.12?1:0;
+    ctx.fillStyle='rgba('+g+','+(g-3)+','+(g-11)+','+rnd(.10,.38).toFixed(3)+')';
+    ctx.fillRect(rnd(0,N),rnd(0,N),rnd(.5,1.5)+w,rnd(.5,1.4));
+  }
+  for(let i=0;i<130;i++){
+    ctx.strokeStyle='rgba(90,84,74,'+rnd(.02,.07).toFixed(3)+')'; ctx.lineWidth=rnd(.5,2);
+    ctx.beginPath(); const y=rnd(0,N); ctx.moveTo(0,y); ctx.bezierCurveTo(N*.3,y+rnd(-6,6),N*.7,y+rnd(-6,6),N,y+rnd(-4,4)); ctx.stroke();
+  }
+  for(let i=0;i<80;i++){
+    const cx=rnd(0,N),cy=rnd(0,N),rad=rnd(8,30),n=Math.floor(rnd(5,9));
+    ctx.beginPath();
+    for(let k=0;k<n;k++){
+      const a=k/n*Math.PI*2, rr=rad*rnd(.70,1.22);
+      const px=cx+Math.cos(a)*rr, py=cy+Math.sin(a)*rr;
+      if(k===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.closePath(); ctx.strokeStyle='rgba(248,244,232,'+rnd(.06,.15).toFixed(3)+')';
+    ctx.lineWidth=rnd(.6,1.5); ctx.stroke();
+  }
+  const t=new THREE.CanvasTexture(cv);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(24,30); t.anisotropy=4;
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+function makeRakeTexture(){
+  const N=256, cv=document.createElement('canvas'); cv.width=cv.height=N;
+  const ctx=cv.getContext('2d'); ctx.clearRect(0,0,N,N);
+  let y=rnd(2,10);
+  for(let i=0;i<22&&y<250;i++){
+    const amp=rnd(1.2,3.4), freq=rnd(.02,.06), phase=rnd(0,6.28);
+    ctx.strokeStyle='rgba(62,56,48,'+rnd(.16,.34).toFixed(3)+')';
+    ctx.lineWidth=rnd(.8,1.8);
+    ctx.beginPath(); ctx.moveTo(0,y);
+    for(let x=0;x<=256;x+=12) ctx.lineTo(x,y+Math.sin(x*freq+phase)*amp);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(248,244,232,.14)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,y+2);
+    for(let x=0;x<=256;x+=12) ctx.lineTo(x,y+2+Math.sin(x*freq+phase)*amp);
+    ctx.stroke();
+    y+=rnd(7,15);
+  }
+  const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+const cloudTex=makeCloudTexture(), grainTex=makeGranularTexture(), rakeTex=makeRakeTexture();
+const cloudUniforms={
+  uCloud:{value:cloudTex}, uCloudOff:{value:new THREE.Vector2()},
+  uGap:{value:-80}, uGapW:{value:24}
+};
+
+/* ================= sky dome ================= */
+const skyMat=new THREE.ShaderMaterial({
+  side:THREE.BackSide, depthWrite:false, fog:false,
+  uniforms:{ uTop:{value:SKY_TOP}, uHor:{value:SKY_HOR}, uSunCol:{value:SUN_COL}, uSunDir:{value:SUN_DIR},
+    uCloud:cloudUniforms.uCloud, uCloudOff:cloudUniforms.uCloudOff },
+  vertexShader:`varying vec3 vD; void main(){ vD=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform vec3 uTop,uHor,uSunCol,uSunDir; uniform sampler2D uCloud; uniform vec2 uCloudOff; varying vec3 vD;
+    void main(){
+      vec3 d=normalize(vD);
+      float h=clamp(d.y*.5+.5,0.,1.);
+      vec3 col=mix(uHor,uTop,pow(h,.78));
+      vec2 cuv=d.xz/max(d.y+.20,.12)*.13+uCloudOff*.5+vec2(.31);
+      float c=texture2D(uCloud,cuv).r*.70+texture2D(uCloud,cuv*2.1+vec2(.17)).r*.30;
+      float cl=smoothstep(.34,.66,c)*clamp(d.y*3.0+.32,0.,1.);
+      vec3 cloud=mix(vec3(.52,.57,.61),vec3(1.,.99,.96),smoothstep(.28,.85,c));
+      col=mix(col,cloud,cl*.85);
+      float s=max(dot(d,normalize(uSunDir)),0.);
+      col+=uSunCol*(pow(s,420.)*2.2+pow(s,14.)*.20);
+      float hz=pow(max(dot(normalize(d.xz+vec2(.0001)),normalize(uSunDir.xz)),0.),8.);
+      col+=uSunCol*hz*pow(1.-clamp(d.y,0.,1.),4.)*.20;
+      gl_FragColor=vec4(col,1.);
+    }`
+});
+const sky=new THREE.Mesh(new THREE.SphereGeometry(900,40,24),skyMat);
+sky.frustumCulled=false; scene.add(sky);
+
+/* ================= lighting ================= */
+const hemi=new THREE.HemisphereLight(0xcfe0e6,0x746b58,0.55); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffe8c4,3.4);
+sun.position.copy(SUN_DIR).multiplyScalar(140); sun.target.position.set(0,0,-25);
+sun.castShadow=true;
+sun.shadow.mapSize.set(1536,1536);
+sun.shadow.camera.left=-110; sun.shadow.camera.right=110;
+sun.shadow.camera.top=110; sun.shadow.camera.bottom=-110;
+sun.shadow.camera.near=10; sun.shadow.camera.far=380;
+sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.035; sun.shadow.radius=3;
+scene.add(sun, sun.target);
+
+/* ================= basin layout ================= */
+const XS=[], ZS=[];
+for(let i=0;i<=6;i++) XS.push(-74+i*(148/6)+rnd(-1.0,1.0));
+for(let i=0;i<=8;i++) ZS.push(52-i*(160/8)+rnd(-1.0,1.0));
+const basins=[];
+for(let row=0;row<8;row++){
+  for(let col=0;col<6;col++){
+    if(row===0 && col===3) continue;            // merged into the hero pond
+    let x0=XS[col]+1.4, x1=XS[col+1]-1.4;
+    let z1=ZS[row]-1.4, z0=ZS[row+1]+1.4;
+    if(row===0 && col===2){ x1=XS[4]-1.4; }       // hero spans two cells
+    x0+=rnd(-.28,.28); x1+=rnd(-.28,.28); z0+=rnd(-.25,.25); z1+=rnd(-.25,.25);
+    const hero=(row===0&&col===2);
+    const depth=hero?0.68:rnd(.60,1.35);
+    let waterY=-Math.min(hero?0.04:rnd(.07,.48),depth*.80);
+    let type=(col*3+row*2+Math.floor(rnd(0,3)))%3;
+    if(hero) type=0;
+    basins.push({x0,x1,z0,z1,depth,waterY,type,hero,row,col,ripTime:-100,
+      ripOrg:new THREE.Vector2((x0+x1)/2,(z0+z1)/2),mat:null});
+  }
+}
+const hero=basins.find(b=>b.hero);
+const BRINE=[
+  {s:new THREE.Color(0xdca9a4),d:new THREE.Color(0x8b5b64)},
+  {s:new THREE.Color(0xd8bb84),d:new THREE.Color(0x866641)},
+  {s:new THREE.Color(0xa6cfca),d:new THREE.Color(0x46777c)}
+];
+const BED=[
+  new THREE.Color(0xb88989), new THREE.Color(0xb6a075), new THREE.Color(0x93ada9)
+];
+
+/* ================= terrain heightfield ================= */
+function hash2(x,y){ const s=Math.sin(x*127.1+y*311.7)*43758.5453; return s-Math.floor(s); }
+function vnoise2(x,y){
+  const xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
+  const u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+  const a=hash2(xi,yi), b=hash2(xi+1,yi), c=hash2(xi,yi+1), d=hash2(xi+1,yi+1);
+  return (a*(1-u)+b*u)*(1-v)+(c*(1-u)+d*u)*v;
+}
+{
+  const X0=-80,X1=80,Z0=-116,Z1=56, NX=140,NZ=150;
+  const geo=new THREE.PlaneGeometry(X1-X0,Z1-Z0,NX,NZ);
+  geo.rotateX(-Math.PI/2);
+  geo.translate((X0+X1)/2,0,(Z0+Z1)/2);
+  const pos=geo.attributes.position;
+  const colors=new Float32Array(pos.count*3);
+  const earth=new THREE.Color(0x8f8065), saltc=new THREE.Color(0xd6d1be);
+  const tmp=new THREE.Color();
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), z=pos.getZ(i);
+    let y=0.48+Math.sin(x*.31)*.04+Math.cos(z*.27)*.035+(R()-.5)*.05;
+    let bedTint=null, inside=false, closest=1e9;
+    for(let b=0;b<basins.length;b++){
+      const B=basins[b];
+      const dx=Math.min(x-B.x0,B.x1-x), dz=Math.min(z-B.z0,B.z1-z);
+      if(dx>0&&dz>0){ const dd=Math.min(dx,dz); if(dd<closest){closest=dd; bedTint=BED[B.type]; inside=true;} }
+      const out=Math.max(B.x0-x,x-B.x1,B.z0-z,z-B.z1);
+      if(out<closest&&out>0) closest=out;
+    }
+    if(inside){
+      const t=smooth(0,0.55,closest);
+      y=y*(1-t)+(-BED_DEPTH_AT(x,z)+Math.sin(x*1.7)*.02+(R()-.5)*.03)*t;
+      tmp.copy(saltc).lerp(bedTint,.55).multiplyScalar(.86+.14*t);
+    } else {
+      const saltSpots=smooth(.52,.78,vnoise2(x*.075,z*.075));
+      tmp.copy(earth).lerp(saltc,saltSpots*.62);
+      tmp.multiplyScalar(.72+.38*vnoise2(x*.13+13,z*.13-7));
+    }
+    if(z<Z0+11){ y=-0.62+(R()-.5)*.06; tmp.set(0x6d6e60); }
+    pos.setY(i,y);
+    colors[i*3]=tmp.r; colors[i*3+1]=tmp.g; colors[i*3+2]=tmp.b;
+  }
+  geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  function BED_DEPTH_AT(x,z){
+    for(let b=0;b<basins.length;b++){ const B=basins[b]; if(x>=B.x0&&x<=B.x1&&z>=B.z0&&z<=B.z1) return B.depth; }
+    return .7;
+  }
+  const mat=new THREE.MeshStandardMaterial({
+    vertexColors:true, map:grainTex, bumpMap:grainTex, bumpScale:0.045,
+    roughness:.94, metalness:0
+  });
+  mat.onBeforeCompile=(sh)=>{
+    sh.uniforms.uCloud=cloudUniforms.uCloud; sh.uniforms.uCloudOff=cloudUniforms.uCloudOff;
+    sh.uniforms.uGap=cloudUniforms.uGap; sh.uniforms.uGapW=cloudUniforms.uGapW;
+    sh.vertexShader=sh.vertexShader
+      .replace('#include <common>','#include <common>\nvarying vec3 vWPT;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvWPT=(modelMatrix*vec4(position,1.0)).xyz;');
+    sh.fragmentShader=sh.fragmentShader
+      .replace('#include <common>',`#include <common>
+        varying vec3 vWPT; uniform sampler2D uCloud; uniform vec2 uCloudOff; uniform float uGap,uGapW;`)
+      .replace('#include <color_fragment>',`#include <color_fragment>
+        float clc=texture2D(uCloud,vWPT.xz*.006+uCloudOff).r*.75+texture2D(uCloud,vWPT.xz*.013+uCloudOff*1.7).r*.25;
+        float gp=exp(-pow((vWPT.x-uGap)/uGapW,2.0));
+        float shade=(.55+.45*clc)+gp*(.14+.26*clc);
+        diffuseColor.rgb*=shade;`);
+  };
+  const mesh=new THREE.Mesh(geo,mat); mesh.receiveShadow=true; scene.add(mesh);
+}
+
+/* ================= sea ================= */
+{
+  const g=new THREE.PlaneGeometry(420,300,1,1); g.rotateX(-Math.PI/2);
+  const m=new THREE.MeshStandardMaterial({color:0x55767c,roughness:.26,metalness:.06,transparent:true,opacity:.95});
+  const sea=new THREE.Mesh(g,m); sea.position.set(0,-.16,-266); sea.receiveShadow=true; scene.add(sea);
+}
+
+/* ================= brine water ================= */
+const waterVert=`
+  varying vec3 vW; varying vec2 vUv;
+  void main(){ vUv=uv; vec4 wp=modelMatrix*vec4(position,1.0); vW=wp.xyz; gl_Position=projectionMatrix*viewMatrix*wp; }`;
+const waterFrag=`
+  precision highp float;
+  uniform float uTime,uOpacity,uRipTime,uRipAmp,uFogD;
+  uniform vec3 uShallow,uDeep,uSunDir,uSunCol,uSkyTop,uSkyHoriz,uCam,uFog;
+  uniform sampler2D uCloud; uniform vec2 uCloudOff; uniform float uGap,uGapW; uniform vec2 uRipOrg;
+  varying vec3 vW; varying vec2 vUv;
+  float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float vn(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
+    float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+    return mix(mix(a,b,f.x),mix(c,d,f.x),f.y); }
+  void main(){
+    float t=uTime;
+    float n1=vn(vW.xz*.26+vec2(t*.055,t*.035));
+    float n2=vn(vW.xz*.61-vec2(t*.043,t*.072));
+    vec3 N=normalize(vec3((n1-.5)*.28+(n2-.5)*.14,1.,(n2-.5)*.24+(n1-.5)*.10));
+    if(uRipTime>-50.){
+      float age=t-uRipTime;
+      if(age>0.){
+        float d=distance(vW.xz,uRipOrg);
+        float wave=sin(d*2.35-age*4.2)*exp(-d*.075)*exp(-age*.24);
+        N.xz+=normalize(vW.xz-uRipOrg+vec2(.0001))*wave*.17*uRipAmp;
+        N=normalize(N);
+      }
+    }
+    vec3 V=normalize(uCam-vW);
+    float fres=.055+.88*pow(1.-max(dot(N,V),0.),3.6); fres=min(fres,.90);
+    vec3 R=reflect(-V,N);
+    float st=clamp(R.y*.5+.5,0.,1.);
+    vec3 sky=mix(uSkyHoriz,uSkyTop,pow(st,.75));
+    vec2 ruv=vW.xz*.006+R.xz*.05+uCloudOff*.5;
+    float rc=texture2D(uCloud,ruv).r;
+    sky=mix(sky,vec3(.98,.98,.95),smoothstep(.40,.72,rc)*.42);
+    float sun=pow(max(dot(R,normalize(uSunDir)),0.),70.);
+    vec3 refl=sky+uSunCol*sun*1.7;
+    float cl=texture2D(uCloud,vW.xz*.006+uCloudOff).r;
+    float gap=exp(-pow((vW.x-uGap)/uGapW,2.0));
+    float illum=(.73+.27*cl)+gap*(.30+.30*cl);
+    float dm=clamp(n1*.65+n2*.35,0.,1.);
+    vec3 body=mix(uDeep,uShallow,dm*.55+.22)*illum;
+    body=mix(body,vec3(dot(body,vec3(.3333))),.16);
+    float glint=pow(max(dot(N,normalize(uSunDir+V)),0.),30.)*.30;
+    float shimmer=pow(vn(vW.xz*2.4+vec2(t*.28,t*.19)),20.)*.035;
+    vec3 col=mix(body,refl*illum,fres)+uSunCol*(sun*.55+glint*.45)*fres+shimmer;
+    float dist=length(uCam-vW);
+    float f=1.-exp(-uFogD*uFogD*dist*dist);
+    col=mix(col,uFog,clamp(f,0.,1.));
+    gl_FragColor=vec4(col,uOpacity);
+  }`;
+const waterGeos=[];
+for(const B of basins){
+  const w=B.x1-B.x0-.24, h=B.z1-B.z0-.24;
+  const g=new THREE.PlaneGeometry(w,h,1,1); g.rotateX(-Math.PI/2);
+  const br=BRINE[B.type];
+  const uniforms={
+    uTime:{value:0}, uOpacity:{value:.70},
+    uShallow:{value:br.s.clone()}, uDeep:{value:br.d.clone()},
+    uSunDir:{value:SUN_DIR}, uSunCol:{value:SUN_COL},
+    uSkyTop:{value:SKY_TOP}, uSkyHoriz:{value:SKY_HOR},
+    uCam:{value:camera.position}, uFog:{value:FOG}, uFogD:{value:scene.fog.density},
+    uCloud:cloudUniforms.uCloud, uCloudOff:cloudUniforms.uCloudOff,
+    uGap:cloudUniforms.uGap, uGapW:cloudUniforms.uGapW,
+    uRipOrg:{value:B.ripOrg}, uRipTime:{value:-100}, uRipAmp:{value:1}
+  };
+  const m=new THREE.ShaderMaterial({uniforms,vertexShader:waterVert,fragmentShader:waterFrag,
+    transparent:true,depthWrite:false,side:THREE.DoubleSide});
+  const mesh=new THREE.Mesh(g,m);
+  mesh.position.set((B.x0+B.x1)/2,B.waterY,(B.z0+B.z1)/2);
+  mesh.renderOrder=2; scene.add(mesh); B.mat=m;
+  // granular bed visible through the brine
+  const bed=new THREE.Mesh(new THREE.PlaneGeometry(w,h,1,1),
+    new THREE.MeshStandardMaterial({color:br.s.clone().multiplyScalar(.52),roughness:.98,map:grainTex}));
+  bed.geometry.rotateX(-Math.PI/2); bed.position.set(mesh.position.x,-B.depth+.06,mesh.position.z);
+  bed.receiveShadow=true; scene.add(bed);
+  // rough salt rim: jagged rectangle ring
+  const shape=new THREE.Shape(), hole=new THREE.Path();
+  const jx=()=>rnd(-.20,.20), jz=()=>rnd(-.20,.20);
+  const ow=w*.5+.18, oh=h*.5+.18, iw=w*.5-.02, ih=h*.5-.02;
+  shape.moveTo(-ow+jx(),-oh+jz()); shape.lineTo(0+jx(),-oh+jz()); shape.lineTo(ow+jx(),-oh+jz());
+  shape.lineTo(ow+jx(),0+jz()); shape.lineTo(ow+jx(),oh+jz()); shape.lineTo(0+jx(),oh+jz());
+  shape.lineTo(-ow+jx(),oh+jz()); shape.lineTo(-ow+jx(),0+jz()); shape.closePath();
+  hole.moveTo(-iw,-ih); hole.lineTo(-iw,ih); hole.lineTo(iw,ih); hole.lineTo(iw,-ih); hole.closePath();
+  shape.holes.push(hole);
+  const rg=new THREE.ShapeGeometry(shape,1); rg.rotateX(-Math.PI/2);
+  const rv=rg.attributes.position;
+  for(let i=0;i<rv.count;i++) rv.setY(i,rv.getY(i)+rnd(0,.075));
+  rg.computeVertexNormals();
+  const rim=new THREE.Mesh(rg,new THREE.MeshStandardMaterial({
+    color:0xd9d3c1,roughness:1,metalness:0,bumpMap:grainTex,bumpScale:.08,side:THREE.DoubleSide }));
+  rim.position.set(mesh.position.x,B.waterY+.10,mesh.position.z);
+  rim.receiveShadow=true; rim.castShadow=true; scene.add(rim);
+  // rake marks on shallow foreground beds
+  if(B.hero||B.row===1){
+    const rg2=new THREE.PlaneGeometry(w*.82,h*.82); rg2.rotateX(-Math.PI/2);
+    const rake=new THREE.Mesh(rg2,new THREE.MeshBasicMaterial({map:rakeTex,transparent:true,opacity:.55,
+      depthWrite:false,color:0xffffff}));
+    rake.position.set(mesh.position.x,-B.depth+.10,mesh.position.z); scene.add(rake);
+  }
+}
+
+/* ================= static detail geometry ================= */
+const woodMat=new THREE.MeshStandardMaterial({color:0x6d5238,roughness:.92,bumpMap:grainTex,bumpScale:.03});
+const woodDark=new THREE.MeshStandardMaterial({color:0x4c3a28,roughness:.95});
+const saltMat=new THREE.MeshStandardMaterial({color:0xe9e6d9,roughness:1,bumpMap:grainTex,bumpScale:.06});
+const pileMat=new THREE.MeshStandardMaterial({color:0xdedbcc,roughness:1,bumpMap:grainTex,bumpScale:.12});
+const metalMat=new THREE.MeshStandardMaterial({color:0x6b6357,roughness:.55,metalness:.55});
+
+/* --- boardwalks: instanced planks along internal berm lines --- */
+{
+  const planks=[];
+  for(const zl of [ZS[1],ZS[3],ZS[5]]){
+    for(let x=-62;x<62;x+=2.15){
+      if(Math.hypot(x-26,zl-36)<11) continue;  // keep the sluice opening clear
+      planks.push([x+rnd(-.06,.06),zl+rnd(-.12,.12)]);
+    }
+  }
+  const g=new THREE.BoxGeometry(1.95,0.14,1.15);
+  const im=new THREE.InstancedMesh(g,woodMat,planks.length);
+  const d=new THREE.Object3D();
+  planks.forEach((p,i)=>{ d.position.set(p[0],0.56,p[1]); d.rotation.set(0,rnd(-.012,.012),0); d.updateMatrix(); im.setMatrixAt(i,d.matrix); });
+  im.castShadow=true; im.receiveShadow=true; scene.add(im);
+  // support joists
+  const jg=new THREE.BoxGeometry(.18,.5,2.6), jm=new THREE.InstancedMesh(jg,woodDark,Math.floor(planks.length/4));
+  let k=0; for(let i=0;i<planks.length;i+=4){ d.position.set(planks[i][0],.32,planks[i][1]); d.rotation.set(0,0,0); d.updateMatrix(); jm.setMatrixAt(k++,d.matrix); }
+  jm.castShadow=true; scene.add(jm);
+}
+
+/* --- crusted stakes --- */
+{
+  const N=110, g=new THREE.CylinderGeometry(.055,.075,1.25,6);
+  const im=new THREE.InstancedMesh(g,woodDark,N);
+  const cg=new THREE.ConeGeometry(.22,.22,7), cm=new THREE.InstancedMesh(cg,saltMat,N);
+  const d=new THREE.Object3D();
+  for(let i=0;i<N;i++){
+    const B=basins[Math.floor(rnd(0,basins.length))];
+    const edge=Math.floor(rnd(0,4)), t=rnd(0,1);
+    let x,z;
+    if(edge===0){ x=B.x0-.4+t*(B.x1-B.x0+.8); z=B.z0-.55; }
+    else if(edge===1){ x=B.x0-.4+t*(B.x1-B.x0+.8); z=B.z1+.55; }
+    else if(edge===2){ x=B.x0-.55; z=B.z0-.4+t*(B.z1-B.z0+.8); }
+    else { x=B.x1+.55; z=B.z0-.4+t*(B.z1-B.z0+.8); }
+    d.position.set(x,.55+rnd(-.06,.06),z); d.rotation.set(rnd(-.05,.05),rnd(0,6.28),rnd(-.05,.05));
+    d.updateMatrix(); im.setMatrixAt(i,d.matrix);
+    d.position.set(x,.08,z); d.rotation.set(0,rnd(0,6.28),0); d.updateMatrix(); cm.setMatrixAt(i,d.matrix);
+  }
+  im.castShadow=true; cm.castShadow=true; scene.add(im,cm);
+}
+
+/* --- conical salt piles --- */
+{
+  for(let i=0;i<13;i++){
+    const B=basins[Math.floor(rnd(0,basins.length))];
+    const x=B.x1+rnd(1.2,2.4), z=B.z0+rnd(-1,3);
+    const r=rnd(1.5,3.2), h=rnd(1.4,2.9);
+    const g=new THREE.ConeGeometry(r,h,15,6);
+    const p=g.attributes.position;
+    for(let v=0;v<p.count;v++){
+      const s=1+Math.sin(p.getX(v)*3.1+p.getZ(v)*2.7)*.030+Math.sin(p.getX(v)*7.3-p.getZ(v)*5.1)*.014;
+      p.setX(v,p.getX(v)*s); p.setZ(v,p.getZ(v)*s);
+    }
+    g.computeVertexNormals();
+    const pile=new THREE.Mesh(g,pileMat);
+    pile.position.set(x,.30+h*.5,z); pile.castShadow=true; pile.receiveShadow=true; scene.add(pile);
+    const skirt=new THREE.Mesh(new THREE.ConeGeometry(r*1.28,h*.24,15,1),pileMat);
+    skirt.position.set(x,.30+h*.10,z); skirt.castShadow=true; skirt.receiveShadow=true; scene.add(skirt);
+    for(let k=0;k<3;k++){
+      const sg=new THREE.ConeGeometry(r*rnd(.18,.34),h*rnd(.3,.5),8);
+      const sm=new THREE.Mesh(sg,pileMat);
+      sm.position.set(x+rnd(-r,r),.35+h*rnd(.1,.25),z+rnd(-r,r));
+      sm.castShadow=true; scene.add(sm);
+    }
+  }
+}
+
+/* --- pumping wheels --- */
+const wheels=[];
+{
+  const positions=[[-46,26],[8,-8],[38,-58],[-30,-84]];
+  for(const [x,z] of positions){
+    const grp=new THREE.Group(); grp.position.set(x,.95,z); grp.rotation.y=rnd(-.4,.4);
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.5,12),woodDark); hub.rotation.z=Math.PI/2; grp.add(hub);
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(1.55,.11,8,24),woodMat); rim.rotation.y=Math.PI/2; grp.add(rim);
+    const rim2=new THREE.Mesh(new THREE.TorusGeometry(1.12,.07,6,20),woodDark); rim2.rotation.y=Math.PI/2; grp.add(rim2);
+    for(let s=0;s<8;s++){
+      const sp=new THREE.Mesh(new THREE.BoxGeometry(.09,3.0,.09),woodMat);
+      sp.rotation.x=s*Math.PI/8; grp.add(sp);
+      const pad=new THREE.Mesh(new THREE.BoxGeometry(.12,.42,.55),woodMat);
+      pad.position.set(0,Math.cos(s*Math.PI/4)*1.42,Math.sin(s*Math.PI/4)*1.42);
+      pad.rotation.x=s*Math.PI/4; grp.add(pad);
+    }
+    grp.traverse(o=>{ if(o.isMesh){o.castShadow=true;} });
+    scene.add(grp); wheels.push(grp);
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.3,1.1,.3),woodDark); post.position.set(x,.5,z); post.castShadow=true; scene.add(post);
+  }
+}
+
+/* --- drainage rivulets --- */
+{
+  const wet=new THREE.MeshStandardMaterial({color:0x5a5342,roughness:.45,metalness:.05});
+  for(let i=0;i<11;i++){
+    const B=basins[Math.floor(rnd(0,basins.length))];
+    const sx=B.x1+rnd(1,3), sz=B.z0+rnd(-2,1);
+    const pts=[ new THREE.Vector3(sx,.42,sz),
+      new THREE.Vector3(sx+rnd(-2,1),.38,sz+rnd(1,2.5)),
+      new THREE.Vector3(B.x1+rnd(.2,1),.22,B.z0+rnd(.5,1.5)),
+      new THREE.Vector3(B.x1-.4,B.waterY+.03,B.z0+rnd(1,2)) ];
+    const curve=new THREE.CatmullRomCurve3(pts);
+    const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,14,.045,5,false),wet);
+    tube.castShadow=true; scene.add(tube);
+  }
+}
+
+/* ================= diagonal timber sluice channel ================= */
+const GATE_POS=new THREE.Vector2(26,36);
+const INFLOW=new THREE.Vector2(17,41);
+const sluice=new THREE.Group(); scene.add(sluice);
+let gateBoard, gatePostY=0;
+{
+  const a=new THREE.Vector2(64,54), b=GATE_POS.clone();
+  const dir=b.clone().sub(a); const len=dir.length(); dir.normalize();
+  const perp=new THREE.Vector2(-dir.y,dir.x);
+  const mid=a.clone().add(b).multiplyScalar(.5);
+  const angle=Math.atan2(dir.y,dir.x);
+  function beam(L,W,H,px,pz,py,mat){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(L,H,W),mat);
+    m.position.set(px,py,pz); m.rotation.y=-angle; m.castShadow=true; m.receiveShadow=true; sluice.add(m); return m;
+  }
+  beam(len,2.6,.20,mid.x,mid.y,.60,woodDark);
+  beam(len,.28,.85,mid.x+perp.x*1.30,mid.y+perp.y*1.30,1.02,woodMat);
+  beam(len,.28,.85,mid.x-perp.x*1.30,mid.y-perp.y*1.30,1.02,woodMat);
+  for(let d=0;d<len;d+=5){
+    const p=a.clone().addScaledVector(dir,d);
+    beam(.22,3.1,.24,p.x,p.y,.72,woodMat);
+  }
+  // gate frame at the downstream opening
+  const px=perp.x, pz=perp.y;
+  for(const s of [-1,1]){
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.32,2.7,.34),woodDark);
+    post.position.set(b.x+px*1.42*s,1.45,b.y+pz*1.42*s); post.castShadow=true; sluice.add(post);
+  }
+  const lintel=new THREE.Mesh(new THREE.BoxGeometry(3.4,.28,.35),woodDark);
+  lintel.position.set(b.x,2.72,b.y); lintel.rotation.y=-angle; lintel.castShadow=true; sluice.add(lintel);
+  gateBoard=new THREE.Mesh(new THREE.BoxGeometry(2.55,1.55,.20),woodMat);
+  gateBoard.position.set(b.x,.98,b.y); gateBoard.rotation.y=-angle; gateBoard.castShadow=true; sluice.add(gateBoard);
+  gatePostY=gateBoard.position.y;
+  // metal lift rod
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,2.2,8),metalMat);
+  rod.position.set(b.x,2.45,b.y); sluice.add(rod);
+  // outflow stream through the opening
+  const sdir=INFLOW.clone().sub(GATE_POS), sl=sdir.length(); sdir.normalize();
+  const sg=new THREE.PlaneGeometry(sl,.55,1,1); sg.rotateX(-Math.PI/2);
+  const streamMat=new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    uniforms:{uTime:{value:0},uOpacity:{value:0}},
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader:`uniform float uTime,uOpacity; varying vec2 vUv;
+      void main(){ float s=sin(vUv.y*28.-uTime*6.+sin(vUv.x*7.)*.7)*.5+.5;
+        float foam=smoothstep(.78,.99,s)*.32;
+        vec3 c=mix(vec3(.44,.62,.66),vec3(.95,.98,.96),foam);
+        float edge=smoothstep(0.,.25,vUv.x)*(1.-smoothstep(.75,1.,vUv.x));
+        gl_FragColor=vec4(c,uOpacity*(.26+foam*.32)*edge); }`
+  });
+  const stream=new THREE.Mesh(sg,streamMat);
+  stream.position.set((GATE_POS.x+INFLOW.x)/2,.10,(GATE_POS.y+INFLOW.y)/2);
+  stream.rotation.y=-Math.atan2(sdir.y,sdir.x);
+  stream.renderOrder=3; sluice.add(stream);
+  sluice.userData.streamMat=streamMat;
+}
+
+/* ================= polygonal crystals (instanced, pooled) ================= */
+const crystalUniforms={
+  uTime:{value:0}, uGap:cloudUniforms.uGap, uGapW:cloudUniforms.uGapW,
+  uCam:{value:camera.position}, uFog:{value:FOG}, uFogD:{value:scene.fog.density}
+};
+{
+  const spots=[];
+  for(const B of basins){
+    const count=B.hero?230:Math.floor(rnd(8,16));
+    for(let i=0;i<count;i++){
+      const edge=Math.floor(rnd(0,4)), t=rnd(0,1);
+      let x,z; const ins=B.hero?rnd(.15,2.3):rnd(.12,.95);
+      if(edge===0){ x=B.x0+.2+t*(B.x1-B.x0-.4); z=B.z0+ins; }
+      else if(edge===1){ x=B.x0+.2+t*(B.x1-B.x0-.4); z=B.z1-ins; }
+      else if(edge===2){ x=B.x0+ins; z=B.z0+.2+t*(B.z1-B.z0-.4); }
+      else { x=B.x1-ins; z=B.z0+.2+t*(B.z1-B.z0-.4); }
+      spots.push([x,z,B.hero?1:0]);
+    }
+  }
+  // exposed margin crystals between basins
+  for(let i=0;i<220;i++){
+    const B=basins[Math.floor(rnd(0,basins.length))];
+    spots.push([B.x1+rnd(.3,1.6),B.z0+rnd(-2,2),0]);
+  }
+  const g=new THREE.OctahedronGeometry(.13,0);
+  const phases=new Float32Array(spots.length), heroes=new Float32Array(spots.length);
+  const im=new THREE.InstancedMesh(g,new THREE.ShaderMaterial({
+    uniforms:crystalUniforms,
+    vertexShader:`
+      attribute float aPhase,aHero; uniform float uTime,uGap,uGapW;
+      varying float vTw,vLit,vHero; varying vec3 vW;
+      void main(){
+        vec4 wp=instanceMatrix*vec4(position,1.0); vec4 world=modelMatrix*wp;
+        vec3 wn=normalize(mat3(modelMatrix)*mat3(instanceMatrix)*normal);
+        vW=world.xyz; vHero=aHero;
+        float gp=exp(-pow((world.x-uGap)/uGapW,2.0));
+        float tw=pow(max(0.,sin(uTime*2.55+aPhase*6.2831)),28.);
+        vTw=tw*(.22+gp*1.6+aHero*gp*1.2);
+        vLit=.42+.58*max(dot(wn,normalize(vec3(.55,.82,.28))),0.);
+        gl_Position=projectionMatrix*viewMatrix*world;
+      }`,
+    fragmentShader:`
+      uniform vec3 uCam,uFog; uniform float uFogD;
+      varying float vTw,vLit,vHero; varying vec3 vW;
+      void main(){
+        vec3 col=vec3(.76,.77,.73)*vLit+vec3(1.,.97,.88)*vTw*2.1;
+        float d=length(uCam-vW); float f=1.-exp(-uFogD*uFogD*d*d);
+        col=mix(col,uFog,clamp(f,0.,1.));
+        gl_FragColor=vec4(col,1.);
+      }`
+  }),spots.length);
+  const d=new THREE.Object3D();
+  spots.forEach((s,i)=>{
+    const sc=s[2]?rnd(.45,1.30):rnd(.28,.90);
+    d.position.set(s[0],s[2]?hero.waterY+.06:rnd(.30,.40),s[1]);
+    d.rotation.set(rnd(0,3),rnd(0,6.28),rnd(0,3));
+    d.scale.set(sc,sc*rnd(1.0,1.9),sc); d.updateMatrix();
+    im.setMatrixAt(i,d.matrix); phases[i]=rnd(0,1); heroes[i]=s[2];
+  });
+  g.setAttribute('aPhase',new THREE.InstancedBufferAttribute(phases,1));
+  g.setAttribute('aHero',new THREE.InstancedBufferAttribute(heroes,1));
+  im.frustumCulled=false; scene.add(im);
+}
+
+/* ================= camera: cinematic path + damped manual orbit ================= */
+const camPath=new THREE.CatmullRomCurve3([
+  new THREE.Vector3(52,30,66), new THREE.Vector3(42,28,54),
+  new THREE.Vector3(28,27,40), new THREE.Vector3(10,29,24),
+  new THREE.Vector3(-12,32,4), new THREE.Vector3(-30,35,-20),
+  new THREE.Vector3(-6,38,-46), new THREE.Vector3(26,36,-22)
+],true,'catmullrom',.4);
+const lookPath=new THREE.CatmullRomCurve3([
+  new THREE.Vector3(10,0,34), new THREE.Vector3(8,0,22), new THREE.Vector3(2,0,8),
+  new THREE.Vector3(-6,0,-14), new THREE.Vector3(-2,0,-34), new THREE.Vector3(8,0,-46),
+  new THREE.Vector3(10,0,-18)
+],true,'catmullrom',.4);
+let manual=false, paused=false, pathT=0.015;
+const currentLook=new THREE.Vector3(10,0,34);
+const tmpP=new THREE.Vector3(), tmpL=new THREE.Vector3();
+// manual orbit state
+const orb={ th:0, ph:1.0, rad:100, gth:0, gph:1.0, grad:100, target:new THREE.Vector3(), gtarget:new THREE.Vector3() };
+function enterManual(){
+  if(manual) return;
+  manual=true; bCine.classList.remove('active');
+  const off=tmpP.copy(camera.position).sub(currentLook);
+  const sph=new THREE.Spherical().setFromVector3(off);
+  orb.th=orb.gth=sph.theta; orb.ph=orb.gph=sph.phi; orb.rad=orb.grad=sph.radius;
+  orb.target.copy(currentLook); orb.gtarget.copy(currentLook);
+}
+function sphericalToVec(th,ph,r,out){ return out.set(r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph),r*Math.sin(ph)*Math.cos(th)); }
+
+let dragging=false, lastX=0,lastY=0, pinchDist=0;
+canvas.addEventListener('pointerdown',e=>{
+  enterManual(); dragging=true; lastX=e.clientX; lastY=e.clientY;
+  canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId); wake();
+});
+canvas.addEventListener('pointermove',e=>{
+  wake();
+  if(!dragging) return;
+  const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+  orb.gth-=dx*.0045; orb.gph=clamp(orb.gph-dy*.0045,.12,1.46);
+});
+function endDrag(){ dragging=false; canvas.classList.remove('dragging'); }
+canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
+canvas.addEventListener('wheel',e=>{ e.preventDefault(); enterManual();
+  orb.grad=clamp(orb.grad*Math.exp(e.deltaY*.0011),24,230); wake(); },{passive:false});
+canvas.addEventListener('touchstart',e=>{ if(e.touches.length===2){ enterManual(); pinchDist=Math.hypot(
+  e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); } },{passive:true});
+canvas.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinchDist>0){
+  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  orb.grad=clamp(orb.grad*(pinchDist/d),24,230); pinchDist=d; e.preventDefault(); } },{passive:false});
+
+/* ================= UI ================= */
+const ui=document.getElementById('ui');
+const bCine=document.getElementById('bCine'), bReset=document.getElementById('bReset'),
+      bPause=document.getElementById('bPause'), bSound=document.getElementById('bSound');
+let lastAct=performance.now();
+function wake(){ lastAct=performance.now(); ui.classList.remove('hidden'); }
+['pointermove','pointerdown','wheel','keydown','focusin','touchstart'].forEach(ev=>
+  window.addEventListener(ev,wake,{passive:true}));
+bCine.onclick=()=>{ manual=false; bCine.classList.add('active'); wake(); };
+bReset.onclick=()=>{ pathT=0.015; manual=false; bCine.classList.add('active'); wake(); };
+bPause.onclick=()=>{ paused=!paused; bPause.classList.toggle('active',paused); bPause.textContent=paused?'Resume':'Pause'; wake(); };
+
+/* ================= procedural audio ================= */
+let audioCtx=null, master=null, trickleGain=null, soundOn=false;
+function initAudio(){
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  master=audioCtx.createGain(); master.gain.value=0; master.connect(audioCtx.destination);
+  const len=audioCtx.sampleRate*3;
+  const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate), dta=buf.getChannelData(0);
+  let lastS=0;
+  for(let i=0;i<len;i++){ const w=Math.random()*2-1; lastS=(lastS+.022*w)/1.022; dta[i]=lastS*3.2; }
+  const wind=audioCtx.createBufferSource(); wind.buffer=buf; wind.loop=true;
+  const wf=audioCtx.createBiquadFilter(); wf.type='lowpass'; wf.frequency.value=440;
+  const wg=audioCtx.createGain(); wg.gain.value=.11;
+  wind.connect(wf).connect(wg).connect(master); wind.start();
+  const lfo=audioCtx.createOscillator(); lfo.frequency.value=.075;
+  const lg=audioCtx.createGain(); lg.gain.value=.05; lfo.connect(lg).connect(wg.gain); lfo.start();
+  // trickling brine
+  const nb=audioCtx.createBuffer(1,len,audioCtx.sampleRate), nd=nb.getChannelData(0);
+  for(let i=0;i<len;i++) nd[i]=Math.random()*2-1;
+  const ns=audioCtx.createBufferSource(); ns.buffer=nb; ns.loop=true;
+  const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1350; bp.Q.value=.8;
+  trickleGain=audioCtx.createGain(); trickleGain.gain.value=.012;
+  ns.connect(bp).connect(trickleGain).connect(master); ns.start();
+}
+function creak(){
+  if(!soundOn||!audioCtx) return;
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain(), f=audioCtx.createBiquadFilter();
+  o.type='sawtooth'; o.frequency.setValueAtTime(118,t); o.frequency.exponentialRampToValueAtTime(72,t+1.15);
+  f.type='bandpass'; f.frequency.value=390; f.Q.value=3.2;
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.055,t+.18);
+  g.gain.exponentialRampToValueAtTime(.0001,t+1.25);
+  o.connect(f).connect(g).connect(master); o.start(t); o.stop(t+1.3);
+}
+bSound.onclick=()=>{
+  if(!audioCtx) initAudio();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  soundOn=!soundOn;
+  master.gain.setTargetAtTime(soundOn?.55:0,audioCtx.currentTime,.22);
+  bSound.textContent=soundOn?'Sound: on':'Sound: off'; bSound.classList.toggle('active',soundOn); wake();
+};
+
+/* ================= simulation (fixed step) & animation ================= */
+let simTime=0, acc=0, last=performance.now();
+const pending=[]; // [time, basin, originX, originZ]
+let gateT=0, prevGateT=0;
+function stepSim(h){
+  simTime+=h;
+  const phase=simTime%15;
+  let target=0;
+  if(phase<4.6) target=smooth(0,1.1,phase)*(1-smooth(3.8,4.6,phase));
+  gateT=target;
+  if(prevGateT<.5&&gateT>=.5){
+    hero.ripTime=simTime; hero.ripOrg.set(INFLOW.x,INFLOW.y);
+    if(audioCtx&&soundOn) creak();
+    const b2=basins.find(b=>b.row===1&&b.col===3);
+    if(b2) pending.push([simTime+3.2,b2,(b2.x0+b2.x1)/2,b2.z1-1]);
+  }
+  prevGateT=gateT;
+  for(let i=pending.length-1;i>=0;i--){
+    if(simTime>=pending[i][0]){ const p=pending[i]; p[1].ripTime=simTime; p[1].ripOrg.set(p[2],p[3]); pending.splice(i,1); }
+  }
+}
+function resize(){
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
+  renderer.setSize(innerWidth,innerHeight,false);
+}
+window.addEventListener('resize',resize);
+
+function animate(now){
+  requestAnimationFrame(animate);
+  const dt=Math.min((now-last)/1000,.05); last=now;
+  if(!paused){ acc+=dt; let guard=0; while(acc>=1/120&&guard++<12){ stepSim(1/120); acc-=1/120; } }
+  // shared time uniforms
+  cloudUniforms.uCloudOff.value.set(simTime*.0042,simTime*.0016);
+  cloudUniforms.uGap.value=-84+((simTime%26)/26)*168;
+  crystalUniforms.uTime.value=simTime;
+  // water + sluice
+  for(const B of basins){ B.mat.uniforms.uTime.value=simTime; B.mat.uniforms.uRipTime.value=B.ripTime; }
+  sluice.userData.streamMat.uniforms.uTime.value=simTime;
+  sluice.userData.streamMat.uniforms.uOpacity.value=gateT*.92;
+  gateBoard.position.y=gatePostY+gateT*1.55;
+  for(const w of wheels) w.rotation.x+=dt*.22;
+  if(trickleGain&&audioCtx) trickleGain.gain.setTargetAtTime(.010+gateT*.045,audioCtx.currentTime,.3);
+  sun.intensity=3.3+.20*Math.sin(simTime*.08);
+  // camera
+  if(!manual){
+    pathT=(pathT+dt/95)%1;
+    camPath.getPointAt(pathT,tmpP); lookPath.getPointAt(pathT,tmpL);
+    const k=1-Math.exp(-dt*1.6);
+    camera.position.lerp(tmpP,k); currentLook.lerp(tmpL,k);
+  } else {
+    const k=1-Math.exp(-dt*9);
+    orb.th+=(orb.gth-orb.th)*k; orb.ph+=(orb.gph-orb.ph)*k; orb.rad+=(orb.grad-orb.rad)*k;
+    orb.target.lerp(orb.gtarget,k);
+    sphericalToVec(orb.th,orb.ph,orb.rad,tmpP).add(orb.target);
+    camera.position.lerp(tmpP,1-Math.exp(-dt*12));
+    currentLook.lerp(orb.target,1-Math.exp(-dt*12));
+  }
+  camera.lookAt(currentLook);
+  camera.updateMatrixWorld();
+  if(now-lastAct>5200) ui.classList.add('hidden');
+  renderer.render(scene,camera);
+}
+camera.lookAt(currentLook);
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

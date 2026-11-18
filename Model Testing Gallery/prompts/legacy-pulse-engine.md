@@ -1,0 +1,28 @@
+Build one complete, self-contained web demo: PULSE ENGINE — a generative audiovisual instrument. It plays music by itself, you can steer it, and the visuals are driven by the sound. This is an audio-engineering and aesthetics test.
+
+DELIVERABLE
+A single HTML file, self-contained: all HTML, CSS and JavaScript inline. Three.js r160 via importmap from unpkg ("three": https://unpkg.com/three@0.160.0/build/three.module.js, "three/addons/": https://unpkg.com/three@0.160.0/examples/jsm/) allowed for the visuals. No assets of any kind — all sound must be synthesized in WebAudio (no samples, no audio files); all imagery generated in code. No build step, no TypeScript, no npm. Zero console errors.
+
+AUDIO ENGINE
+1. A 16-step sequencer with four synthesized drum voices — kick, snare, hats, clap — each built from oscillators/noise with real envelopes. Pattern editable by clicking steps in the UI.
+2. A bassline and an arpeggio synth (subtractive: oscillator + filter + envelope) playing a seeded four-chord progression, key and mood of your choice (stay in key — it must sound musical).
+3. Generative mode, ON by default: a seeded composer (seed 1337) mutates patterns and melodies over time so it never exactly repeats, while staying musical — the kind of loop you'd leave running, not random beeps. A "Randomise" button reseeds it.
+4. Rock-solid timing: no audible jitter or drift — all note events scheduled against AudioContext.currentTime (lookahead scheduling, not per-step setTimeout).
+5. A master chain with soft limiting so it never clips, whatever the user clicks; master volume and mute.
+6. Transport: Play/Stop and a tempo slider 90–160 BPM.
+
+VISUALS (Three.js)
+- A full-viewport scene reacting live through an AnalyserNode: for example a slowly rotating particle galaxy that pulses on the kick, warps with the bass, sparkles on hats, with a radial spectrum ring for mids/highs and slow camera drift. It must look composed, not like a debug spectrum.
+- Cohesive synthwave palette (deep blue/purple/cyan/magenta), additive blending, glow via sprites or additive planes (no post-processing dependency needed).
+
+UI
+- A start overlay: "CLICK TO START AUDIO" (browsers block autoplay) — everything begins on the first click.
+- A slim bottom bar: Play/Stop, tempo, mute, Generative on/off, Randomise. Small keyboard hotkeys: 1–4 mute individual drums, G toggles generative; list the hotkeys in one small help line.
+
+QUALITY BAR
+- Audio first: clean, mixed and musical (kick audible, bass warm, hats crisp); no clicks or pops when patterns change (envelopes must handle note starts/stops).
+- The visuals must visibly lock to the beat — the kick pulse unmistakable.
+- 60fps at 1080p with audio running; pixel ratio capped at 2.
+
+OUTPUT
+Return the complete file as one HTML code block. No explanations, no commentary.

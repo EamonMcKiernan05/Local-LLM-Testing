@@ -1,0 +1,35 @@
+Build one complete, self-contained web demo: a floating Japanese island in the sky, voxel/cube art style, cinematic and alive. It must look like a crafted scene, not a tech demo.
+
+DELIVERABLE
+A single HTML file, self-contained: all HTML, CSS and JavaScript inline. Three.js r160 via importmap from unpkg — "three": https://unpkg.com/three@0.160.0/build/three.module.js and "three/addons/": https://unpkg.com/three@0.160.0/examples/jsm/ — ES modules, OrbitControls from three/addons. Nothing else external: no images, textures, models, fonts or audio files — every surface, shape and effect must be generated procedurally in code (canvas-generated textures are fine). No build step, no TypeScript, no npm, no frameworks. Opening the file in a browser must work with zero console errors.
+
+SCENE — all of the following must be present
+1. The island: an irregular floating landmass built from cubes — grass top layer, dirt and rock strata beneath, tapered underside so it reads as torn from the earth. The edge must be uneven, never a circle.
+2. A five-tier pagoda (cube-built): alternating wall bands, wide dark roofs with upturned corners (scaled boxes are fine), gold finial. It is the visual anchor — put it on the high point.
+3. A torii gate at the head of a stone path that climbs to the pagoda, stone lanterns along it with warm emissive glow, and a small cluster of cube houses with lantern-lit windows. A small reflecting pond with stone edging sits near the base.
+4. Vegetation: cube-style pines in clusters plus one large cherry tree with a pink cube canopy near the pagoda.
+5. A waterfall pouring off one edge of the island, with mist particles where it disappears into the clouds below.
+6. A sea of clouds below the island: several layered semi-transparent cloud slabs plus drifting cloud puffs, giving real depth far below.
+7. Cherry-blossom petals drifting across the scene (200+ instanced), and two or three small flocks of birds circling.
+8. Sky: vertical gradient, sun and moon, stars that appear at night, soft distance fog tinted to the time of day.
+
+ANIMATION & LIGHTING
+- The island slowly bobs and tilts, as if drifting in air (subtle — a few degrees max).
+- Full day/night cycle on a ~60 second loop: dawn, noon, golden sunset, night. Sun/moon orbit the scene, light colour and fog follow, lanterns and windows glow at night, stars fade in.
+- Continuous motion everywhere: waterfall, mist, petals, clouds, pond shimmer, birds.
+- Soft shadows; warm rim light at sunset.
+
+CAMERA & CONTROLS
+- Damped OrbitControls with sensible limits (cannot go under the island or inside the pagoda).
+- A "Cinematic" toggle button: slowly orbits the island at a low dramatic angle with gentle drift; toggles back to free orbit.
+- A "Pause time" toggle for the day/night cycle.
+
+PERFORMANCE
+- Stable 60fps at 1080p on a mid-range laptop: use InstancedMesh for cubes, petals and clouds; keep draw calls low; cap pixel ratio at 2; handle resize.
+- All procedural placement uses a seeded PRNG (mulberry32, seed 1337) so the island is IDENTICAL on every load.
+
+UI
+Minimal corner overlay: title "SKY TEMPLE", one-line hint ("Drag to orbit · Scroll to zoom"), the two toggle buttons. Fade to low opacity after 10 seconds idle; restore on mouse move. No other UI. The scene must be screenshot-ready the moment it loads — no interaction needed for the hero shot.
+
+OUTPUT
+Return the complete file as one HTML code block. No explanations, no commentary before or after.

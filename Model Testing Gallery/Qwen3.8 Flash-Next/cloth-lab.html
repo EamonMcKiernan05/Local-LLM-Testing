@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloth Lab — cloth &amp; rigid spheres, solver written from scratch</title>
+<link rel="icon" href="data:," />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f12; }
+  body { font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; }
+  canvas { display: block; }
+
+  #hud {
+    position: fixed; top: 14px; left: 14px; z-index: 10;
+    padding: 12px 14px 11px; border-radius: 10px;
+    background: rgba(11,13,17,.66);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+    color: #d9e2ec; font-size: 11px; letter-spacing: .045em;
+    user-select: none; pointer-events: none; min-width: 246px;
+  }
+  #hud .title {
+    font-size: 15px; font-weight: 700; letter-spacing: .30em;
+    color: #f2f6fa; margin-bottom: 2px;
+  }
+  #hud .sub { font-size: 9.5px; color: #7c8a99; letter-spacing: .12em; margin-bottom: 10px; }
+  #hud .keys { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-bottom: 10px; }
+  #hud .keys span {
+    border: 1px solid rgba(255,255,255,.13); border-radius: 4px;
+    padding: 2px 5px; font-size: 9.5px; color: #9fb0c0; background: rgba(255,255,255,.03);
+  }
+  #hud .keys b { color: #ffd479; font-weight: 700; }
+  #hud .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; }
+  #hud .stats div { display: flex; justify-content: space-between; gap: 8px; }
+  #hud .stats i { font-style: normal; color: #6f7d8c; font-size: 9.5px; }
+  #hud .stats s { text-decoration: none; color: #cfe3f5; font-size: 10.5px; font-variant-numeric: tabular-nums; }
+  #hud .stats s.hot { color: #8ee6a8; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%);
+    z-index: 11; padding: 7px 14px; border-radius: 999px;
+    background: rgba(11,13,17,.78); border: 1px solid rgba(255,255,255,.14);
+    color: #ffd479; font-size: 11px; letter-spacing: .18em; white-space: nowrap;
+    opacity: 0; transition: opacity .25s ease; pointer-events: none;
+  }
+  #toast.on { opacity: 1; }
+
+  #foot {
+    position: fixed; right: 14px; bottom: 12px; z-index: 10;
+    color: #4d5966; font-size: 9.5px; letter-spacing: .12em;
+    user-select: none; pointer-events: none; text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="title">CLOTH LAB</div>
+  <div class="sub">VERLET + XPBD SOLVER · NO PHYSICS LIBS</div>
+  <div class="keys">
+    <span><b>drag</b> grab / fling</span>
+    <span><b>T</b> tear</span>
+    <span><b>W</b> wind</span>
+    <span><b>B</b> balls</span>
+    <span><b>F</b> wire</span>
+    <span><b>R</b> reset</span>
+  </div>
+  <div class="stats">
+    <div><i>particles</i><s id="s-parts">0</s></div>
+    <div><i>links</i><s id="s-links">0</s></div>
+    <div><i>steps/s</i><s id="s-steps" class="hot">0</s></div>
+    <div><i>fps</i><s id="s-fps" class="hot">0</s></div>
+    <div><i>bodies</i><s id="s-balls">0</s></div>
+    <div><i>tears</i><s id="s-tears">0</s></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="foot">fixed 120 Hz accumulator · 8 gauss-seidel passes<br />left-drag cloth · right-click tears</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/*  =======================================================================
+    PHYSICS CORE  —  pure JS, no dependencies, no DOM, no per-step garbage
+    -----------------------------------------------------------------------
+    Model : particles (mass) + holonomic distance constraints.
+    Step  : semi-implicit Verlet predict
+            Gauss-Seidel projection of distance constraints (stiffness as a
+            relaxation factor -> XPBD in the zero-compliance limit)
+            positional collision projection (floor / spheres / self)
+            re-projection so contacts do not fight the fabric
+    Tearing: a link is deleted when its strain exceeds a threshold; a tear
+            lowers the threshold for a short window so neighbours cascade.
+    Everything lives in flat typed arrays; loops are flat and branch-light.
+    ======================================================================= */
+
+// ==== PHYSICS CORE BEGIN ====
+function createClothSim(cfg) {
+  const cols = cfg.cols, rows = cfg.rows, n = cols * rows;
+  const sp = cfg.spacing;
+  const diag = sp * Math.SQRT2;
+  const floorY = cfg.floorY;
+  const g = cfg.gravity;
+  const relax = Number.isFinite(cfg.overRelax) ? cfg.overRelax : 1;
+
+  // ---------------------------------------------------------------- state
+  const pos = new Float32Array(n * 3);
+  const prev = new Float32Array(n * 3);
+  const invMass = new Float32Array(n);
+  const alive = new Uint8Array(n);
+
+  // ----------------------------------------------------------- constraints
+  const maxC = n * 8;
+  const cA = new Int32Array(maxC);
+  const cB = new Int32Array(maxC);
+  const cRest = new Float32Array(maxC);
+  const cStiff = new Float32Array(maxC);
+  const cKind = new Uint8Array(maxC);   // 0 structural, 1 shear, 2 bend
+  const cOn = new Uint8Array(maxC);
+  let cCount = 0;
+  let cLive = 0;
+
+  // adjacency: which links touch a particle (used by the tear tool)
+  const adjHead = new Int32Array(n).fill(-1);
+  const adjNext = new Int32Array(maxC * 2).fill(-1);
+  const adjLink = new Int32Array(maxC * 2);
+
+  function addLink(a, b, rest, stiff, kind) {
+    cA[cCount] = a; cB[cCount] = b; cRest[cCount] = rest;
+    cStiff[cCount] = stiff; cKind[cCount] = kind; cOn[cCount] = 1;
+    adjLink[adjN] = cCount; adjNext[adjN] = adjHead[a]; adjHead[a] = adjN++;
+    adjLink[adjN] = cCount; adjNext[adjN] = adjHead[b]; adjHead[b] = adjN++;
+    cCount++;
+  }
+  let adjN = 0;
+
+  function buildLinks() {
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        if (c + 1 < cols) addLink(i, i + 1, sp, cfg.stiffStruct, 0);
+        if (r + 1 < rows) addLink(i, i + cols, sp, cfg.stiffStruct, 0);
+        if (c + 1 < cols && r + 1 < rows) {
+          addLink(i, i + cols + 1, diag, cfg.stiffShear, 1);
+          addLink(i + 1, i + cols, diag, cfg.stiffShear, 1);
+        }
+        if (c + 2 < cols) addLink(i, i + 2, 2 * sp, cfg.stiffBend, 2);
+        if (r + 2 < rows) addLink(i, i + 2 * cols, 2 * sp, cfg.stiffBend, 2);
+      }
+    }
+    cLive = cCount;
+  }
+
+  // ------------------------------------------------------------- rigid set
+  const maxBalls = cfg.maxBalls;
+  const bX = new Float32Array(maxBalls), bY = new Float32Array(maxBalls), bZ = new Float32Array(maxBalls);
+  const bVX = new Float32Array(maxBalls), bVY = new Float32Array(maxBalls), bVZ = new Float32Array(maxBalls);
+  const bPX = new Float32Array(maxBalls), bPY = new Float32Array(maxBalls), bPZ = new Float32Array(maxBalls);
+  const bR = new Float32Array(maxBalls), bIM = new Float32Array(maxBalls);
+  let ballCount = 0;
+
+  // pedestal: a static sphere the cloth can be draped across
+  const ped = { x: cfg.pedX, y: cfg.pedY, z: cfg.pedZ, r: cfg.pedR };
+
+  // ------------------------------------------------------------- spatial hash
+  const HASH_BITS = 13, HASH_SIZE = 1 << HASH_BITS, HASH_MASK = HASH_SIZE - 1;
+  const hashTable = new Int32Array(HASH_SIZE);
+  const hashNext = new Int32Array(n);
+  const cell = sp * 1.3;
+  const invCell = 1 / cell;
+  const selfDist = sp * (Number.isFinite(cfg.selfDistFactor) ? cfg.selfDistFactor : 1);
+  const selfDistSq = selfDist * selfDist;
+  const selfSkip = cfg.selfSkip;
+
+  // --------------------------------------------------------------- scratch
+  const grab = {
+    on: false, count: 0,
+    idx: new Int32Array(96), wgt: new Float32Array(96),
+    x: 0, y: 0, z: 0, radius: cfg.grabRadius, stiff: cfg.grabStiff, maxStep: cfg.grabMaxStep
+  };
+
+  let simTime = 0, tearCount = 0, tearWindow = 0, dirty = true;
+  let windOn = false, windSpeed = cfg.windSpeed;
+
+  // ------------------------------------------------------------- lifecycle
+  // The sheet starts as a corrugated curtain, not a flat banner. A flat sheet
+  // whose pins are exactly one rest-width apart has no slack: gravity can only
+  // relieve it by stretching the top row, and a position solver fights that
+  // forever. Corrugating it (projected span < rest width, folds already there)
+  // puts every link at its rest length from frame one, so the fabric hangs in
+  // folds exactly like a gathered curtain.
+  // A sheet held by one particle per corner also puts its whole weight through
+  // a single link, so each corner is attached over a small patch, the way a
+  // real curtain is attached to a grommet.
+  function resetCloth() {
+    const span = 2 * cfg.pinX;
+    const dxp = span / (cols - 1);
+    const amp = Math.sqrt(Math.max(0, sp * sp - dxp * dxp)) * (cols - 1) / (2 * Math.PI * cfg.pleats);
+    const patch = cfg.pinPatch;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c, i3 = i * 3;
+        const u = c / (cols - 1);
+        const x = -cfg.pinX + u * span;
+        const y = cfg.topY - r * sp;
+        const z = cfg.z0 + amp * Math.sin(2 * Math.PI * cfg.pleats * u);
+        const side = (r === 0 && c < patch) ? 0 : (r === 0 && c >= cols - patch) ? 1 : -1;
+        pos[i3] = x; pos[i3 + 1] = y; pos[i3 + 2] = z;
+        prev[i3] = x; prev[i3 + 1] = y; prev[i3 + 2] = z;
+        alive[i] = 1;
+        invMass[i] = side >= 0 ? 0 : 1;
+      }
+    }
+    cOn.fill(1, 0, cCount);
+    cLive = cCount;
+    dirty = true;
+  }
+
+  function reset() {
+    resetCloth();
+    ballCount = 0;
+    simTime = 0; tearCount = 0; tearWindow = 0;
+    grab.on = false; grab.count = 0;
+    dirty = true;
+  }
+
+  // ------------------------------------------------------------- integrate
+  function integrate(dt) {
+    const damp = cfg.damping;
+    const dt2 = dt * dt;
+    const t = simTime;
+    const aero = cfg.aeroK;
+    let gust = 0, wx = 0, wy = 0, wz = 0;
+    if (windOn) {
+      gust = 0.55 + 0.42 * Math.sin(t * 0.83) * Math.sin(t * 0.31 + 1.7) + 0.20 * Math.sin(t * 2.9);
+      wx = windSpeed * gust;
+    }
+    for (let i = 0; i < n; i++) {
+      if (invMass[i] === 0) continue;           // pinned or torn out
+      const i3 = i * 3;
+      let dx = (pos[i3] - prev[i3]) * damp;
+      let dy = (pos[i3 + 1] - prev[i3 + 1]) * damp;
+      let dz = (pos[i3 + 2] - prev[i3 + 2]) * damp;
+      dy -= g * dt2;                            // gravity
+      if (windOn) {
+        // aerodynamic drag toward a smooth, gusty air velocity field
+        const y = pos[i3 + 1], x = pos[i3], z = pos[i3 + 2];
+        const ax = wx * (0.72 + 0.46 * Math.sin(t * 2.1 + y * 3.4 + z * 1.9) + 0.24 * Math.sin(t * 4.3 + x * 2.7));
+        const ay = wx * 0.26 * Math.sin(t * 3.1 + x * 4.2 + z * 2.3);
+        const az = wx * (0.42 * Math.sin(t * 1.7 + x * 2.9 + y * 1.3) + 0.18 * Math.sin(t * 5.1 + z * 3.7));
+        dx += (ax * dt - dx) * aero;
+        dy += (ay * dt - dy) * aero;
+        dz += (az * dt - dz) * aero;
+      }
+      prev[i3] = pos[i3]; prev[i3 + 1] = pos[i3 + 1]; prev[i3 + 2] = pos[i3 + 2];
+      pos[i3] += dx; pos[i3 + 1] += dy; pos[i3 + 2] += dz;
+    }
+  }
+
+  function integrateBalls(dt) {
+    for (let b = 0; b < ballCount; b++) {
+      bVY[b] -= g * dt;
+      bVX[b] *= cfg.ballDrag; bVY[b] *= cfg.ballDrag; bVZ[b] *= cfg.ballDrag;
+      bPX[b] = bX[b]; bPY[b] = bY[b]; bPZ[b] = bZ[b];
+      bX[b] += bVX[b] * dt; bY[b] += bVY[b] * dt; bZ[b] += bVZ[b] * dt;
+    }
+  }
+
+  // ------------------------------------------------------------------ grab
+  function applyGrab() {
+    if (!grab.on || grab.count === 0) return;
+    let ax = 0, ay = 0, az = 0, k = 0;
+    for (k = 0; k < grab.count; k++) {
+      const i3 = grab.idx[k] * 3;
+      ax += pos[i3]; ay += pos[i3 + 1]; az += pos[i3 + 2];
+    }
+    const inv = 1 / grab.count;
+    ax *= inv; ay *= inv; az *= inv;
+    let dx = grab.x - ax, dy = grab.y - ay, dz = grab.z - az;
+    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (len > grab.maxStep) { const s = grab.maxStep / len; dx *= s; dy *= s; dz *= s; }
+    dx *= grab.stiff; dy *= grab.stiff; dz *= grab.stiff;
+    for (k = 0; k < grab.count; k++) {
+      const i = grab.idx[k];
+      if (!alive[i] || invMass[i] === 0) continue;
+      const i3 = i * 3, w = grab.wgt[k];
+      pos[i3] += dx * w; pos[i3 + 1] += dy * w; pos[i3 + 2] += dz * w;
+    }
+  }
+
+  // ------------------------------------------------------------- constraint
+  // Symmetric Gauss-Seidel: alternating sweep direction converges several
+  // times faster on a hanging chain than one-way sweeps, which is what keeps
+  // the sheet inextensible (and stops gravity from "stretching" it at rest).
+  let sweepFlip = false;
+  function solveLinks(checkTear) {
+    const thr = tearWindow > 0 ? cfg.tearSpread : cfg.tearStrain;
+    const last = cCount - 1;
+    for (let s = 0; s < cCount; s++) {
+      const k = sweepFlip ? last - s : s;
+      if (!cOn[k]) continue;
+      const a = cA[k], b = cB[k];
+      const a3 = a * 3, b3 = b * 3;
+      const dx = pos[b3] - pos[a3];
+      const dy = pos[b3 + 1] - pos[a3 + 1];
+      const dz = pos[b3 + 2] - pos[a3 + 2];
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 < 1e-18) continue;
+      const d = Math.sqrt(d2);
+      const rest = cRest[k];
+      // The hem at the pins is reinforced: a curtain rips in the field, not off
+      // its rod, and a strain tear next to a pin would unzip the whole sheet.
+      if (checkTear && d > rest * thr && invMass[a] > 0 && invMass[b] > 0) {
+        cOn[k] = 0; cLive--; tearCount++; tearWindow = cfg.tearWindow; dirty = true;
+        continue;
+      }
+      const wa = invMass[a], wb = invMass[b], ws = wa + wb;
+      if (ws === 0) continue;
+      const f = (d - rest) / d * cStiff[k] * relax / ws;
+      const fa = f * wa, fb = f * wb;
+      pos[a3] += dx * fa; pos[a3 + 1] += dy * fa; pos[a3 + 2] += dz * fa;
+      pos[b3] -= dx * fb; pos[b3 + 1] -= dy * fb; pos[b3 + 2] -= dz * fb;
+    }
+    sweepFlip = !sweepFlip;
+  }
+
+  // ------------------------------------------------------------ collisions
+  function collideFloor() {
+    const y0 = floorY + 1e-4, mu = cfg.floorFriction;
+    for (let i = 0; i < n; i++) {
+      if (invMass[i] === 0) continue;
+      const i3 = i * 3;
+      if (pos[i3 + 1] < y0) {
+        pos[i3 + 1] = y0;
+        prev[i3] += (pos[i3] - prev[i3]) * mu;
+        prev[i3 + 2] += (pos[i3 + 2] - prev[i3 + 2]) * mu;
+      }
+    }
+  }
+
+  // particle <-> sphere contact (shared by both broad phases)
+  function contactSphere(i, sx, sy, sz, sr, sim, b) {
+    const wi = invMass[i];
+    if (wi === 0) return;
+    const i3 = i * 3;
+    let dx = pos[i3] - sx, dy = pos[i3 + 1] - sy, dz = pos[i3 + 2] - sz;
+    const d2 = dx * dx + dy * dy + dz * dz;
+    if (d2 >= sr * sr) return;
+    let d = Math.sqrt(d2);
+    if (d < 1e-6) { dx = 0; dy = 1; dz = 0; d = 1e-6; }
+    const ws = wi + sim, pen = sr - d;
+    const ux = dx / d, uy = dy / d, uz = dz / d;
+    const mi = wi / ws, ms = sim / ws;
+    pos[i3] += ux * pen * mi; pos[i3 + 1] += uy * pen * mi; pos[i3 + 2] += uz * pen * mi;
+    if (ms > 0) { bX[b] -= ux * pen * ms; bY[b] -= uy * pen * ms; bZ[b] -= uz * pen * ms; }
+    // tangential grip: fabric does not slide freely over a sphere
+    const fr = cfg.sphereFriction;
+    let rx = pos[i3] - prev[i3], ry = pos[i3 + 1] - prev[i3 + 1], rz = pos[i3 + 2] - prev[i3 + 2];
+    if (ms > 0) { rx -= bX[b] - bPX[b]; ry -= bY[b] - bPY[b]; rz -= bZ[b] - bPZ[b]; }
+    const dn = rx * ux + ry * uy + rz * uz;
+    prev[i3] += (rx - ux * dn) * fr; prev[i3 + 1] += (ry - uy * dn) * fr; prev[i3 + 2] += (rz - uz * dn) * fr;
+  }
+
+  // cloth AABB, used as the broad phase for every sphere query
+  let ax0 = 0, ax1 = 0, ay0 = 0, ay1 = 0, az0 = 0, az1 = 0;
+  function updateBounds() {
+    ax0 = ay0 = az0 = 1e9; ax1 = ay1 = az1 = -1e9;
+    for (let i = 0; i < n; i++) {
+      if (!alive[i]) continue;
+      const i3 = i * 3;
+      const x = pos[i3], y = pos[i3 + 1], z = pos[i3 + 2];
+      if (x < ax0) ax0 = x; else if (x > ax1) ax1 = x;
+      if (y < ay0) ay0 = y; else if (y > ay1) ay1 = y;
+      if (z < az0) az0 = z; else if (z > az1) az1 = z;
+    }
+  }
+  function overlapsCloth(sx, sy, sz, sr) {
+    return !(sx + sr < ax0 || sx - sr > ax1 || sy + sr < ay0 || sy - sr > ay1 || sz + sr < az0 || sz - sr > az1);
+  }
+
+  function collideBodies() {
+    updateBounds();
+    // pedestal: a single large sphere, a flat sweep beats a cell walk
+    if (overlapsCloth(ped.x, ped.y, ped.z, ped.r)) {
+      for (let i = 0; i < n; i++) contactSphere(i, ped.x, ped.y, ped.z, ped.r, 0, -1);
+    }
+    // balls: walk only the hash cells each sphere actually covers
+    for (let b = 0; b < ballCount; b++) {
+      const sx = bX[b], sy = bY[b], sz = bZ[b], sr = bR[b], sim = bIM[b];
+      if (!overlapsCloth(sx, sy, sz, sr)) continue;
+      const x0 = Math.floor((sx - sr) * invCell), x1 = Math.floor((sx + sr) * invCell);
+      const y0 = Math.floor((sy - sr) * invCell), y1 = Math.floor((sy + sr) * invCell);
+      const z0 = Math.floor((sz - sr) * invCell), z1 = Math.floor((sz + sr) * invCell);
+      for (let cxx = x0; cxx <= x1; cxx++) {
+        for (let cyy = y0; cyy <= y1; cyy++) {
+          for (let czz = z0; czz <= z1; czz++) {
+            for (let i = hashTable[hashOf(cxx, cyy, czz)]; i >= 0; i = hashNext[i]) {
+              contactSphere(i, sx, sy, sz, sr, sim, b);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function collideBalls() {
+    for (let a = 0; a < ballCount; a++) {
+      for (let b = a + 1; b < ballCount; b++) {
+        const dx = bX[b] - bX[a], dy = bY[b] - bY[a], dz = bZ[b] - bZ[a];
+        const rs = bR[a] + bR[b];
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 >= rs * rs || d2 < 1e-12) continue;
+        const d = Math.sqrt(d2);
+        const pen = (rs - d) / d;
+        const wa = bIM[a], wb = bIM[b], ws = wa + wb;
+        const sa = wa / ws * pen, sb = wb / ws * pen;
+        bX[a] -= dx * sa; bY[a] -= dy * sa; bZ[a] -= dz * sa;
+        bX[b] += dx * sb; bY[b] += dy * sb; bZ[b] += dz * sb;
+      }
+    }
+    // pedestal vs balls
+    for (let b = 0; b < ballCount; b++) {
+      const dx = bX[b] - ped.x, dy = bY[b] - ped.y, dz = bZ[b] - ped.z;
+      const rs = bR[b] + ped.r, d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 >= rs * rs || d2 < 1e-12) continue;
+      const d = Math.sqrt(d2), pen = (rs - d) / d;
+      bX[b] += dx * pen; bY[b] += dy * pen; bZ[b] += dz * pen;
+    }
+  }
+
+  function finishBalls(dt) {
+    const inv = 1 / dt, rest = cfg.ballRest, maxV = cfg.ballMaxSpeed;
+    for (let b = 0; b < ballCount; b++) {
+      let vx = (bX[b] - bPX[b]) * inv, vy = (bY[b] - bPY[b]) * inv, vz = (bZ[b] - bPZ[b]) * inv;
+      const floorContact = bY[b] <= floorY + bR[b] + 1e-3;
+      if (floorContact) {
+        bY[b] = floorY + bR[b];
+        if (vy < 0) vy = -vy * rest;
+        vx *= cfg.ballFloorFriction; vz *= cfg.ballFloorFriction;
+        if (Math.abs(vy) < 0.35) vy = 0;
+        if (Math.abs(vx) < 0.02 && Math.abs(vz) < 0.02) { vx = 0; vz = 0; }
+      }
+      const s2 = vx * vx + vy * vy + vz * vz;
+      if (s2 > maxV * maxV) { const s = maxV / Math.sqrt(s2); vx *= s; vy *= s; vz *= s; }
+      bVX[b] = vx; bVY[b] = vy; bVZ[b] = vz;
+    }
+  }
+
+  // ------------------------------------------------------- self collision
+  function hashOf(ix, iy, iz) {
+    return (Math.imul(ix, 92837111) ^ Math.imul(iy, 689287499) ^ Math.imul(iz, 283923481)) & HASH_MASK;
+  }
+
+  function buildHash() {
+    hashTable.fill(-1);
+    for (let i = 0; i < n; i++) {
+      if (!alive[i]) continue;
+      const i3 = i * 3;
+      const h = hashOf(Math.floor(pos[i3] * invCell), Math.floor(pos[i3 + 1] * invCell), Math.floor(pos[i3 + 2] * invCell));
+      hashNext[i] = hashTable[h];
+      hashTable[h] = i;
+    }
+  }
+
+  function selfCollide() {
+    const skip = selfSkip;
+    for (let i = 0; i < n; i++) {
+      if (!alive[i]) continue;
+      const wi = invMass[i];
+      const i3 = i * 3;
+      const xi = pos[i3], yi = pos[i3 + 1], zi = pos[i3 + 2];
+      const cx = Math.floor(xi * invCell), cy = Math.floor(yi * invCell), cz = Math.floor(zi * invCell);
+      const ri = (i / cols) | 0, ci = i - ri * cols;
+      for (let ox = -1; ox <= 1; ox++) {
+        for (let oy = -1; oy <= 1; oy++) {
+          for (let oz = -1; oz <= 1; oz++) {
+            for (let j = hashTable[hashOf(cx + ox, cy + oy, cz + oz)]; j >= 0; j = hashNext[j]) {
+              if (j <= i) continue;
+              const rj = (j / cols) | 0, cj = j - rj * cols;
+              const ar = ri - rj; if (ar > -skip && ar < skip) { const ac = ci - cj; if (ac > -skip && ac < skip) continue; }
+              const j3 = j * 3;
+              const dx = pos[j3] - xi, dy = pos[j3 + 1] - yi, dz = pos[j3 + 2] - zi;
+              const d2 = dx * dx + dy * dy + dz * dz;
+              if (d2 >= selfDistSq || d2 < 1e-12) continue;
+              const d = Math.sqrt(d2);
+              const wj = invMass[j], ws = wi + wj;
+              if (ws === 0) continue;
+              const corr = (selfDist - d) / d;
+              const si = wi / ws, sj = wj / ws;
+              pos[i3] -= dx * corr * si; pos[i3 + 1] -= dy * corr * si; pos[i3 + 2] -= dz * corr * si;
+              pos[j3] += dx * corr * sj; pos[j3 + 1] += dy * corr * sj; pos[j3 + 2] += dz * corr * sj;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------ step
+  function step(dt) {
+    simTime += dt;
+    if (tearWindow > 0) tearWindow -= dt;
+    integrate(dt);
+    integrateBalls(dt);
+    applyGrab();
+    const iters = cfg.iterations;
+    for (let it = 0; it < iters; it++) solveLinks(it === iters - 1);
+    buildHash();
+    collideFloor();
+    collideBodies();
+    collideBalls();
+    if (cfg.selfCollide) { buildHash(); selfCollide(); }
+    solveLinks(false);
+    solveLinks(false);
+    collideFloor();
+    finishBalls(dt);
+  }
+
+  // ------------------------------------------------------------- tools
+  function nearestParticle(x, y, z, maxDist) {
+    let best = -1, bestD = maxDist * maxDist;
+    for (let i = 0; i < n; i++) {
+      if (!alive[i]) continue;
+      const i3 = i * 3;
+      const dx = pos[i3] - x, dy = pos[i3 + 1] - y, dz = pos[i3 + 2] - z;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 < bestD) { bestD = d2; best = i; }
+    }
+    return best;
+  }
+
+  function beginGrab(x, y, z) {
+    const seed = nearestParticle(x, y, z, 0.35);
+    if (seed < 0) return false;
+    grab.on = true; grab.x = x; grab.y = y; grab.z = z;
+    grab.count = 0;
+    const r2 = grab.radius * grab.radius;
+    for (let i = 0; i < n && grab.count < grab.idx.length; i++) {
+      if (!alive[i] || invMass[i] === 0) continue;
+      const i3 = i * 3;
+      const dx = pos[i3] - x, dy = pos[i3 + 1] - y, dz = pos[i3 + 2] - z;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 > r2) continue;
+      const t = 1 - Math.sqrt(d2) / grab.radius;
+      grab.idx[grab.count] = i;
+      grab.wgt[grab.count] = i === seed ? 1 : t * t * (3 - 2 * t);
+      grab.count++;
+    }
+    if (grab.count === 0) {
+      grab.idx[0] = seed; grab.wgt[0] = 1; grab.count = 1;
+    }
+    return true;
+  }
+
+  function updateGrab(x, y, z) { grab.x = x; grab.y = y; grab.z = z; }
+  function endGrab() { grab.on = false; grab.count = 0; }
+
+  function tearParticle(i) {
+    if (i < 0 || i >= n || !alive[i]) return false;
+    alive[i] = 0; invMass[i] = 0;
+    for (let e = adjHead[i]; e >= 0; e = adjNext[e]) {
+      const k = adjLink[e];
+      if (cOn[k]) { cOn[k] = 0; cLive--; }
+    }
+    tearCount++; tearWindow = cfg.tearWindow; dirty = true;
+    return true;
+  }
+
+  function spawnBalls(count, area) {
+    for (let k = 0; k < count; k++) {
+      if (ballCount >= maxBalls) {           // recycle the oldest body
+        for (let b = 0; b + 1 < maxBalls; b++) {
+          bX[b] = bX[b + 1]; bY[b] = bY[b + 1]; bZ[b] = bZ[b + 1];
+          bVX[b] = bVX[b + 1]; bVY[b] = bVY[b + 1]; bVZ[b] = bVZ[b + 1];
+          bR[b] = bR[b + 1]; bIM[b] = bIM[b + 1];
+        }
+        ballCount--;
+      }
+      const b = ballCount++;
+      const r = 0.2 * (0.85 + Math.random() * 0.3);
+      bR[b] = r;
+      bIM[b] = 1 / (cfg.ballDensity * r * r * r);
+      bX[b] = area.x0 + Math.random() * (area.x1 - area.x0);
+      bY[b] = area.y0 + Math.random() * (area.y1 - area.y0);
+      bZ[b] = area.z0 + Math.random() * (area.z1 - area.z0);
+      bVX[b] = (Math.random() - 0.5) * 0.6;
+      bVY[b] = -Math.random() * 0.4;
+      bVZ[b] = (Math.random() - 0.5) * 0.6;
+      bPX[b] = bX[b]; bPY[b] = bY[b]; bPZ[b] = bZ[b];
+    }
+    return ballCount;
+  }
+
+  buildLinks();
+  reset();
+
+  return {
+    cols, rows, n, spacing: sp, floorY,
+    pos, prev, invMass, alive,
+    cA, cB, cOn, cKind, cRest, cCount,
+    get cLive() { return cLive; },
+    get ballCount() { return ballCount; },
+    get maxBalls() { return maxBalls; },
+    get tearCount() { return tearCount; },
+    get simTime() { return simTime; },
+    get windOn() { return windOn; },
+    get grabbing() { return grab.on; },
+    bX, bY, bZ, bR,
+    ped,
+    step, reset, nearestParticle, beginGrab, updateGrab, endGrab,
+    tearParticle, spawnBalls,
+    setWind(v) { windOn = !!v; },
+    isDirty() { return dirty; },
+    clearDirty() { dirty = false; }
+  };
+}
+// ==== PHYSICS CORE END ====
+
+/*  =======================================================================
+    RENDER + INPUT LAYER
+    The cloth mesh shares the solver's position buffer directly: no copy,
+    no per-frame allocation. Topology (triangles, wire, points) is rebuilt
+    only when a link breaks.
+    ======================================================================= */
+
+const CFG = {
+  cols: 60, rows: 40, spacing: 0.05,
+  topY: 2.6, z0: 0, floorY: 0, gravity: 9.8,
+  pinX: 1.0, pleats: 3, pinPatch: 5,
+  pedX: 1.62, pedY: 0.6, pedZ: 0.12, pedR: 0.6,
+  maxBalls: 96,
+  stiffStruct: 1.0, stiffShear: 0.6, stiffBend: 0.25,
+  iterations: 8, damping: 0.995, overRelax: 1,
+  aeroK: 0.045, windSpeed: 2.8,
+  selfCollide: true, selfDistFactor: 1.0, selfSkip: 3,
+  floorFriction: 0.4, sphereFriction: 0.3,
+  grabRadius: 0.22, grabStiff: 0.7, grabMaxStep: 0.06,
+  tearStrain: 2.6, tearSpread: 2.15, tearWindow: 2.6,
+  ballDrag: 0.999, ballRest: 0.32, ballFloorFriction: 0.72,
+  ballMaxSpeed: 16, ballDensity: 900,
+};
+
+const sim = createClothSim(CFG);
+const N = sim.n, COLS = sim.cols, ROWS = sim.rows;
+
+// ---------------------------------------------------------------- renderer
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1014);
+scene.fog = new THREE.FogExp2(0x0d1014, 0.035);
+
+const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 120);
+camera.position.set(1.15, 1.95, 5.6);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0.05, 1.35, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.minDistance = 1.2;
+controls.maxDistance = 16;
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: null };
+controls.update();
+
+// studio environment for the glossy spheres (generated, no assets)
+{
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const envScene = new RoomEnvironment();
+  const rt = pmrem.fromScene(envScene, 0.04);
+  scene.environment = rt.texture;
+  envScene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  pmrem.dispose();
+}
+
+// ------------------------------------------------------------------ lights
+const key = new THREE.DirectionalLight(0xfff1e2, 2.1);
+key.position.set(4.2, 7.4, 4.6);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 1;
+key.shadow.camera.far = 22;
+key.shadow.camera.left = -5.5;
+key.shadow.camera.right = 5.5;
+key.shadow.camera.top = 5.5;
+key.shadow.camera.bottom = -5.5;
+key.shadow.bias = -0.0006;
+key.shadow.normalBias = 0.035;
+key.shadow.radius = 3;
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0x8fb6ff, 0.55);
+fill.position.set(-5.5, 3.2, -3.4);
+scene.add(fill);
+
+const rim = new THREE.DirectionalLight(0xffd7a8, 0.45);
+rim.position.set(-1.5, 2.2, -6);
+scene.add(rim);
+
+scene.add(new THREE.HemisphereLight(0x9fb8d8, 0x241f1a, 0.26));
+
+const pool = new THREE.SpotLight(0xfff6ea, 110, 22, 0.62, 0.75, 1.5);
+pool.position.set(0.2, 8.4, 2.6);
+pool.target.position.set(0.1, 0, 0);
+scene.add(pool, pool.target);
+
+// ------------------------------------------------------------------- stage
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(60, 60),
+  new THREE.MeshStandardMaterial({ color: 0x1c2027, roughness: 0.92, metalness: 0.02 })
+);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const metal = new THREE.MeshStandardMaterial({ color: 0x99a2ad, roughness: 0.34, metalness: 0.9 });
+const postH = CFG.topY + 0.16;
+for (const s of [-1, 1]) {
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.05, postH, 24), metal);
+  post.position.set(s * CFG.pinX, postH / 2, 0);
+  post.castShadow = true;
+  post.receiveShadow = true;
+  scene.add(post);
+  const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.23, 0.05, 28), metal);
+  foot.position.set(s * CFG.pinX, 0.025, 0);
+  foot.castShadow = true; foot.receiveShadow = true;
+  scene.add(foot);
+  const knob = new THREE.Mesh(new THREE.SphereGeometry(0.055, 20, 14), metal);
+  knob.position.set(s * CFG.pinX, CFG.topY + 0.02, 0);
+  knob.castShadow = true;
+  scene.add(knob);
+}
+
+const pedestal = new THREE.Mesh(
+  new THREE.SphereGeometry(CFG.pedR, 56, 36),
+  new THREE.MeshPhysicalMaterial({ color: 0xdfe6ee, roughness: 0.14, metalness: 0.08, clearcoat: 1, clearcoatRoughness: 0.1 })
+);
+pedestal.position.set(CFG.pedX, CFG.pedY, CFG.pedZ);
+pedestal.castShadow = true;
+pedestal.receiveShadow = true;
+scene.add(pedestal);
+
+// ------------------------------------------------------------------- cloth
+const clothGeo = new THREE.BufferGeometry();
+const posAttr = new THREE.BufferAttribute(sim.pos, 3);
+posAttr.setUsage(THREE.DynamicDrawUsage);
+clothGeo.setAttribute('position', posAttr);
+const normals = new Float32Array(N * 3);
+const nrmAttr = new THREE.BufferAttribute(normals, 3);
+nrmAttr.setUsage(THREE.DynamicDrawUsage);
+clothGeo.setAttribute('normal', nrmAttr);
+const uvs = new Float32Array(N * 2);
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const i = (r * COLS + c) * 2;
+  uvs[i] = c / (COLS - 1); uvs[i + 1] = 1 - r / (ROWS - 1);
+}
+clothGeo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+const triArr = new Uint16Array((COLS - 1) * (ROWS - 1) * 6);
+const triAttr = new THREE.BufferAttribute(triArr, 1);
+triAttr.setUsage(THREE.DynamicDrawUsage);
+clothGeo.setIndex(triAttr);
+clothGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, CFG.topY - 1, 0), 8);
+
+const clothMat = new THREE.MeshPhysicalMaterial({
+  color: 0x8f452c,
+  roughness: 0.7,
+  metalness: 0.0,
+  side: THREE.DoubleSide,
+  sheen: 0.6,
+  sheenRoughness: 0.32,
+  sheenColor: new THREE.Color(0xffd9c4),
+  clearcoat: 0.0,
+  envMapIntensity: 0.5,
+});
+const cloth = new THREE.Mesh(clothGeo, clothMat);
+cloth.castShadow = true;
+cloth.receiveShadow = true;
+scene.add(cloth);
+
+// wireframe view of the particle grid
+const lineGeo = new THREE.BufferGeometry();
+lineGeo.setAttribute('position', posAttr);
+const lineArr = new Uint16Array(sim.cCount * 2);
+const lineAttr = new THREE.BufferAttribute(lineArr, 1);
+lineAttr.setUsage(THREE.DynamicDrawUsage);
+lineGeo.setIndex(lineAttr);
+lineGeo.boundingSphere = clothGeo.boundingSphere;
+const wire = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
+  color: 0x8fd8ff, transparent: true, opacity: 0.8, depthWrite: false,
+}));
+wire.visible = false;
+scene.add(wire);
+
+const ptGeo = new THREE.BufferGeometry();
+ptGeo.setAttribute('position', posAttr);
+const ptArr = new Uint16Array(N);
+const ptAttr = new THREE.BufferAttribute(ptArr, 1);
+ptAttr.setUsage(THREE.DynamicDrawUsage);
+ptGeo.setIndex(ptAttr);
+ptGeo.boundingSphere = clothGeo.boundingSphere;
+const dots = new THREE.Points(ptGeo, new THREE.PointsMaterial({
+  color: 0xffd479, size: 0.022, sizeAttenuation: true, transparent: true, opacity: 0.9, depthWrite: false,
+}));
+dots.visible = false;
+scene.add(dots);
+
+// ------------------------------------------------------------------- balls
+const ballGeo = new THREE.SphereGeometry(1, 26, 18);
+const ballMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.16, metalness: 0.82, clearcoat: 0.5 });
+const balls = new THREE.InstancedMesh(ballGeo, ballMat, CFG.maxBalls);
+balls.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+balls.castShadow = true;
+balls.receiveShadow = true;
+balls.count = 0;
+scene.add(balls);
+const ballColors = [0xd8b25a, 0xb8c4d0, 0x8f6f4e, 0x5f7d9a, 0xa8482f];
+{
+  const c = new THREE.Color();
+  for (let i = 0; i < CFG.maxBalls; i++) balls.setColorAt(i, c.setHex(ballColors[i % ballColors.length]));
+  if (balls.instanceColor) balls.instanceColor.needsUpdate = true;
+}
+const ballMat4 = new THREE.Matrix4();
+const ballPos = new THREE.Vector3();
+const ballScale = new THREE.Vector3(1, 1, 1);
+const IDENTITY_Q = new THREE.Quaternion();
+const hoverPoint = new THREE.Vector3();
+
+// -------------------------------------------------- topology + frame sync
+let triCount = 0, lineCount = 0, ptCount = 0;
+
+function rebuildTopology() {
+  let t = 0;
+  for (let r = 0; r < ROWS - 1; r++) {
+    for (let c = 0; c < COLS - 1; c++) {
+      const a = r * COLS + c, b = a + 1, d = a + COLS, e = d + 1;
+      if (!(sim.alive[a] && sim.alive[b] && sim.alive[d] && sim.alive[e])) continue;
+      triArr[t++] = a; triArr[t++] = d; triArr[t++] = b;
+      triArr[t++] = b; triArr[t++] = d; triArr[t++] = e;
+    }
+  }
+  triCount = t;
+  triAttr.count = t;
+
+  let l = 0;
+  for (let k = 0; k < sim.cCount; k++) {
+    if (!sim.cOn[k] || sim.cKind[k] !== 0) continue;
+    lineArr[l++] = sim.cA[k]; lineArr[l++] = sim.cB[k];
+  }
+  lineCount = l;
+  lineAttr.count = l;
+
+  let p = 0;
+  for (let i = 0; i < N; i++) if (sim.alive[i]) ptArr[p++] = i;
+  ptCount = p;
+  ptAttr.count = p;
+
+  triAttr.needsUpdate = true;
+  lineAttr.needsUpdate = true;
+  ptAttr.needsUpdate = true;
+}
+
+function updateNormals() {
+  normals.fill(0);
+  const p = sim.pos;
+  for (let t = 0; t < triCount; t += 3) {
+    const a = triArr[t] * 3, b = triArr[t + 1] * 3, c = triArr[t + 2] * 3;
+    const ax = p[a], ay = p[a + 1], az = p[a + 2];
+    const e1x = p[b] - ax, e1y = p[b + 1] - ay, e1z = p[b + 2] - az;
+    const e2x = p[c] - ax, e2y = p[c + 1] - ay, e2z = p[c + 2] - az;
+    const nx = e1y * e2z - e1z * e2y;
+    const ny = e1z * e2x - e1x * e2z;
+    const nz = e1x * e2y - e1y * e2x;
+    normals[a] += nx; normals[a + 1] += ny; normals[a + 2] += nz;
+    normals[b] += nx; normals[b + 1] += ny; normals[b + 2] += nz;
+    normals[c] += nx; normals[c + 1] += ny; normals[c + 2] += nz;
+  }
+  for (let i = 0; i < N * 3; i += 3) {
+    const x = normals[i], y = normals[i + 1], z = normals[i + 2];
+    const len = Math.sqrt(x * x + y * y + z * z);
+    if (len > 1e-9) {
+      const inv = 1 / len;
+      normals[i] = x * inv; normals[i + 1] = y * inv; normals[i + 2] = z * inv;
+    } else {
+      normals[i] = 0; normals[i + 1] = 0; normals[i + 2] = 1;
+    }
+  }
+}
+
+function syncGraphics() {
+  if (sim.isDirty()) { rebuildTopology(); sim.clearDirty(); }
+  updateNormals();
+  posAttr.needsUpdate = true;
+  nrmAttr.needsUpdate = true;
+
+  const count = sim.ballCount;
+  balls.count = count;
+  for (let b = 0; b < count; b++) {
+    ballPos.set(sim.bX[b], sim.bY[b], sim.bZ[b]);
+    ballScale.setScalar(sim.bR[b]);
+    ballMat4.compose(ballPos, IDENTITY_Q, ballScale);
+    balls.setMatrixAt(b, ballMat4);
+  }
+  if (count > 0) balls.instanceMatrix.needsUpdate = true;
+}
+
+// ------------------------------------------------------------------- input
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const dragPlane = new THREE.Plane();
+const hitPoint = new THREE.Vector3();
+const camDir = new THREE.Vector3();
+let dragging = false, hoverIndex = -1;
+
+function toNdc(ev) {
+  ndc.x = (ev.clientX / window.innerWidth) * 2 - 1;
+  ndc.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+}
+
+function pickCloth(ev) {
+  toNdc(ev);
+  raycaster.setFromCamera(ndc, camera);
+  const hit = raycaster.intersectObject(cloth, false);
+  return hit.length ? hit[0].point : null;
+}
+
+function nearestIndex(p) {
+  return sim.nearestParticle(p.x, p.y, p.z, 0.6);
+}
+
+window.addEventListener('pointerdown', ev => {
+  if (ev.button !== 0 && ev.button !== 2) return;
+  const p = pickCloth(ev);
+  if (!p) return;
+  if (ev.button === 2) {
+    const i = nearestIndex(p);
+    if (i >= 0 && sim.tearParticle(i)) toast('TEAR');
+    ev.preventDefault();
+    return;
+  }
+  if (sim.beginGrab(p.x, p.y, p.z)) {
+    dragging = true;
+    controls.enabled = false;
+    // The grab moves in the screen plane, so the fabric follows the cursor
+    // exactly; orbit first and "right" becomes depth, which is how you pull the
+    // sheet across the pedestal.
+    camera.getWorldDirection(camDir);
+    dragPlane.setFromNormalAndCoplanarPoint(camDir, p);
+  }
+}, true);
+
+window.addEventListener('pointermove', ev => {
+  const p = pickCloth(ev);
+  if (p) {
+    hoverIndex = nearestIndex(p);
+    hoverPoint.copy(p);
+  } else {
+    hoverIndex = -1;
+  }
+  if (!dragging) return;
+  toNdc(ev);
+  raycaster.setFromCamera(ndc, camera);
+  if (raycaster.ray.intersectPlane(dragPlane, hitPoint)) sim.updateGrab(hitPoint.x, hitPoint.y, hitPoint.z);
+});
+
+window.addEventListener('pointerup', () => {
+  if (!dragging) return;
+  dragging = false;
+  sim.endGrab();
+  controls.enabled = true;
+});
+
+window.addEventListener('contextmenu', ev => ev.preventDefault());
+
+window.addEventListener('keydown', ev => {
+  const k = ev.key.toLowerCase();
+  if (k === 't') {
+    if (hoverIndex >= 0 && sim.tearParticle(hoverIndex)) toast('TEAR');
+    else toast('AIM AT THE CLOTH');
+  } else if (k === 'w') {
+    sim.setWind(!sim.windOn);
+    toast(sim.windOn ? 'WIND ON' : 'WIND OFF');
+  } else if (k === 'b') {
+    sim.spawnBalls(10, { x0: -1.1, x1: 1.1, y0: 3.3, y1: 4.0, z0: -0.5, z1: 0.5 });
+    toast('10 BALLS');
+  } else if (k === 'f') {
+    wire.visible = !wire.visible;
+    dots.visible = wire.visible;
+    cloth.visible = !wire.visible;
+    toast(wire.visible ? 'PARTICLE GRID' : 'SOLID');
+  } else if (k === 'r') {
+    sim.reset();
+    wire.visible = false; dots.visible = false; cloth.visible = true;
+    balls.count = 0;
+    rebuildTopology();
+    toast('RESET');
+  }
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// --------------------------------------------------------------------- hud
+const el = {
+  parts: document.getElementById('s-parts'),
+  links: document.getElementById('s-links'),
+  steps: document.getElementById('s-steps'),
+  fps: document.getElementById('s-fps'),
+  balls: document.getElementById('s-balls'),
+  tears: document.getElementById('s-tears'),
+  toast: document.getElementById('toast'),
+};
+let toastTimer = 0;
+function toast(msg) {
+  el.toast.textContent = msg;
+  el.toast.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.toast.classList.remove('on'), 1300);
+}
+
+// ---------------------------------------------------------------- main loop
+const FIXED_DT = 1 / 120;
+let acc = 0, last = performance.now();
+let stepCount = 0, frameCount = 0, statTime = 0;
+
+rebuildTopology();
+
+function tick(now) {
+  requestAnimationFrame(tick);
+  let dt = (now - last) / 1000;
+  last = now;
+  if (dt > 0.25) dt = 0.25;
+  acc += dt;
+  let n = 0;
+  while (acc >= FIXED_DT && n < 8) { sim.step(FIXED_DT); acc -= FIXED_DT; n++; stepCount++; }
+  if (acc > FIXED_DT * 8) acc = 0;
+
+  syncGraphics();
+  controls.update();
+  renderer.render(scene, camera);
+
+  frameCount++;
+  statTime += dt;
+  if (statTime >= 0.5) {
+    el.parts.textContent = String(aliveCount());
+    el.links.textContent = String(sim.cLive);
+    el.steps.textContent = String(Math.round(stepCount / statTime));
+    el.fps.textContent = String(Math.round(frameCount / statTime));
+    el.balls.textContent = String(sim.ballCount);
+    el.tears.textContent = String(sim.tearCount);
+    stepCount = 0; frameCount = 0; statTime = 0;
+  }
+}
+
+function aliveCount() {
+  let c = 0;
+  for (let i = 0; i < N; i++) if (sim.alive[i]) c++;
+  return c;
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
