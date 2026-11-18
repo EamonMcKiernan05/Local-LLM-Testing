@@ -82,13 +82,13 @@ function fbm(x,y,oct=4){let s=0,a=0.5,f=1;for(let i=0;i<oct;i++){s+=a*vn2(x*f,y*
 const WATER_Y=0.0;
 function mudHeight(x,z){
   const ax=Math.abs(x);
-  let h=-1.15+smoothstep(2.6,7.2,ax)*2.55;              // channel floor -> banks
+  let h=-1.15+smoothstep(2.6,6.4,ax)*3.1;              // channel floor -> banks
   h+=(fbm(x*0.35+11.3,z*0.28+4.1,4)-0.5)*0.55;          // rolling mud
   const ridge=Math.abs(vn2(x*1.15,z*0.62)*2-1);         // exposed ridges near waterline
   h+=ridge*0.22*smoothstep(1.1,0.05,Math.abs(h));
   if(x<-2.9&&x>-4.9&&z>-1.6&&z<9.6){                    // muddy shelf (horseshoe crab), left side
     const w=smoothstep(-4.9,-4.3,x)*smoothstep(-2.9,-3.4,x)*smoothstep(-1.6,-0.4,z)*smoothstep(9.6,8.4,z);
-    h+=w*0.92;
+    h+=w*0.72;
   }
   if(x<-4.2){h+=smoothstep(-4.2,-5.6,x)*0.3;}          // left bank a touch higher (detail side)
   return h;
@@ -127,7 +127,7 @@ moonLight.shadow.mapSize.set(2048,2048);
 {const c=moonLight.shadow.camera;c.left=-34;c.right=34;c.top=34;c.bottom=-34;c.near=200;c.far=560;}
 moonLight.shadow.bias=-0.0006;moonLight.shadow.normalBias=0.025;
 scene.add(moonLight);
-scene.add(new THREE.HemisphereLight(0x0b1622,0x040302,0.28));
+scene.add(new THREE.HemisphereLight(0x0b1622,0x040302,0.42));
 
 /* environment map (generated once, equirect canvas -> PMREM) */
 {
@@ -229,6 +229,7 @@ const moonTex=canvasTex(256,256,(g,w,h)=>{
   g.beginPath();g.arc(128,128,104,0,7);g.fill();
   for(let i=0;i<26;i++){g.fillStyle=`rgba(120,130,160,${rr(0.04,0.1)})`;g.beginPath();g.arc(rr(30,226),rr(30,226),rr(4,20),0,7);g.fill();}
   g.globalCompositeOperation='destination-out';
+  g.fillStyle='#000';
   g.beginPath();g.arc(170,110,98,0,7);g.fill();
   g.globalCompositeOperation='source-over';
 });
@@ -421,8 +422,8 @@ function makeMangrove(bx,bz,opts={}){
   }
 }
 
-for(let i=0;i<6;i++){makeMangrove(-rr(4.8,7.6),-26+i*rr(7,10),{big:i===2});}
-for(let i=0;i<5;i++){makeMangrove(rr(4.8,7.4),-23+i*rr(8,11));}
+for(let i=0;i<6;i++){makeMangrove(-rr(4.6,7.0),-26+i*rr(7,10),{big:i===2});}
+for(let i=0;i<5;i++){makeMangrove(rr(4.6,7.0),-23+i*rr(8,11));}
 makeMangrove(-3.55,15.2,{h:4.4,roots:10,big:true,lean:-0.22}); // hero overhang near opening
 
 /* fallen branch — left bank, half-submerged, spanning into the channel */
@@ -432,11 +433,11 @@ let branchTip,branchCurve;
   const pts=[
     new THREE.Vector3(-4.6,mudHeight(-4.6,z0)+0.02,z0),
     new THREE.Vector3(-3.6,mudHeight(-3.6,z0)+0.05,z0-0.2),
-    new THREE.Vector3(-2.4,-0.06,z0-0.35),
-    new THREE.Vector3(-1.0,-0.10,z0-0.55),
-    new THREE.Vector3(0.4,-0.12,z0-0.7),
-    new THREE.Vector3(1.9,-0.10,z0-0.85),
-    new THREE.Vector3(2.55,-0.02,z0-0.9)
+    new THREE.Vector3(-2.4,0.02,z0-0.35),
+    new THREE.Vector3(-1.0,-0.02,z0-0.55),
+    new THREE.Vector3(0.4,-0.04,z0-0.7),
+    new THREE.Vector3(1.9,-0.02,z0-0.85),
+    new THREE.Vector3(2.55,0.05,z0-0.9)
   ];
   branchCurve=catmull(pts);
   woodGeos.push(tubeGeom(branchCurve,u=>lerp(0.17,0.055,u),26,8));
@@ -450,7 +451,7 @@ let branchTip,branchCurve;
 }
 
 const barkMat=wetify(new THREE.MeshStandardMaterial({
-  map:barkTex,bumpMap:barkBump,bumpScale:0.55,roughness:0.85,roughnessMap:barkBump,
+  map:barkTex,bumpMap:barkBump,bumpScale:0.55,roughness:0.85,
   color:0xbfae9c,envMapIntensity:0.16
 }),0.24,0.85);
 const woodMesh=new THREE.Mesh(mergeGeometries(woodGeos,false),barkMat);
@@ -465,8 +466,8 @@ scene.add(woodMesh);
   const leafGeo=new THREE.PlaneGeometry(0.2,0.28);
   leafGeo.translate(0,0.14,0);
   const leafMat=new THREE.MeshStandardMaterial({
-    map:leafTex,alphaTest:0.42,side:THREE.DoubleSide,roughness:0.32,metalness:0.0,
-    color:0x6a8a72,envMapIntensity:0.22
+    map:leafTex,alphaTest:0.42,side:THREE.DoubleSide,roughness:0.55,metalness:0.0,
+    color:0x6a8a72,envMapIntensity:0.12
   });
   const count=leafPts.length*26;
   const im=new THREE.InstancedMesh(leafGeo,leafMat,count);
@@ -514,8 +515,8 @@ scene.add(woodMesh);
   g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
   g.computeVertexNormals();
   const mudMat=wetify(new THREE.MeshStandardMaterial({
-    map:mudTex,vertexColors:true,roughness:0.92,roughnessMap:barkBump,envMapIntensity:0.12
-  }),0.3,0.5);
+    map:mudTex,vertexColors:true,roughness:0.9,envMapIntensity:0.12
+  }),0.55,0.35);
   mudMat.map.repeat.set(6,16);
   const mud=new THREE.Mesh(g,mudMat);
   mud.receiveShadow=true;
@@ -635,10 +636,11 @@ const waterMat=new THREE.ShaderMaterial({
     }
     void main(){
       vec3 p=position;float h=0.0;vec2 dz=vec2(0.0);
-      wv(vec2(0.85,0.22),0.026,1.05,h,dz);
-      wv(vec2(-0.32,1.05),0.016,1.6,h,dz);
-      wv(vec2(1.7,-1.45),0.008,2.3,h,dz);
-      wv(vec2(0.45,2.7),0.004,3.1,h,dz);
+      wv(vec2(1.55,0.42),0.020,1.15,h,dz);
+      wv(vec2(-0.55,1.85),0.013,1.7,h,dz);
+      wv(vec2(2.6,-2.2),0.008,2.4,h,dz);
+      wv(vec2(0.9,4.6),0.004,3.1,h,dz);
+      wv(vec2(-3.2,1.4),0.0025,4.2,h,dz);
       p.y+=h;
       vNormal=normalize(vec3(-dz.x,1.0,dz.y));
       vec4 wp=modelMatrix*vec4(p,1.0);
@@ -673,29 +675,29 @@ const waterMat=new THREE.ShaderMaterial({
       }
       N=normalize(N);
       N.xz+=vec2(vnz(vWorldPos.xz*6.0+vec2(uTime*0.5,-uTime*0.35))-0.5,
-                 vnz(vWorldPos.xz.yx*7.3+5.1+uTime*0.3)-0.5)*0.16;
+                 vnz(vWorldPos.xz.yx*7.3+5.1+uTime*0.3)-0.5)*0.10;
       N.xz+=vec2(vnz(vWorldPos.xz*17.0+uTime*0.9)-0.5,
-                 vnz(vWorldPos.xz.yx*15.0-uTime*0.7+9.0)-0.5)*0.07;
+                 vnz(vWorldPos.xz.yx*15.0-uTime*0.7+9.0)-0.5)*0.05;
       N=normalize(N);
       vec3 V=normalize(uCam-vWorldPos);
       float depthT=smoothstep(4.4,1.5,abs(vWorldPos.x));
-      vec3 base=mix(vec3(0.011,0.020,0.018),vec3(0.004,0.009,0.012),depthT);
-      base*=0.72+0.55*vnz(vWorldPos.xz*0.8+uTime*0.02);
+      vec3 base=mix(vec3(0.013,0.023,0.021),vec3(0.006,0.012,0.016),depthT);
+      base*=0.8+0.4*vnz(vWorldPos.xz*0.8+uTime*0.02);
       vec3 R=reflect(-V,N);
       float fres=0.02+0.98*pow(1.0-max(dot(N,V),0.0),5.0);
-      vec3 skyCol=mix(vec3(0.016,0.024,0.036),vec3(0.002,0.005,0.010),clamp(R.y,0.0,1.0));
+      vec3 skyCol=mix(vec3(0.022,0.032,0.048),vec3(0.004,0.008,0.014),clamp(R.y,0.0,1.0));
       float mglow=pow(max(dot(R,normalize(uMoon)),0.0),14.0);
       skyCol+=uMoonCol*mglow*0.05;
       vec3 H=normalize(normalize(uMoon)+V);
-      float spec=pow(max(dot(N,H),0.0),42.0);
-      float specWide=pow(max(dot(N,H),0.0),7.0);
-      vec3 col=base+skyCol*fres*0.6;
-      col+=uMoonCol*(spec*1.35+specWide*0.03);
+      float spec=pow(max(dot(N,H),0.0),46.0);
+      float specWide=pow(max(dot(N,H),0.0),11.0);
+      vec3 col=base+skyCol*fres*0.95;
+      col+=uMoonCol*(spec*0.85+specWide*0.015);
       vec2 buv=vec2((vWorldPos.x+9.0)/18.0,(vWorldPos.z+30.0)/60.0);
       float bio=texture2D(uBio,buv).r;
       float sc=0.42+1.1*vnz(vWorldPos.xz*5.5+vec2(uTime*0.35,uTime*0.22));
       bio*=sc;
-      bio=smoothstep(0.02,0.30,bio);
+      bio=smoothstep(0.012,0.16,bio);
       vec3 bioCol=mix(vec3(0.09,0.72,0.60),vec3(0.18,0.52,0.95),vnz(vWorldPos.xz*1.6+7.3));
       col+=bioCol*bio*1.35;
       col+=vec3(0.16,0.8,0.7)*ringGlow*0.85;
@@ -707,7 +709,7 @@ const waterMat=new THREE.ShaderMaterial({
     }`
 });
 {
-  const g=new THREE.PlaneGeometry(12,64,96,256);
+  const g=new THREE.PlaneGeometry(12,64,80,208);
   g.rotateX(-Math.PI/2);
   const water=new THREE.Mesh(g,waterMat);
   water.position.y=WATER_Y;
@@ -757,7 +759,8 @@ function makePoints(count){
   pts.renderOrder=3;
   scene.add(pts);
   return {
-    g,pos,life,size,col,count,
+    g,mat,
+    pos,life,size,col,count,
     vel:new Float32Array(count*3),
     rem:new Float32Array(count),
     span:new Float32Array(count),
@@ -825,7 +828,7 @@ for(let i=0;i<FISH;i++){
 /* horseshoe crab on the left muddy shelf */
 const crab=(()=>{
   const g=new THREE.Group();
-  const mat=new THREE.MeshStandardMaterial({color:0x2e2418,roughness:0.6,metalness:0.05,envMapIntensity:0.3});
+  const mat=new THREE.MeshStandardMaterial({color:0x3d3222,roughness:0.55,metalness:0.05,envMapIntensity:0.5});
   const dome=new THREE.Mesh(new THREE.SphereGeometry(0.15,14,10),mat);
   dome.scale.set(1.05,0.42,0.85);dome.position.y=0.05;
   const skirt=new THREE.Mesh(new THREE.SphereGeometry(0.13,12,8),mat);
@@ -864,7 +867,7 @@ function crabStep(dt){
   crab.injT-=dt;
   if(crab.injT<=0&&h>-0.25){
     crab.injT=0.15;
-    bioInject(crab.x,crab.z,0.06,0.35);
+    bioInject(crab.x,crab.z,0.15,0.35);
   }
 }
 
@@ -880,7 +883,7 @@ function scheduleDrip(){
 }
 function impact(x,z){
   spawnRipple(x,z,rr(0.5,1.0));
-  bioRing(x,z,0.5,0.45);
+  bioRing(x,z,1.2,0.45);
   for(let i=0;i<9;i++){
     const a=rng()*6.28,s=rr(0.15,0.5);
     splashPts.spawn(x,WATER_Y+0.02,z,Math.cos(a)*s,rr(0.5,1.1),Math.sin(a)*s,-6,rr(0.3,0.55),rr(3,6),0.55,0.9,0.85);
@@ -890,16 +893,18 @@ function impact(x,z){
 /* eddy network: branching curves anchored at the fallen branch */
 const eddySegs=[];   // {a:Vector3,b:Vector3,birth:number}
 {
-  const root=branchTip.clone().add(new THREE.Vector3(0.15,-0.03,-0.2));
+  const root=branchTip.clone().add(new THREE.Vector3(-0.9,-0.03,0.15));
   function grow(p,dir,len,depth,birthBase){
     let cur=p.clone(),d=dir.clone().normalize();
     const n=4;
     let birth=birthBase;
     for(let i=0;i<n;i++){
-      d.x+=(rng()-0.5)*0.9;d.z+=(rng()-0.5)*0.5;d.y=(rng()-0.5)*0.15;
+      d.x+=(rng()-0.5)*0.5;d.z+=(rng()-0.5)*0.3;d.y=(rng()-0.5)*0.15;
+      if(d.z<0.2)d.z+=0.4;
       d.normalize();
       const next=cur.clone().addScaledVector(d,len/n);
       next.y=-0.06;
+      next.x=clamp(next.x,-1.2,3.2);
       eddySegs.push({a:cur.clone(),b:next.clone(),birth});
       birth+=0.06;
       cur=next;
@@ -907,12 +912,12 @@ const eddySegs=[];   // {a:Vector3,b:Vector3,birth:number}
     if(depth>0){
       const nb=ri(1,2);
       for(let k=0;k<nb;k++){
-        const nd=new THREE.Vector3(rr(-0.6,1.4),0,rr(-0.8,0.8)).normalize();
+        const nd=new THREE.Vector3(rr(-0.7,0.7),0,rr(0.3,0.9)).normalize();
         grow(cur,nd,len*rr(0.6,0.85),depth-1,birth*rr(0.75,0.95));
       }
     }
   }
-  grow(root,new THREE.Vector3(0.9,0,0.42),2.4,3,0);
+  grow(root,new THREE.Vector3(0.2,0,0.98),3.2,3,0);
 }
 const eddyLineMat=new THREE.ShaderMaterial({
   transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false,
@@ -922,9 +927,9 @@ const eddyLineMat=new THREE.ShaderMaterial({
     uniform float uPulse;uniform float uLife;uniform float uFogDen;
     varying float vI;
     void main(){
-      float head=uPulse*1.35;
+      float head=uPulse*1.05;
       float d=head-aBirth;
-      float e=smoothstep(0.28,0.0,abs(d-0.12))*step(0.0,d);
+      float e=smoothstep(0.5,0.0,abs(d-0.15))*step(0.0,d);
       vI=e*uLife;
       vec4 mv=modelViewMatrix*vec4(position,1.0);
       vI*=exp(-uFogDen*uFogDen*mv.z*mv.z);
@@ -934,7 +939,7 @@ const eddyLineMat=new THREE.ShaderMaterial({
     varying float vI;
     void main(){
       if(vI<=0.001)discard;
-      gl_FragColor=vec4(vec3(0.15,0.95,0.8)*vI*1.6,1.0);
+      gl_FragColor=vec4(vec3(0.15,0.95,0.8)*vI*4.0,1.0);
     }`
 });
 {
@@ -948,6 +953,7 @@ const eddyLineMat=new THREE.ShaderMaterial({
   scene.add(lines);
 }
 const pulse={t:-99,active:false};
+let branchT=0.28; // refined after the path curve is built
 function triggerPulse(){pulse.t=simTime;pulse.active=true;}
 function pulseStep(dt){
   if(!pulse.active)return;
@@ -957,19 +963,19 @@ function pulseStep(dt){
   eddyLineMat.uniforms.uPulse.value=P;
   eddyLineMat.uniforms.uLife.value=life;
   if(age<5.2){
-    const amt=0.05*life*dt*60;
+    const amt=0.6*life*dt*60;
     for(const s of eddySegs){
       const f=clamp(P*1.35-s.birth,0,1);
-      if(f>0.02&&rng()<0.35){
-        const p=rng()<0.5?s.a:s.b;
-        bioInject(p.x,p.z,amt*f,0.3);
+      if(f>0.02&&rng()<0.5){
+        const u=rng();
+        bioInject(lerp(s.a.x,s.b.x,u),lerp(s.a.z,s.b.z,u),amt*f,0.32);
       }
     }
-    for(let i=0;i<3;i++){
+    for(let i=0;i<6;i++){
       const s=eddySegs[Math.floor(rng()*eddySegs.length)];
       const u=rng();
-      eddyPts.spawn(lerp(s.a.x,s.b.x,u),-0.05,lerp(s.a.z,s.b.z,u),
-        rr(-0.05,0.12),rr(-0.02,0.02),rr(-0.03,0.06),0,rr(0.8,1.6),rr(4,7),0.2,1.0,0.85);
+      eddyPts.spawn(lerp(s.a.x,s.b.x,u),-0.04,lerp(s.a.z,s.b.z,u),
+        rr(-0.05,0.12),rr(-0.02,0.02),rr(-0.03,0.06),0,rr(0.8,1.6),rr(9,15),0.2,1.0,0.85);
     }
   }
   if(age>8){pulse.active=false;eddyLineMat.uniforms.uLife.value=0;}
@@ -1082,6 +1088,21 @@ const path=new THREE.CatmullRomCurve3([
 ],true,'catmullrom',0.5);
 const CAM_SPEED=1/150; // full loop in 150 s
 let pathT=0.06;        // opening framing: near the overhang roots
+/* refine branchT: the spot where the fallen branch sits framed ahead of the gaze */
+{
+  let best=1e9;
+  const view=new THREE.Vector3(),ahead=new THREE.Vector3();
+  for(let i=0;i<192;i++){
+    const t=i/192;
+    path.getPointAt(t,view);
+    path.getPointAt((t+0.028)%1,ahead);
+    const gaze=ahead.clone().sub(view).normalize();
+    const toTip=branchTip.clone().sub(view);
+    if(toTip.dot(gaze)<=0.55)continue;
+    const d=toTip.length();
+    if(d>2.5&&d<9&&d<best){best=d;branchT=t;}
+  }
+}
 let mode='auto';       // 'auto' | 'manual' | 'blend'
 let blendFrom=null,blendT=0;
 
@@ -1247,7 +1268,7 @@ let composer,bloom;
 /* ============================================================
    18 — simulation step (fixed 1/120 s)
    ============================================================ */
-const _fm=new THREE.Matrix4(),_fq=new THREE.Quaternion(),_fe=new THREE.Euler(),_fs=new THREE.Vector3(1,1,1);
+const _fm=new THREE.Matrix4(),_fq=new THREE.Quaternion(),_fe=new THREE.Euler(),_fs=new THREE.Vector3(1,1,1),_fv=new THREE.Vector3();
 function simStep(dt){
   // fish
   for(let i=0;i<FISH;i++){
@@ -1265,15 +1286,16 @@ function simStep(dt){
     f.wakeT-=dt;
     if(f.wakeT<=0){
       f.wakeT=0.11;
-      bioInject(f.x,f.z,0.10,0.30);
+      bioInject(f.x,f.z,0.35,0.30);
       wakePts.spawn(f.x-Math.cos(f.heading)*0.15,WATER_Y-0.02,f.z-Math.sin(f.heading)*0.15,
         -Math.cos(f.heading)*0.06,0,-Math.sin(f.heading)*0.06,
-        0,rr(0.8,1.4),rr(4,7),0.18,0.95,0.78);
+        0,rr(0.8,1.4),rr(6,10),0.18,0.95,0.78);
     }
     const wig=Math.sin(simTime*9+f.phase)*0.25;
     _fe.set(0,-f.heading+Math.PI/2+wig*0.3,Math.sin(simTime*9+f.phase)*0.08);
     _fq.setFromEuler(_fe);
-    _fm.compose(new THREE.Vector3(f.x,f.y,f.z),_fq,_fs);
+    _fv.set(f.x,f.y,f.z);
+    _fm.compose(_fv,_fq,_fs);
     fishIM.setMatrixAt(i,_fm);
   }
   fishIM.instanceMatrix.needsUpdate=true;
@@ -1288,15 +1310,18 @@ function simStep(dt){
       impact(im.x,im.z);
     }
   }
-  // hero pulse schedule
-  if(!pulse.active&&simTime>nextPulse){triggerPulse();nextPulse=simTime+rr(50,65);}
+  // hero pulse: fires when the drifting camera has the fallen branch framed ahead
+  if(!pulse.active&&simTime>nextPulse){
+    const aheadT=((branchT-pathT)%1+1)%1;   // how far the trigger point is ahead on the path
+    if(aheadT>0.014&&aheadT<0.06){triggerPulse();nextPulse=simTime+rr(55,70);}
+  }
   pulseStep(dt);
   // field + particles
   bioStep(dt);
   wakePts.update(dt);splashPts.update(dt);eddyPts.update(dt);
   waterUniforms.uTime.value=simTime;
 }
-let nextPulse=22;
+let nextPulse=5;
 
 /* ============================================================
    19 — main loop (frame-rate independent, fixed sim steps)
@@ -1315,7 +1340,7 @@ function frame(now){
       degraded=true;
       dpr=1;renderer.setPixelRatio(1);composer.setPixelRatio(1);
       composer.setSize(window.innerWidth,window.innerHeight);
-      for(const ps of [wakePts,splashPts,eddyPts])ps.g.material.uniforms.uPix.value=1;
+      for(const ps of [wakePts,splashPts,eddyPts])ps.mat.uniforms.uPix.value=1;
     }
   }
   if(!paused){
@@ -1349,8 +1374,9 @@ window.addEventListener('resize',()=>{
 });
 
 /* test hooks */
+/* small debug surface (harmless; used for automated checks) */
 window.__md={triggerPulse,get fps(){return fpsEma},get mode(){return mode},get paused(){return paused},
-  goCine:()=>goCinematic(true),degraded:()=>degraded,moonTex};
+  degraded:()=>degraded};
 </script>
 </body>
 </html>
