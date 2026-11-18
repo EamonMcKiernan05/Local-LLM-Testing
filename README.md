@@ -9,7 +9,7 @@ RAM: 32GB DDR4 2400mhz
 
 GPUs: 2x Tesla V100 32GB
 
-NVME: 256gb PCIe 3.0 x4 NVME SSD
+NVME: 512GB + 1TB
 
 Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.0 x16 + 1x PCIe 2.0 x4 (Electrically x16)
 
@@ -17,15 +17,11 @@ Motherboard: MACHINIST X99-MR9A PRO MAX — single socket, no NVLink; 2x PCIe 3.
 
 +32GB DDR4 2400mhz - already purchased
 
-Dual Xeon Motherboard - on order
-
-2x Xeon E5 2650 V4 - stored from previous builds/projects
-
-512gb PCIe 3.0 x4 NVME SSD - on order
+MACHINIST X99 MR9S - on order
 
 ---
 
-## Tests
+## Speed Tests
 
 Latest measured numbers, one row per model file. Every figure is a real run on box .5 — the dataset section below each row carries the method, the battery and the caveats.
 
