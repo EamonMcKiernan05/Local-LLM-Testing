@@ -4,7 +4,7 @@ Create a bowl of glacial gravel enclosing a small lake with two opposed jetties.
 
 ## The miniature
 
-Make a photorealistic real-time Three.js mini-world diorama. Give the bounded landscape a connected top, volumetric sides and a finished back. Compose it to fill roughly three quarters of the opening view. Use one daylight sun, soft sky fill and contact shadows consistent with terrain and structures. Build a steep wooded bank opposite a shallow grassy beach. Put a fishing creel and brass waterline marks on both jetties. The cutaway foreground exposes the basin profile and the submerged end of the beach steps.
+Make a photorealistic real-time Three.js mini-world diorama. Give the bounded landscape a connected top, volumetric sides and a finished back. Compose it to fill roughly three quarters of the opening view. Use one daylight sun, soft sky fill and contact shadows consistent with terrain and structures. Build a steep wooded bank opposite a shallow grassy beach. Put a fishing creel and brass waterline marks on both jetties. 
 
 ## Daylight and materials
 
@@ -19,7 +19,7 @@ Use a breezy midsummer morning with broken high cloud. Keep the far grass silver
 
 Open high enough to see both marked posts. Choose the first quarter of the orbit to expose the basin profile and the opposite phases of the two waterlines.
 
-Start with **Cinematic** on. Move the camera through a continuous **360° orbit** around a fixed point at the visual centre of the diorama, one full revolution about every 90 seconds. Use an elevated orthographic three-quarter view, stable radius, level horizon and constant angular speed through the loop seam. Keep the entire miniature framed with a little sky or breathing room on every bearing. Keep terrain, sunlight, weather and simulation in world coordinates.
+Start with **Cinematic** on. Move the camera through a continuous **360° orbit** around a fixed point at the visual centre of the diorama, one full revolution about every 60 seconds. Use an elevated orthographic three-quarter view, stable radius, level horizon and constant angular speed through the loop seam. Keep the entire miniature framed with a little sky or breathing room on every bearing. Keep terrain, sunlight, weather and simulation in world coordinates.
 
 Show a labelled **Cinematic** toggle. Dragging takes over with damped manual orbit. Wheel or pinch zooms within bounds. Re-enabling Cinematic eases back onto the circle from the current bearing. **Reset View** restores the opening composition. Camera controls must preserve the current physical state.
 

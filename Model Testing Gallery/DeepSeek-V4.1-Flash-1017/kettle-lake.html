@@ -731,7 +731,7 @@ const LAKE = {
   A: 17.6, B: 10.6,          // shoreline ellipse half axes (x, z)
   west: -18.2, east: 17.5,   // seiche axis endpoints in world x
 };
-const BITE = { x0: -21.0, x1: -4.5, z0: 5.5 };   // cutaway bite: removed region (open to the front edge)
+const BITE = { x0: -21.0, x1: -4.5, z0: 5.5 };   // legacy constants, unused: no cutaway in this build
 const FOOT = { ex: 30.5, ez: 22.5, p: 3.4 };      // superellipse footprint
 const SUNC = new THREE.Vector3();                  // filled below (spherical to cartesian)
 
@@ -825,7 +825,7 @@ function terrainHeight(x, z) {
   return landHeight(x, z, e);
 }
 function isWater(x, z) { return shoreE(x, z) < 1; }
-function isBite(x, z) { return x > BITE.x0 && x < BITE.x1 && z > BITE.z0; }
+function isBite(x, z) { return false; }   // closed diorama: no cutaway
 
 /* seiche axis coordinate: 0 at the west end, 1 at the east end */
 function lakeFrac(x) { return clamp((x - LAKE.west) / (LAKE.east - LAKE.west), 0, 1); }
@@ -1490,7 +1490,7 @@ function buildPlaque() {
   x.font = "600 86px Georgia, 'Times New Roman', serif";
   x.fillText("KETTLE  LAKE", W / 2, 168);
   x.font = "500 34px ui-sans-serif, 'Segoe UI', Arial, sans-serif";
-  x.fillText("GLACIAL  OUTWASH  \u00b7  SECTION  A\u2013A", W / 2, 232);
+  x.fillText("GLACIAL  OUTWASH  \u00b7  KETTLE  BASIN", W / 2, 232);
   x.font = "400 26px Georgia, serif";
   x.fillStyle = "rgba(52,38,14,0.7)";
   x.fillText("two shores  \u00b7  one basin", W / 2, 300);
@@ -2139,12 +2139,6 @@ function buildSkirtAndWalls() {
     const a = base + i * 2;
     idxAll.push(a, a + 1, a + 3, a, a + 3, a + 2);
   }
-  /* cut walls */
-  const segX = 56, segZ = 60;
-  const sub = (r) => { for (let i = 0; i < r.idx.length; i++) idxAll.push(r.idx[i] + r.base); };
-  sub(pushWallStrip(P, Nn, UVs, TOP, BITE.x0, BITE.z0, BITE.x1, BITE.z0, segX, { x: 0, z: 1 }));
-  sub(pushWallStrip(P, Nn, UVs, TOP, BITE.x1, BITE.z0, BITE.x1, frontZ(BITE.x1) - 0.02, segZ, { x: -1, z: 0 }));
-  sub(pushWallStrip(P, Nn, UVs, TOP, BITE.x0, BITE.z0, BITE.x0, frontZ(BITE.x0) - 0.02, segZ, { x: 1, z: 0 }));
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(P, 3));
   geo.setAttribute("uv", new THREE.Float32BufferAttribute(UVs, 2));
@@ -2248,18 +2242,6 @@ function buildTurfLips() {
     rimPts.push(BOUNDARY[k]); rimOut.push(BOUNDARY_NRM[k]);
   }
   if (rimPts.length > 2) addLip(rimPts, rimOut, terrainHeight);
-  /* edges of the cut walls */
-  const xt = [];
-  for (let i = 0; i <= 40; i++) xt.push(lerp(BITE.x0, BITE.x1, i / 40));
-  addLip(xt.map((x) => ({ x, z: BITE.z0 })), xt.map(() => ({ x: 0, z: 1 })), terrainHeight);
-  const zt1 = [], zt2 = [];
-  for (let i = 0; i <= 34; i++) {
-    const z = lerp(BITE.z0, frontZ(BITE.x1) - 0.05, i / 34);
-    zt1.push({ x: BITE.x1, z });
-    zt2.push({ x: BITE.x0, z: lerp(BITE.z0, frontZ(BITE.x0) - 0.05, i / 34) });
-  }
-  addLip(zt1, zt1.map(() => ({ x: -1, z: 0 })), terrainHeight);
-  addLip(zt2, zt2.map(() => ({ x: 1, z: 0 })), terrainHeight);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
   geo.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
@@ -2387,11 +2369,6 @@ function buildTerrain() {
   SCENE.add(walls);
   TEX.walls = walls;
 
-  const pit = buildPitFloor();
-  pit.name = 'pitfloor';
-  SCENE.add(pit);
-  TEX.pitFloor = pit;
-
   const lips = buildTurfLips();
   lips.name = 'turflips';
   SCENE.add(lips);
@@ -2400,26 +2377,6 @@ function buildTerrain() {
   SCENE.add(buildPlinth());
   const steps = buildBeachSteps();
   SCENE.add(steps);
-  const wallRocks = new GeoBatch();
-  const wr = mulberry32(9911);
-  for (let i = 0; i < 16; i++) {
-    const along = wr();
-    const bx = lerp(BITE.x0 + 0.6, BITE.x1 - 0.4, along);
-    const by = -5.2 + wr() * 3.4;
-    const s0 = 0.26 + wr() * 0.5;
-    wallRocks.add(new THREE.IcosahedronGeometry(s0, 1), matrixTRS(bx, by, BITE.z0 + 0.16, wr() * 2, wr() * 6, wr() * 2));
-  }
-  for (let i = 0; i < 14; i++) {
-    const bz = lerp(BITE.z0 + 1.2, FOOT.ez - 2.5, wr());
-    const by = -5.8 + wr() * 4.6;
-    const s0 = 0.3 + wr() * 0.55;
-    wallRocks.add(new THREE.IcosahedronGeometry(s0, 1), matrixTRS(BITE.x1 - 0.15, by, bz, wr() * 2, wr() * 6, wr() * 2));
-  }
-  const wallRockMat = new THREE.MeshStandardMaterial({
-    map: TEX.stoneDark.map, normalMap: TEX.stoneDark.normal, roughness: 0.92, metalness: 0, color: 0xc0b49c,
-  });
-  const wallRockMesh = wallRocks.build(wallRockMat, { cast: true, receive: true });
-  SCENE.add(wallRockMesh);
   /* soft skylight bounce from the open front so the cut reads in shade */
   const bounce = new THREE.DirectionalLight(0xe6e0d0, 1.75);
   bounce.position.set(-16, 20, 58);
@@ -2433,7 +2390,6 @@ function buildTerrain() {
   for (let i = 0; i < BOUNDARY.length; i += 3) {
     FIT_POINTS.push([BOUNDARY[i].x, BOUNDARY_TOP[i] + 0.3, BOUNDARY[i].z]);
   }
-  FIT_POINTS.push([BITE.x0, -7.4, BITE.z0], [BITE.x1, -7.4, BITE.z0], [BITE.x0, -7.4, FOOT.ez + 1.4], [BITE.x1, -7.4, FOOT.ez + 1.4]);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     FIT_POINTS.push([sx * (FOOT.ex + 1.5), -9.4, sz * (FOOT.ez + 1.5)]);
     FIT_POINTS.push([sx * (FOOT.ex + 1.5), -7.5, sz * (FOOT.ez + 1.5)]);
@@ -2837,8 +2793,6 @@ function buildWater() {
   SCENE.add(mesh);
   TEX.water = mesh;
   TEX.waterMat = mat;
-  const caps = buildWaterCaps();
-  SCENE.add(caps);
   SCENE.add(buildWaterShadows());
 }
 
@@ -3860,15 +3814,6 @@ function buildPebbles() {
     if (e > 1.45) continue;
     if (rng.next() > 0.55) continue;
     list.push({ x, z, y: h + 0.02, s: rng.range(0.05, 0.20), rot: [rng.next() * TAU, rng.next() * TAU, rng.next() * TAU], tint: rng.next() });
-  }
-  /* rubble in the cut pit */
-  for (let i = 0; i < 620; i++) {
-    const x = rng.range(BITE.x0 - 0.2, BITE.x1 + 0.2);
-    const z = rng.range(BITE.z0 - 0.2, FOOT.ez + 1.1);
-    if (!isBite(x, z)) continue;
-    const edge = Math.min(x - BITE.x0, BITE.x1 - x, z - BITE.z0);
-    const s = rng.range(0.06, 0.34) * (0.5 + sat(1 - edge / 4));
-    list.push({ x, z, y: LAYOUT.pitFloor + s * 0.4, s, rot: [rng.next() * TAU, rng.next() * TAU, rng.next() * TAU], tint: rng.next() * 0.7 });
   }
   /* rocky rim outcrops */
   for (let i = 0; i < 500; i++) {
