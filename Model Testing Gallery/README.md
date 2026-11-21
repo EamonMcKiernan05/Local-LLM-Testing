@@ -1,7 +1,7 @@
 # Model Testing Gallery
 
 The builds behind [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html) —
-47 self-contained browser demos written by AI models, published unedited, defects and all.
+61 self-contained browser demos written by AI models, published unedited, defects and all.
 
 This repo mirrors the website exactly: a build or a prompt is here only if it is on the page.
 Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbatim, typos included.
@@ -17,7 +17,6 @@ Organised by model. Prompts live in [`prompts/`](prompts) and are quoted verbati
 | Qwen 4 Preview — DeepSeek Harness | `Qwen 4 Preview/{liberty-1886,medieval-village,the-pagoda,torchlight-depths}.html` | `prompts/{liberty,village,pagoda,torchlight}.md` |
 | Qwen 4 Preview — Qwen Code | `QwenCode/{sky-temple,medieval-village,liberty-1886}.html` | `prompts/{pagoda,village,liberty}.md` |
 | DeepSeek V4.1 Flash | `DeepSeek-V4.1-Flash-1017/THE-CASTLE.html` | `prompts/castle.md` |
-| MiniMax M3.1 Flash | `MiniMax M3.1-Flash Tests/{sky-temple-minimax-m3-1-flash,dusk-cityline-minimax-m3.1-flash}.html` | `prompts/pack-sky-temple.md`, `pack-dusk-cityline.md` |
 | HY4 | `HY4/THE-CASTLE.html` | `prompts/castle.md` |
 | LongCat 2.5 | `LongCat-2.5/sky-temple.html` | `prompts/pagoda.md` |
 
@@ -36,5 +35,4 @@ serving config where one was recorded. Builds with no recorded provider are not 
 
 DeepSeek Harness sessions (`C:\Users\Eamon\.dsh\sessions`) hold the first prompt and every
 follow-up for the Qwen and DeepSeek builds. The Qwen3.8 Flash-Next prompts were recovered from
-the earlier prompt-indexed pages of the site; the two MiniMax prompts come from the v3.4 bench
-pack. Nothing here was reconstructed by guesswork.
+the earlier prompt-indexed pages of the site. Nothing here was reconstructed by guesswork.
