@@ -57,6 +57,13 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list. This run went through the portal's tencent/hy4-flash:free route \u2014 the same model, served on the free tier.",
   "provider": "Nous portal"
  },
+ "hy4-flash-croft-at-the-wrack-line": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "not recorded",
+  "note": "No session log for this build in the harness store.",
+  "provider": "Not recorded"
+ },
  "hy4-flash-glacial-heart": {
   "config": "API base https://inference-api.nousresearch.com/v1",
   "harness": "DeepSeek Harness",
