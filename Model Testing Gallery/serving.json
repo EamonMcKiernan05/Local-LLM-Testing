@@ -1,8 +1,22 @@
 {
+ "deepseek-v41-breadfruit-cay": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
  "deepseek-v41-castle": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
   "model": "deepseek-flash",
+  "provider": "DeepSeek API"
+ },
+ "deepseek-v41-linen-on-the-bleaching-green": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
  "hy4-castle": {
@@ -12,6 +26,14 @@
   "provider": "Nous Portal"
  },
  "hy4-flash-blue-hour-dry-dock": {
+  "config": "API base https://inference-api.nousresearch.com/v1",
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-breadfruit-cay": {
   "config": "API base https://inference-api.nousresearch.com/v1",
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -43,6 +65,14 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list. This run went through the portal's tencent/hy4-flash:free route \u2014 the same model, served on the free tier.",
   "provider": "Nous portal"
  },
+ "hy4-flash-linen-on-the-bleaching-green": {
+  "config": "API base https://inference-api.nousresearch.com/v1",
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
  "hy4-flash-liquid-chrome-garden": {
   "config": "API base https://inference-api.nousresearch.com/v1",
   "harness": "DeepSeek Harness",
@@ -58,6 +88,20 @@
   "model": "tencent/hy4-flash",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list. This run went through the portal's tencent/hy4-flash:free route \u2014 the same model, served on the free tier.",
   "provider": "Nous portal"
+ },
+ "hy4-flash-maya-m-breadfruit-cay": {
+  "harness": "Maya M",
+  "kind": "cloud",
+  "model": "hy4-flash",
+  "note": "Session captured from the Maya M harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M"
+ },
+ "hy4-flash-maya-m-linen-on-the-bleaching-green": {
+  "harness": "Maya M",
+  "kind": "cloud",
+  "model": "hy4-flash",
+  "note": "Session captured from the Maya M harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M"
  },
  "hy4-flash-medieval-village": {
   "config": "API base https://inference-api.nousresearch.com/v1",
@@ -137,6 +181,14 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
  },
+ "qwen-4-max-breadfruit-cay": {
+  "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
  "qwen-4-max-cloudfall-pass": {
   "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
   "harness": "DeepSeek Harness",
@@ -154,6 +206,14 @@
   "provider": "Qwen token plan"
  },
  "qwen-4-max-glass-tide": {
+  "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
+ "qwen-4-max-linen-on-the-bleaching-green": {
   "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
   "harness": "DeepSeek Harness",
   "kind": "cloud",
