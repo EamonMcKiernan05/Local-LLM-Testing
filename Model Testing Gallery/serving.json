@@ -96,6 +96,13 @@
   "note": "Session captured from the Maya M harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Maya M"
  },
+ "hy4-flash-maya-m-kettle-lake": {
+  "harness": "Maya M",
+  "kind": "cloud",
+  "model": "hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M"
+ },
  "hy4-flash-maya-m-linen-on-the-bleaching-green": {
   "harness": "Maya M",
   "kind": "cloud",
@@ -167,6 +174,13 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "Nous portal"
  },
+ "inkling-2-mini-the-pagoda": {
+  "harness": "Maya M",
+  "kind": "cloud",
+  "model": "Inkling-2-Mini",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M"
+ },
  "longcat-25-sky-temple": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -220,6 +234,13 @@
   "model": "qwen4-max",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
+ },
+ "qwen-4-max-kettle-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen/qwen4-max:free",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
  },
  "qwen-4-max-linen-on-the-bleaching-green": {
   "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
