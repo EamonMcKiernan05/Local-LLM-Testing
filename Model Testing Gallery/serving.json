@@ -188,13 +188,6 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Maya M"
  },
- "inkling-2-mini-the-pagoda-v2": {
-  "harness": "Maya M",
-  "kind": "cloud",
-  "model": "inkling-2-mini",
-  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
-  "provider": "Maya M"
- },
  "longcat-25-sky-temple": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
