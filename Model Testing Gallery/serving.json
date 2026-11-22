@@ -159,6 +159,14 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list. This run went through the portal's tencent/hy4-flash:free route \u2014 the same model, served on the free tier.",
   "provider": "Nous portal"
  },
+ "hy4-flash-two-shores-of-kettle-lake": {
+  "config": "API base https://inference-api.nousresearch.com/v1",
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
  "longcat-25-sky-temple": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
