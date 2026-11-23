@@ -181,6 +181,13 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "Nous portal"
  },
+ "inkling-2-mini-the-croft": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "not recorded",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Not recorded"
+ },
  "inkling-2-mini-the-pagoda": {
   "harness": "Maya M",
   "kind": "cloud",
