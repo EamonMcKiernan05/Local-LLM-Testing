@@ -38,8 +38,29 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 | Qwen3.8-Flash-Next (UD-IQ3_XXS) | Strata 0.2.14.1 | 2026-11-16 | 262K | **2,083.0 tok/s** (91K) | 68.7 → 79.7 tok/s | 4 |
 | Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
 | MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
+| MiniCPM5-15B-A2.5B (hosted API) | gBench 0.5.0 | 2026-11-23 | 512K claimed | **330 ms TTFT** (174-token prompt) | 179 → 165 tok/s (174 → 16,430 tok) | 7 |
 
 Prefill is the best measured value and the depth it was measured at; decode is the per-depth range across the dataset's own depths. Where a dataset compares engine versions, the row carries the newest engine and the section quotes the pair.
+
+### MiniCPM5-15B-A2.5B on a hosted API — 7 configurations, 1,289 requests, 0 failures
+
+Everything measured on this model so far: **[`MiniCPM5-15B-A2.5B - Hosted API/`](MiniCPM5-15B-A2.5B%20-%20Hosted%20API/)**
+
+A 15B MoE MiniCPM5 (2.5B active) served by a hosted OpenAI-compatible endpoint, measured 2026-11-23
+with **gBench 0.5.0.post1** in remote-endpoint mode. The endpoint URL and API key are withheld — the
+provider is not named in this repo. This is the serving pillar only: latency and throughput, no
+capability tests.
+
+**The findings:**
+
+| | |
+|---|---|
+| Decode, single stream | **179 tok/s** (TPOT 5.60 ms) at a 174-token prompt, **165 tok/s** (6.07 ms) at 16,430 tokens — an 8% cost across a 94× longer prompt |
+| Prompt reading | TTFT **330 ms** at 174 tokens, **1.7 s** at 16,430; ~9.6K prompt tokens/s marginal |
+| Tail at depth | TTFT **p99 19.9 s** at 16K and 7.9 s at 8K against medians of 1.7 s and 1.2 s — provider-side queueing, not errors |
+| Concurrency | **851 output tok/s at 8 streams** (382 at 4, 107 at 1), TPOT unchanged at 5.6 ms — capacity is concurrency |
+| Failures | **0 of 1,289**; `ignore_eos` honoured, 128 tokens generated every time |
+| Not tested | prompts past 16,384 tokens (512K window claimed), the stress/SLO sweep, capability evals |
 
 ### Qwen3.8-27B on llama.cpp — 284 recorded runs, 277 with measurements
 
