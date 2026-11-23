@@ -8,6 +8,8 @@ deliberately absent from this repo.
 The model reports a 512K-token context window and function calling. Nothing here tests capability —
 this is the serving pillar only: latency and throughput.
 
+![MiniCPM5-15B-A2.5B on a hosted API — time to first token and throughput](charts/minicpm5-15b-api-speed.png)
+
 ## The numbers
 
 Single stream (batch 1), 128 tokens generated per request:
