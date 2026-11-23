@@ -60,9 +60,9 @@
  "hy4-flash-croft-at-the-wrack-line": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
-  "model": "not recorded",
-  "note": "No session log for this build in the harness store.",
-  "provider": "Not recorded"
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
  },
  "hy4-flash-glacial-heart": {
   "config": "API base https://inference-api.nousresearch.com/v1",
