@@ -62,6 +62,34 @@
   "note": "Provider and model are the subscription and model the build ran on. The harness session header named a stale local-engine config, which is not used here.",
   "provider": "GLM Coding Plan"
  },
+ "hungerg-breadfruit-cay": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "hungerg-free",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "opencode-go-custom"
+ },
+ "hungerg-croft": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "hungerg-free",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "opencode-go-custom"
+ },
+ "hungerg-index": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "hungerg-free",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "opencode-go-custom"
+ },
+ "hungerg-sky-temple": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
  "hy4-castle": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
