@@ -1,4 +1,32 @@
 {
+ "deepseek-v4-1-flash-1017-first-hooves-at-the-ford": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
+ "deepseek-v4-1-flash-1017-honeycomb-water-meadow": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
+ "deepseek-v4-1-flash-1017-the-floating-classroom": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
+ "deepseek-v4-1-flash-1017-the-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
  "deepseek-v41-breadfruit-cay": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -19,11 +47,46 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
+ "glm-5-4-pagoda": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "/mnt/nvme/Qwen3.8-27B/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M (llama.cpp engine)"
+ },
  "hy4-castle": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
   "model": "hy4",
   "provider": "Nous Portal"
+ },
+ "hy4-flash-api-first-hooves-at-the-ford": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-api-the-floating-classroom": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-api-the-honeycomb-water-meadow": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-api-the-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
  },
  "hy4-flash-blue-hour-dry-dock": {
   "config": "API base https://inference-api.nousresearch.com/v1",
@@ -188,6 +251,13 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Not recorded"
  },
+ "inkling-2-mini-the-kettle-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "inkling-2-mini",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M (llama.cpp engine)"
+ },
  "inkling-2-mini-the-pagoda-v2": {
   "harness": "Maya M",
   "kind": "cloud",
@@ -195,11 +265,25 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Maya M"
  },
+ "inkling-2-mini-the-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "inkling-2-mini",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya M (llama.cpp engine)"
+ },
  "longcat-25-sky-temple": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
   "model": "longcat-2.5:free",
   "provider": "Nous Portal"
+ },
+ "qwen-4-max-029-floating-classroom": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
  },
  "qwen-4-max-basalt-organ": {
   "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
@@ -240,6 +324,13 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
  },
+ "qwen-4-max-first-hooves-at-the-ford": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
  "qwen-4-max-glacial-heart": {
   "config": "API base https://token-plan.maas.qwencloudapi.com/compatible-mode/v1\nOpenAI Responses API (not chat-completions)",
   "harness": "DeepSeek Harness",
@@ -254,6 +345,13 @@
   "kind": "cloud",
   "model": "qwen4-max",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
+ "qwen-4-max-honeycomb-water-meadow": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
  },
  "qwen-4-max-kettle-lake": {
@@ -340,6 +438,13 @@
   "kind": "cloud",
   "model": "qwen4-max",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
+ "qwen-4-max-the-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
  },
  "qwen-4-max-the-shell-road": {
