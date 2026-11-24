@@ -27,6 +27,13 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
+ "deepseek-v4-1-flash-the-pagoda": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
  "deepseek-v41-breadfruit-cay": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
