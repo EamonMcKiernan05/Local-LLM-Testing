@@ -1,7 +1,7 @@
 # Model Testing Gallery
 
 The builds behind [eamonmckiernan.im/gallery.html](https://eamonmckiernan.im/gallery.html) —
-107 self-contained browser demos written by AI models, published unedited, defects and all.
+108 self-contained browser demos written by AI models, published unedited, defects and all.
 
 This repo mirrors the website: every published build is here. A withdrawn build keeps its file
 here but no longer has a card on the page.
