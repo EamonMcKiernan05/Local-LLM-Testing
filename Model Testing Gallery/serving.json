@@ -55,12 +55,33 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
+ "glm-5-4-kettle-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
+ },
  "glm-5-4-pagoda": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
   "model": "GLM-5.4",
   "note": "Provider and model are the subscription and model the build ran on. The harness session header named a stale local-engine config, which is not used here.",
   "provider": "GLM Coding Plan"
+ },
+ "glm-5-4-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
+ },
+ "hungerg-029-floating-classroom": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
  },
  "hungerg-breadfruit-cay": {
   "harness": "DeepSeek Harness",
@@ -83,12 +104,33 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "opencode-go-custom"
  },
+ "hungerg-kettle-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "not recorded",
+  "note": "No session log for this build in the harness store.",
+  "provider": "Not recorded"
+ },
+ "hungerg-kites-over-jute-bank": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
+ },
+ "hungerg-salmon-stair": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
+ },
  "hungerg-sky-temple": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
-  "model": "deepseek-flash",
-  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
-  "provider": "DeepSeek API"
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
  },
  "hy4-castle": {
   "harness": "DeepSeek Harness",
@@ -281,6 +323,13 @@
   "note": "Session captured from the harness. The model id is as configured there and is not checked against the vendor's own list.",
   "provider": "Nous portal"
  },
+ "inkling-2-mini-the-blossom-frost-pocket": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
  "inkling-2-mini-the-croft": {
   "harness": "DeepSeek Harness",
   "kind": "local",
@@ -307,6 +356,13 @@
   "kind": "local",
   "model": "inkling-2-mini",
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Maya"
+ },
+ "inkling-2-mini-the-watercress-at-penny-spring": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
   "provider": "Maya"
  },
  "qwen-4-max-029-floating-classroom": {
