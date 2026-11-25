@@ -1942,6 +1942,7 @@ function installAudioUI(options) {
 
   const TAU = Math.PI * 2;
   const LOOP = 24;
+  const CINEMATIC_ORBIT = 60;
   const clamp = THREE.MathUtils.clamp;
   const lerp = THREE.MathUtils.lerp;
   const $ = (s) => document.querySelector(s);
@@ -2853,7 +2854,7 @@ function installAudioUI(options) {
     cameraState.cinematic = active;
     if (active) { cameraState.cinematicAngle = cameraState.azimuth; cameraState.cinematicStartTime = loopTime; }
     uiAudio?.setCinematic(active);
-    console.info(`[Sky Temple] Cinematic mode ${active ? 'started — 24 second orbit' : 'stopped'}.`);
+    console.info(`[Sky Temple] Cinematic mode ${active ? 'started — 60 second orbit' : 'stopped'}.`);
   }
 
   let uiAudio;
@@ -2948,11 +2949,14 @@ function installAudioUI(options) {
     waterUniforms.phase.value = phase;
     updateLife(phase);
     if (cameraState.cinematic) {
-      const cinematicPhase = (loopTime - cameraState.cinematicStartTime) / LOOP;
+      const cinematicPhase = (loopTime - cameraState.cinematicStartTime) / CINEMATIC_ORBIT;
       cameraState.targetAzimuth = cameraState.cinematicAngle + cinematicPhase * TAU;
       cameraState.targetElevation = Math.PI / 6 + Math.sin(cinematicPhase * TAU) * .035;
+      // Time-exact azimuth prevents easing lag from stretching the 60-second orbit.
+      cameraState.azimuth = cameraState.targetAzimuth;
+    } else {
+      cameraState.azimuth = lerp(cameraState.azimuth, cameraState.targetAzimuth, 1 - Math.exp(-dt * 5));
     }
-    cameraState.azimuth = lerp(cameraState.azimuth, cameraState.targetAzimuth, 1 - Math.exp(-dt * 5));
     cameraState.elevation = lerp(cameraState.elevation, cameraState.targetElevation, 1 - Math.exp(-dt * 5));
     cameraState.zoom = lerp(cameraState.zoom, cameraState.targetZoom, 1 - Math.exp(-dt * 6));
     const ce = Math.cos(cameraState.elevation), se = Math.sin(cameraState.elevation);
@@ -2997,6 +3001,7 @@ function installAudioUI(options) {
       phase: (loopTime % LOOP) / LOOP, drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries,
       textures: renderer.info.memory.textures, cinematic: cameraState.cinematic,
+      cinematicStartTime: cameraState.cinematicStartTime, cinematicStartAngle: cameraState.cinematicAngle,
       azimuth: cameraState.azimuth, elevation: cameraState.elevation, zoom: cameraState.zoom,
       islandMeshes: 1, waterReflection: true, audioStarted: !!uiAudio?.started
     })
