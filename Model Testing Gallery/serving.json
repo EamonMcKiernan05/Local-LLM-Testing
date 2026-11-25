@@ -62,6 +62,13 @@
   "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
   "provider": "GLM Coding Plan"
  },
+ "glm-5-4-honeycomb-meadow": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
+ },
  "glm-5-4-kettle-lake": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -330,7 +337,28 @@
   "note": "Session captured from the harness. The model id is as configured there and is not checked against the vendor's own list.",
   "provider": "Nous portal"
  },
+ "inkling-2-mini-the-acorn-harbour": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
+ "inkling-2-mini-the-beaver-spare-channel": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
  "inkling-2-mini-the-blossom-frost-pocket": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
+ "inkling-2-mini-the-brook-beneath-the-fold": {
   "harness": "DeepSeek Harness",
   "kind": "local",
   "model": "inkling-2-mini",
@@ -342,6 +370,13 @@
   "kind": "local",
   "model": "inkling-2-mini",
   "note": "Session captured from the harness. Maya M is the local llama.cpp engine serving this model, not a harness; the model id is as configured there and is not checked against the vendor's own list.",
+  "provider": "Maya"
+ },
+ "inkling-2-mini-the-ford": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
   "provider": "Maya"
  },
  "inkling-2-mini-the-kettle-lake": {
