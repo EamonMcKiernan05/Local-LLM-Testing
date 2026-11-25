@@ -55,6 +55,13 @@
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
+ "glm-5-4-floating-classroom": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
+ },
  "glm-5-4-kettle-lake": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
