@@ -58,9 +58,9 @@
  "glm-5-4-floating-classroom": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
-  "model": "not recorded",
-  "note": "No session log for this build in the harness store.",
-  "provider": "Not recorded"
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
  },
  "glm-5-4-kettle-lake": {
   "harness": "DeepSeek Harness",
