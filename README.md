@@ -39,8 +39,23 @@ Latest measured numbers, one row per model file. Every figure is a real run on b
 | Qwen3.8-27B (IQ3_S + MTP, UD-Q4_K_XL) | llama.cpp | 2026-09-23 | 150K | **1,097 tok/s** (20K) | 43.1 tok/s (100K) | 284 |
 | MiniCPM-V 4.7 35B-A3B (Q8_0) | llama.cpp b11580 | 2026-10-13 | 256K | **754 tok/s** (20K) | 87.5 → 57.3 tok/s (layer split) | 12 |
 | MiniCPM5-15B-A2.5B (hosted API) | gBench 0.5.0 | 2026-11-23 | 512K claimed | **330 ms TTFT** (174-token prompt) | 179 → 165 tok/s (174 → 16,430 tok) | 7 |
+| Ling-3.2-air (Maya-M IQ2_S) | Project Maya v1.1.83 | 2026-11-27 | 262K | **2,730.8 tok/s** (8K) | 103.2 → 25.7 tok/s (8K → 200K) | 1 |
+| Ling-3.2-air (Maya-L IQ3_S) | Project Maya v1.1.83 | 2026-11-27 | 262K | **2,567.4 tok/s** (8K) | 103.1 → 24.7 tok/s (8K → 200K) | 1 |
 
 Prefill is the best measured value and the depth it was measured at; decode is the per-depth range across the dataset's own depths. Where a dataset compares engine versions, the row carries the newest engine and the section quotes the pair.
+
+### Ling-3.2-air (Maya-M and Maya-L) on two V100s — first run, 262,144-token context
+
+Maya v1.1.83 brought Ling-3.2-air on its own engine. Both of Maya's quants were pulled and measured
+on code prompts at the maximum context the box will hold (254,743-token prompt = 97% of 262,144).
+
+| quant | file | 8K prefill | 8K decode | 64K prefill | 64K decode | 200K prefill | 200K decode |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Maya-M (IQ2_S) | 46.0 GB | 2,730.8 | 103.2 | 2,154.3 | 61.9 | 905.6 | 25.7 |
+| Maya-L (IQ3_S) | 59.2 GB | 2,567.4 | 103.1 | 2,083.8 | 58.9 | 923.3 | 24.7 |
+
+Single rep per depth, `bench.py --corpus code --gen 128`, temperature 0.5, fp16 KV, both GPUs.
+Detail: `Ling-3.2-air Maya-M and Maya-L - Project Maya/BENCH.md`.
 
 ### MiniCPM5-15B-A2.5B on a hosted API — 7 configurations, 1,289 requests, 0 failures
 
