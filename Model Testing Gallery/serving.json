@@ -27,6 +27,20 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
  },
+ "deepseek-v4-1-flash-bronze-grass-at-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
+ "deepseek-v4-1-flash-cable-cars-of-the-cloud-forest": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "deepseek-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "DeepSeek API"
+ },
  "deepseek-v4-1-flash-the-pagoda": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -54,6 +68,20 @@
   "model": "deepseek-flash",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
   "provider": "DeepSeek API"
+ },
+ "glm-5-4-cable-forest": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
+ },
+ "glm-5-4-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "GLM-5.4",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "GLM Coding Plan"
  },
  "glm-5-4-floating-classroom": {
   "harness": "DeepSeek Harness",
@@ -104,6 +132,20 @@
   "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "opencode-go-custom"
  },
+ "hungerg-bronze-grass-at-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
+ },
+ "hungerg-cable-cars": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "HungerG",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "OpenCode Go"
+ },
  "hungerg-croft": {
   "harness": "DeepSeek Harness",
   "kind": "cloud",
@@ -151,6 +193,20 @@
   "kind": "cloud",
   "model": "tencent/hy4",
   "note": "Session captured from the harness. The model id is as configured there and is not checked against the vendor's own list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-api-bronze-grass-at-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Nous portal"
+ },
+ "hy4-flash-api-cable-cars-of-the-cloud-forest": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "tencent/hy4-flash",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Nous portal"
  },
  "hy4-flash-api-first-hooves-at-the-ford": {
@@ -358,7 +414,21 @@
   "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
   "provider": "Maya"
  },
+ "inkling-2-mini-the-bronze-grass-at-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
  "inkling-2-mini-the-brook-beneath-the-fold": {
+  "harness": "DeepSeek Harness",
+  "kind": "local",
+  "model": "inkling-2-mini",
+  "note": "Provider and model are the subscription and model Eamon ran the build on; the harness session header is not used for them.",
+  "provider": "Maya"
+ },
+ "inkling-2-mini-the-cable-cars-of-the-cloud-forest": {
   "harness": "DeepSeek Harness",
   "kind": "local",
   "model": "inkling-2-mini",
@@ -443,6 +513,20 @@
   "kind": "cloud",
   "model": "qwen4-max",
   "note": "Session captured from DeepSeek Harness. Model id as configured in the harness; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
+ "qwen-4-max-bronze-grass-crane-lake": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
+  "provider": "Qwen token plan"
+ },
+ "qwen-4-max-cloud-forest-cableway": {
+  "harness": "DeepSeek Harness",
+  "kind": "cloud",
+  "model": "qwen4-max",
+  "note": "Session captured from the harness. Model id as configured there; not checked against the vendor's own model list.",
   "provider": "Qwen token plan"
  },
  "qwen-4-max-cloudfall-pass": {
