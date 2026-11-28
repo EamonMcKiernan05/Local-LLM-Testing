@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CABLE CARS OF THE CLOUD FOREST — one 96-second loop</title>
+<title>CABLE CARS OF THE CLOUD FOREST — one 60-second loop</title>
 <style>
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #b8c8d6; }
   #scene { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
@@ -915,6 +915,7 @@ const cabins = [];
 {
   for (let i = 0; i < N_CABINS; i++) {
     const g = new THREE.Group();
+    g.scale.set(1.4, 1.4, 1.4);
     const rod = cyl(0.09, 0.09, HANG, '#33302c', { roughness: 0.5, metalness: 0.6 }, 8);
     rod.position.set(0, -HANG / 2, 0);
     g.add(rod);
@@ -960,7 +961,7 @@ P.cable = { ropes, pulleys, cabins, circuitLength, HANG, N_CABINS, cabinAt, STAT
 
 /**
  * CABLE CARS OF THE CLOUD FOREST — flight path, vegetation, rocks, actors,
- * wind and per-frame world updates (96-second master loop).
+ * wind and per-frame world updates (60-second master loop).
  */
 (function () {
 'use strict';
@@ -972,23 +973,21 @@ const { camera } = P;
 
 // ---------------------------------------------------------------- flight path (shared with app_e)
 const FLIGHT_PTS = [
-  [-415, 84, 248],   // platform view (start) — at the threshold, looking at the reservoir
+  [-350, 84, 262],   // platform view (start) — off the threshold, framing the cabins
   [-345, 86, 195],   // leave the valley station, heading into the ravine
   [-230, 92, 155],   // follow the ravine beneath the cables
   [-110, 95, 105],   // under the rope line — cabin emerges from cloud
   [-10, 125, 15],    // climbing east over the reservoir
   [30, 175, -100],   // climbing toward the notch
   [0, 244, -152],    // climbing through the notch (the saddle between spur and massif)
-  [-48, 262, -178],  // sweep behind the spur station
+  [-85, 172, -75],   // sweep behind the spur station (clear of the ropes)
   [-210, 180, -55],  // descend the uncovered hillside
   [-330, 115, 95],   // beside the market, descending the hillside
-  [-395, 88, 160],   // approaching the platform from the northeast
-  [-445, 83, 185],   // arc around the west side of the platform
-  [-450, 82, 260],   // swinging east along the west edge of the plateau
+  [-320, 85, 300],   // swinging south along the east side of the market
 ];
 
 // ---------------------------------------------------------------- shared constants
-const LOOP = 96;
+const LOOP = 60;
 const uTauOf = (t) => TAU * t / LOOP;
 function gust(t) {
   const a = Math.sin(TAU * 2 * t / LOOP + 0.9);
@@ -1056,30 +1055,25 @@ const trees = { list: [] };
   };
 
   const bands = [
-    { x0: -430, x1: 640, z0: -225, z1: -95 },   // north bank forest (overhangs the water)
-    { x0: 615, x1: 920, z0: -120, z1: 230 },    // ravine forest
-    { x0: -240, x1: 520, z0: 235, z1: 400 },    // south-east band
-    { x0: -430, x1: 60, z0: 130, z1: 235 },     // west hillside band
-    { x0: -260, x1: 260, z0: -262, z1: -212 },  // ridge crest band (flanks the ridge station)
+    { x0: -650, x1: 250, z0: -350, z1: 400 },   // the visible landscape
   ];
   const placed = [];
   let attempts = 0;
-  while (placed.length < 480 && attempts < 5200) {
+  while (placed.length < 9500 && attempts < 140000) {
     attempts++;
-    const pick = r();
-    const b = pick < 0.40 ? bands[0] : pick < 0.62 ? bands[1] : pick < 0.80 ? bands[2] : pick < 0.92 ? bands[3] : bands[4];
+    const b = bands[0];
     const x = b.x0 + r() * (b.x1 - b.x0);
     const z = b.z0 + r() * (b.z1 - b.z0);
     const h = terrainHeight(x, z);
     if (h < 52) continue;
     const md = Math.sqrt(Math.pow((x - LAYOUT.market.x) / 150, 2) + Math.pow((z - LAYOUT.market.z) / 105, 2));
-    if (md < 2.15) continue;
-    if (Math.hypot(x - LAYOUT.marketStation.x, z - LAYOUT.marketStation.z) < 45) continue;
-    if (Math.hypot(x - LAYOUT.spurStation.x, z - LAYOUT.spurStation.z) < 48) continue;
-    if (Math.hypot(x - LAYOUT.ridgeStation.x, z - LAYOUT.ridgeStation.z) < 42) continue;
-    if (distToCable(x, z) < 27) continue;
-    if (distToFlightPath(x, z) < 44) continue;
-    placed.push({ x, z, h, s: 0.95 + r() * 0.85, yaw: r() * TAU, tint: r() });
+    if (md < 0.85) continue;
+    if (Math.hypot(x - LAYOUT.marketStation.x, z - LAYOUT.marketStation.z) < 32) continue;
+    if (Math.hypot(x - LAYOUT.spurStation.x, z - LAYOUT.spurStation.z) < 34) continue;
+    if (Math.hypot(x - LAYOUT.ridgeStation.x, z - LAYOUT.ridgeStation.z) < 30) continue;
+    if (distToCable(x, z) < 18) continue;
+    if (distToFlightPath(x, z) < 28) continue;
+    placed.push({ x, z, h, s: 1.35 + r() * 1.05, yaw: r() * TAU, tint: r() });
   }
   const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, placed.length);
   const canopyMesh = new THREE.InstancedMesh(canopyGeo, canopyMat, placed.length);
@@ -1539,9 +1533,9 @@ function updateReflections(t) {
     const worldPos = new THREE.Vector3();
     cab.group.getWorldPosition(worldPos);
     const sway = cab.group.rotation.z;
-    const cabinY = worldPos.y - 7.5 * Math.cos(sway);
-    const cabinX = worldPos.x + 7.5 * Math.sin(sway) * Math.cos(cab.group.rotation.y);
-    const cabinZ = worldPos.z - 7.5 * Math.sin(sway) * Math.sin(cab.group.rotation.y);
+    const cabinY = worldPos.y - 18.4 * Math.cos(sway);
+    const cabinX = worldPos.x + 18.4 * Math.sin(sway) * Math.cos(cab.group.rotation.y);
+    const cabinZ = worldPos.z - 18.4 * Math.sin(sway) * Math.sin(cab.group.rotation.y);
     const h = terrainHeight(cabinX, cabinZ);
     if (h > 47.5) continue;              // only over the water
     if (cabinZ < -45) continue;          // clear patch only (not under the canopy)
@@ -1594,13 +1588,15 @@ P.updateReflections = updateReflections;
 P.ferns = ferns;
 P.actors = actors;
 P.ferry = ferry;
+P.treeCount = trees.list.length;
+P.trees = trees.list;
 
 })();
 
 /**
  * CABLE CARS OF THE CLOUD FOREST — cinematic flight path, controls, main loop.
- * One 96-second master loop: elapsed simulation time; everything is periodic
- * in phase = t/96 so the seam matches the opening frame.
+ * One 60-second master loop: elapsed simulation time; everything is periodic
+ * in phase = t/60 so the seam matches the opening frame.
  */
 (function () {
 'use strict';
@@ -1616,11 +1612,7 @@ const camCurve = new THREE.CatmullRomCurve3(
 );
 
 const UP = new THREE.Vector3(0, 1, 0);
-const _look = new THREE.Vector3();
-const _ahead = new THREE.Vector3();
-const _dir = new THREE.Vector3();
 const _right = new THREE.Vector3();
-const _fwd = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 
 // ---------------------------------------------------------------- state
@@ -1631,99 +1623,62 @@ let cineBlend = 1;               // 1 = fully authored (cinematic), 0 = fully ma
 let manualYaw = 0, manualPitch = 0, manualFov = 52;
 let lastFrameAt = performance.now();
 
-// ---------------------------------------------------------------- helpers
-function circDist(a, b) {
-  let d = Math.abs(a - b) % 1;
-  if (d > 0.5) d = 1 - d;
-  return d;
-}
-function bump(phase, center, half) {
-  const d = circDist(phase, center);
-  if (d >= half) return 0;
-  const t = 1 - d / half;
-  return t * t * (3 - 2 * t);
-}
+// ---------------------------------------------------------------- camera
+// The cable cars are the main focus of the shot. The look target is the cabin
+// that sits most ahead of the camera; it is smoothed so the shot glides
+// between cabins instead of snapping. The camera stays level (no roll).
+let _lookSm = null;
+let _lookInit = false;
+const _fwd = new THREE.Vector3();
+const _dir = new THREE.Vector3();
+const _lookTarget = new THREE.Vector3();
 
-function nearestCabinBody() {
+function desiredLook(phase, pos) {
+  // reference forward: the path tangent (stable, deterministic) — cabins near the
+  // camera's heading are the focus, not the stale smoothed look target.
+  camCurve.getTangentAt(phase, _fwd);
+  _fwd.normalize();
+
+  // the cable cars are the main focus: pick the nearest cabin ahead of the camera
+  // (skip the cabin cramped against the market station — it is hidden behind the post)
   let best = null, bestD = Infinity;
-  const cp = camera.position;
   for (const cab of cable.cabins) {
     const p = cab.group.position;
-    const d = p.distanceToSquared(cp);
+    const mdStation = Math.hypot(p.x - LAYOUT.marketStation.x, p.z - LAYOUT.marketStation.z);
+    if (mdStation < 60) continue;                     // cabin tucked into the market station
+    _dir.copy(p).sub(pos);
+    const d = _dir.length();
+    if (d < 1e-3) continue;
+    _dir.divideScalar(d);
+    const dot = _dir.dot(_fwd);
+    if (dot < 0.35) continue;                    // only cabins clearly in front
     if (d < bestD) { bestD = d; best = p; }
   }
-  if (!best) return null;
-  return new THREE.Vector3(best.x, best.y - 9.2, best.z);
-}
-
-// ---------------------------------------------------------------- camera
-function authoredLook(phase, pos) {
-  // default: look ahead along the path
-  const ahead = camCurve.getPointAt((phase + 0.035) % 1, _ahead);
-  // interest points with periodic bumps
-  const cabinPt = nearestCabinBody();
-  let look = ahead, bestW = 0;
-  // cabin emerging from cloud over the clear patch (mid-route) — frame it with its reflection below
-  if (cabinPt) {
-    const w = bump(phase, 0.234, 0.085);
-    if (w > bestW) {
-      bestW = w;
-      look = new THREE.Vector3(
-        cabinPt.x,
-        0.55 * cabinPt.y + 0.45 * 48,
-        cabinPt.z
-      );
+  if (!best) {
+    // fallback: the cabin most ahead of the path tangent (rare)
+    let bestDot = -Infinity;
+    for (const cab of cable.cabins) {
+      const p = cab.group.position;
+      const mdStation = Math.hypot(p.x - LAYOUT.marketStation.x, p.z - LAYOUT.marketStation.z);
+      if (mdStation < 60) continue;
+      _dir.copy(p).sub(pos);
+      const d = _dir.length();
+      if (d < 1e-3) continue;
+      _dir.divideScalar(d);
+      const dot = _dir.dot(_fwd);
+      if (dot > bestDot) { bestDot = dot; best = p; }
     }
   }
-  // ridge station (approach / pass)
-  {
-    const w = bump(phase, 0.467, 0.065);
-    if (w > bestW) { bestW = w; look = new THREE.Vector3(LAYOUT.ridgeStation.x, LAYOUT.ridgeStation.crestY + 6, LAYOUT.ridgeStation.z); }
-  }
-  // spur station (behind it)
-  {
-    const w = bump(phase, 0.525, 0.075);
-    if (w > bestW) { bestW = w; look = new THREE.Vector3(LAYOUT.spurStation.x, LAYOUT.spurStation.tipY + 3, LAYOUT.spurStation.z); }
-  }
-  // market platform (start / approach)
-  {
-    const w = bump(phase, 0.0, 0.06);
-    if (w > bestW) { bestW = w; look = new THREE.Vector3(-160, 58, 30); }
-  }
-  // hillside descent beside the market — frame the market as it passes
-  {
-    const w = bump(phase, 0.84, 0.11);
-    if (w > bestW) {
-      bestW = w;
-      look = new THREE.Vector3(LAYOUT.marketStation.x + 6, LAYOUT.marketStation.platformY + 8, LAYOUT.marketStation.z);
-    }
-  }
-  // blend between path-ahead and the chosen interest point
-  if (bestW > 0 && look !== ahead) {
-    _look.copy(ahead).lerp(look, bestW);
-    return _look;
-  }
-  return ahead;
+  _lookTarget.set(best.x, best.y - 18.4, best.z);
+  return _lookTarget;
 }
 
 function updateCamera(dt, t) {
   const phase = (t / LOOP + 1) % 1;
   const pos = camCurve.getPointAt(phase, _v3tmp);
-  const tan = camCurve.getTangentAt(phase, _v3tmp2);
 
-  // roll from yaw-rate (banked through the corners) — gentle and periodic
-  const tanAhead = camCurve.getTangentAt((phase + 0.012) % 1, _v3tmp3);
-  const yawNow = Math.atan2(tan.x, tan.z);
-  const yawAhead = Math.atan2(tanAhead.x, tanAhead.z);
-  let dYaw = yawAhead - yawNow;
-  dYaw = Math.atan2(Math.sin(dYaw), Math.cos(dYaw));
-  const rollRaw = clamp(-dYaw * 4.5, -0.28, 0.28);
-  // ramp the bank in from the platform view so the opening frame is level
-  const seamFade = P.smoothstep(0.0, 0.055, circDist(phase, 0.0));
-  const roll = rollRaw * seamFade;
-
-  // authored FOV (gentle breathing), widened at the cabin bump, manual lens when in manual mode
-  const baseFov = clamp(52 + 7 * Math.sin(TAU * (phase - 0.12)) + 18 * bump(phase, 0.234, 0.085), 44, 80);
+  // gentle breathing FOV — no roll: the camera stays level (yaw/pitch only)
+  const baseFov = clamp(52 + 6 * Math.sin(TAU * (phase - 0.12)), 46, 62);
 
   // ease the cinematic blend
   if (mode === 'cinematic') cineBlend = Math.min(1, cineBlend + dt / 1.2);
@@ -1731,8 +1686,18 @@ function updateCamera(dt, t) {
 
   camera.position.copy(pos);
 
-  const look = authoredLook(phase, pos);
-  // base orientation toward the authored look target
+  const desired = desiredLook(phase, pos);
+  if (dt <= 0 || !_lookInit) {
+    _lookSm = _lookSm || new THREE.Vector3();
+    _lookSm.copy(desired);
+    _lookInit = true;
+  } else {
+    // glide toward the chosen cabin — smooth, never snapping
+    const a = 1 - Math.exp(-dt * 5.0);
+    _lookSm.lerp(desired, a);
+  }
+  const look = _lookSm;
+  // base orientation toward the authored look target (level: yaw + pitch only)
   const m = new THREE.Matrix4().lookAt(pos, look, UP);
   camera.quaternion.setFromRotationMatrix(m);
   // manual yaw around world up
@@ -1748,12 +1713,6 @@ function updateCamera(dt, t) {
     _q.setFromAxisAngle(_right, effPitch);
     camera.quaternion.premultiply(_q);
   }
-  // banked roll around the camera's local forward axis
-  if (Math.abs(roll) > 0.0001) {
-    _fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
-    _q.setFromAxisAngle(_fwd, roll);
-    camera.quaternion.premultiply(_q);
-  }
 
   const fov = lerp(manualFov, baseFov, cineBlend);
   if (Math.abs(camera.fov - fov) > 0.01) {
@@ -1763,8 +1722,6 @@ function updateCamera(dt, t) {
 }
 
 const _v3tmp = new THREE.Vector3();
-const _v3tmp2 = new THREE.Vector3();
-const _v3tmp3 = new THREE.Vector3();
 
 // ---------------------------------------------------------------- UI wiring
 const btnCinematic = document.getElementById('btnCinematic');
@@ -1792,6 +1749,7 @@ btnReset.addEventListener('click', () => {
   setMode('cinematic');
   cineBlend = 1;
   manualYaw = 0; manualPitch = 0; manualFov = 52;
+  _lookInit = false;   // re-frame cleanly at the start of the take
 });
 
 // dragging to look around switches to manual mode

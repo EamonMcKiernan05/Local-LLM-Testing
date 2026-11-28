@@ -56,7 +56,7 @@
   #panel b { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 10.5px; letter-spacing: 0; text-align: right; font-weight: 500; text-transform: none; }
   #panel .cap { margin-top: 4px; font-size: 8.5px; letter-spacing: .06em; opacity: .55; }
   #sound {
-    position: absolute; left: 50%; bottom: 42px; transform: translateX(-50%);
+    position: absolute; left: 50%; top: 22px; transform: translateX(-50%);
     font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; padding: 9px 16px 8px;
     border: 1px solid rgba(255,240,220,.7); border-radius: 999px; background: rgba(12,20,38,.6);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: .95; transition: opacity .6s; white-space: nowrap;
@@ -67,7 +67,7 @@
     .title { left: 18px; bottom: 20px; } .title h1 { font-size: 24px; } .title .hint { margin-top: 8px; }
     .controls { right: 18px; bottom: 20px; flex-wrap: wrap; justify-content: flex-end; max-width: 60vw; } .btn { padding: 9px 10px 8px 12px; }
     #panel { right: 18px; top: 18px; width: 212px; font-size: 10px; } #panel .row { grid-template-columns: 74px 1fr; }
-    #sound { bottom: 70px; }
+    #sound { top: auto; bottom: 70px; }
   }
 </style>
 </head>
@@ -86,7 +86,7 @@
     <button class="btn" id="btnReset" type="button">Reset view</button>
   </div>
   <div id="panel">
-    <h2>Master loop · 96 s</h2>
+    <h2>Master loop · 60 s</h2>
     <div class="row"><span>clock</span><b id="clock">0.0 s</b></div>
     <div class="row"><span>take</span><b id="phase">0 %</b></div>
     <div class="row"><span>altitude</span><b id="alt">—</b></div>
@@ -115,7 +115,7 @@ const t="166",e={LEFT:0,MIDDLE:1,RIGHT:2,ROTATE:0,DOLLY:1,PAN:2},n={ROTATE:0,PAN
 //  is loaded. World units are metres. x east, z south, y up; the reservoir's
 //  mean level is y = 0.
 // ===========================================================================
-const LOOP = 96, TAU = Math.PI * 2, DEG = Math.PI / 180;
+const LOOP = 60, TAU = Math.PI * 2, DEG = Math.PI / 180;
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const lerp = (a, b, t) => a + (b - a) * t;
 const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -398,7 +398,7 @@ for (const k in MAT) { MAT[k].onBeforeCompile = patchFog; MAT[k].customProgramCa
 // ------------------------------------------------------------------ height fog
 const FOG_U = {
   uFogCol: { value: new THREE.Color().setRGB(0.80, 0.84, 0.88, THREE.SRGBColorSpace) }, uFogSun: { value: new THREE.Color().setRGB(1.0, 0.90, 0.74, THREE.SRGBColorSpace) },
-  uFogD: { value: 1 / 3600 }, uSunDir: { value: SUN_DIR },
+  uFogD: { value: 600 }, uSunDir: { value: SUN_DIR },
 };
 const FOG_VERT = `
 vec4 fogW = vec4(transformed, 1.0);
@@ -411,8 +411,9 @@ const FOG_PARS = `uniform vec3 uFogCol, uFogSun, uSunDir; uniform float uFogD; v
 float fogAmount(vec3 P) {
   vec3 dv = P - cameraPosition; float dist = length(dv);
   float hm = 0.5 * (P.y + cameraPosition.y);
-  float dens = uFogD * (0.6 + 0.75 * exp(-max(hm, 0.0) / 110.0));
-  return 1.0 - exp(-pow(dist * dens, 1.3));
+  float far = smoothstep(uFogD, 7000.0, dist);                   // haze only in the distance: nothing within half a kilometre
+  float low = 0.8 + 0.45 * exp(-max(hm, 0.0) / 90.0);            // a little denser low in the valley
+  return clamp(far * low, 0.0, 0.92);
 }
 vec3 fogTint(vec3 P) { float s = pow(max(dot(normalize(P - cameraPosition), uSunDir), 0.0), 5.0); return mix(uFogCol, uFogSun, s * 0.85); }`;
 // patch a MeshStandardMaterial: varying in the vertex stage, fog before tone mapping (three's own fog is switched off)
@@ -451,7 +452,7 @@ const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(9000, 48, 24), new THREE
       if (y > 0.0) {
         vec2 pc = d.xz / (y + 0.10) * 1.4 + uDrift;
         float n = texture2D(tNoise, pc * 0.041).r * 0.6 + texture2D(tNoise, pc * 0.12).g * 0.3 + texture2D(tNoise, pc * 0.33).b * 0.1;
-        float cov = smoothstep(0.47, 0.70, n) * smoothstep(-0.03, 0.05, y);
+        float cov = smoothstep(0.56, 0.78, n) * smoothstep(-0.03, 0.05, y);
         float shade = texture2D(tNoise, pc * 0.041 + uSunDir.xz * 0.03).r;
         float lit = 0.78 + 0.34 * pow(sd, 2.0);
         vec3 cc = vec3(1.0, 0.95, 0.88) * lit * mix(0.78, 1.08, smoothstep(0.42, 0.68, n - 0.6 * shade + 0.3));
@@ -540,23 +541,28 @@ const lerp3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2],
 //  station with its market stands on the gentle south-east pasture shore.
 // ===========================================================================
 const WATER_Y = 0;
-// horizontal scale of the geography (stations, water, ridges, paths); heights stay in metres
-const WS = 0.75;
-// station pads: x, z, pad height (the bullwheel sits padY + 8), pad radius
-const ST = { V: { x: 740, z: 360, padY: 14, r: 46 }, S: { x: -400, z: -540, padY: 150, r: 22 }, R: { x: -350, z: 820, padY: 366, r: 26 } };
-const MARKET = { x: 822, z: 436, padY: 22, r: 34 };
+// horizontal scale of the geography (stations, water, ridges, paths) and vertical scale of the relief.
+// The 60 s take at ~25 m/s covers ~1.5 km, so the valley is laid out to that size.
+const WS = 0.75, HS = 1;
+// station pads: x, z in unscaled units (× WS); padY × HS; r is the pad radius in metres (absolute)
+const ST = { V: { x: 740, z: 360, padY: 14, r: 34 }, S: { x: -400, z: -540, padY: 150, r: 16 }, R: { x: -350, z: 820, padY: 366, r: 19 } };
+const MARKET = { x: 822 * 0.75, z: 436 * 0.75, padY: 22, r: 26 };   // the market square beside the valley station (original position)
 const NOTCH = { x: -385, z: 300, r: 95, depth: 62 };
-// reservoir capsules [ax, az, bx, bz, ra, rb]: union of round-capped segments
+// reservoir capsules [ax, az, bx, bz, ra, rb]: union of round-capped segments.
+// The water runs from the basin below the market west-north-west through the ravine and on, meandering, to the horizon
 const CAPS = [
   [560, 200, 280, 40, 210, 230],            // the wide basin below the market
   [280, 40, -100, -110, 230, 140],          // the basin narrows into the ravine mouth
   [-100, -110, -700, -420, 140, 85],        // the long forested ravine
   [-700, -420, -1200, -660, 85, 110],       // the ravine opens west
-  [-1200, -660, -1900, -900, 110, 170],     // the far water to the distant shore
+  [-1200, -660, -1900, -900, 110, 170],     // the far water
+  [-1900, -900, -3000, -1250, 170, 230],    // the river meanders on between the far mountains
+  [-3000, -1250, -4400, -1500, 230, 320],   // ... to the horizon
+  [-4400, -1500, -6000, -1700, 320, 420],
   [420, 120, 700, -120, 90, 50],            // the north-east arm
   [250, 180, 60, 420, 100, 60],             // the southern inlet through the pasture hills
 ];
-// ridges [ax, az, bx, bz, ha, hb, width]: Gaussian crests with linearly varying height
+// ridges [ax, az, bx, bz, ha, hb, width]: Gaussian crests with linearly varying height (heights × HS)
 const RIDGES = [
   [400, 560, -350, 950, 60, 340, 260],      // the south-east spur of the massif → the ridge station
   [-350, 950, -1300, 1150, 340, 430, 300],  // the massif's main crest, west
@@ -567,11 +573,11 @@ const RIDGES = [
 ];
 const R_KNOLL = { h: 82, r: 42 };             // the rocky summit the ridge station perches on
 const WIND_DIR = (() => { const x = 0.82, y = 0.57, l = Math.hypot(x, y); return { x: x / l, y: y / l }; })();   // blows toward the east-south-east
-// apply the horizontal scale to every geographic constant (x, z and radii; heights untouched)
-for (const k in ST) { ST[k].x *= WS; ST[k].z *= WS; ST[k].r *= WS; }
-MARKET.x *= WS; MARKET.z *= WS; MARKET.r *= WS; NOTCH.x *= WS; NOTCH.z *= WS; NOTCH.r *= WS; R_KNOLL.r *= WS;
+// apply the scales to every geographic constant: x, z and radii × WS; heights × HS
+for (const k in ST) { ST[k].x *= WS; ST[k].z *= WS; ST[k].padY *= HS; }
+MARKET.padY *= HS; NOTCH.x *= WS; NOTCH.z *= WS; NOTCH.r *= WS; NOTCH.depth *= HS; R_KNOLL.r *= WS; R_KNOLL.h *= HS;   // MARKET x/z are already in metres
 for (const c of CAPS) { c[0] *= WS; c[1] *= WS; c[2] *= WS; c[3] *= WS; c[4] *= WS; c[5] *= WS; }
-for (const r of RIDGES) { r[0] *= WS; r[1] *= WS; r[2] *= WS; r[3] *= WS; r[6] *= WS; }
+for (const r of RIDGES) { r[0] *= WS; r[1] *= WS; r[2] *= WS; r[3] *= WS; r[4] *= HS; r[5] *= HS; r[6] *= WS; }
 const scaleGeo = (x, z) => [x * WS, z * WS];
 
 // ---------------------------------------------------------- reservoir shape
@@ -597,27 +603,29 @@ function ridgeH(x, z, ax, az, bx, bz, ha, hb, w) {
 }
 function farH(x, z) {
   const r = Math.hypot(x, z) + 1e-6;
-  let h = 700 * sstep(2300, 4000, r) * (0.5 + 0.9 * fbm2(x * 0.0007 + 3.3, z * 0.0007 + 0.7, 3));
+  let h = 700 * HS * sstep(1800, 3000, r) * (0.5 + 0.9 * fbm2(x * 0.0009 + 3.3, z * 0.0009 + 0.7, 3));
   h *= 1 - 0.72 * sstep(0.25, 0.9, x / r);                     // the valley opens to the east
+  h *= sstep(150, 600, reservoirD(x, z));                      // the far mountains stand back from the river, which runs on between them
   return h;
 }
 // the regional relief without the reservoir
 function hillsH(x, z) {
-  let h = 9 + 14 * (fbm2(x * 0.0021 + 3.0, z * 0.0021 + 8.0, 4) - 0.5) * 2;
-  for (let i = 0; i < RIDGES.length; i++) { const r = RIDGES[i]; h = smax(h, ridgeH(x, z, r[0], r[1], r[2], r[3], r[4], r[5], r[6]), 12); }
+  let h = (9 + 14 * (fbm2(x * 0.0021 + 3.0, z * 0.0021 + 8.0, 4) - 0.5) * 2) * HS;
+  for (let i = 0; i < RIDGES.length; i++) { const r = RIDGES[i]; h = smax(h, ridgeH(x, z, r[0], r[1], r[2], r[3], r[4], r[5], r[6]), 12 * HS); }
   const nd = Math.hypot(x - NOTCH.x, z - NOTCH.z); h -= NOTCH.depth * Math.exp(-nd * nd / (NOTCH.r * NOTCH.r));
-  h = smax(h, 82 * Math.exp(-((x - 980 * WS) ** 2 + (z - 580 * WS) ** 2) / (2 * (320 * WS) ** 2)), 12);     // the long pasture rise south of the market
-  h = smax(h, 135 * Math.exp(-((x - 1010 * WS) ** 2 + (z - 700 * WS) ** 2) / (2 * (180 * WS) ** 2)), 20); // the uncovered hillside beside the market
+  h = smax(h, 82 * HS * Math.exp(-((x - 980 * WS) ** 2 + (z - 580 * WS) ** 2) / (2 * (320 * WS) ** 2)), 12 * HS);     // the long pasture rise south of the market
+  h = smax(h, 135 * HS * Math.exp(-((x - 1010 * WS) ** 2 + (z - 700 * WS) ** 2) / (2 * (180 * WS) ** 2)), 20 * HS); // the uncovered hillside beside the market
   h += farH(x, z);
-  const rugged = (h * 0.09 + 3) * (fbm2(x * 0.0052 / WS + 1.0, z * 0.0052 / WS + 5.0, 4) - 0.5) * 2 * sstep(25, 130, h);
-  h += rugged + 6 * (fbm2(x * 0.03 / WS + 2.0, z * 0.03 / WS + 6.0, 3) - 0.5) * 2 * sstep(8, 60, h);
+  const rugged = (h * 0.09 + 3 * HS) * (fbm2(x * 0.0052 / WS + 1.0, z * 0.0052 / WS + 5.0, 4) - 0.5) * 2 * sstep(25 * HS, 130 * HS, h);
+  h += rugged + 6 * HS * (fbm2(x * 0.03 / WS + 2.0, z * 0.03 / WS + 6.0, 3) - 0.5) * 2 * sstep(8 * HS, 60 * HS, h);
   const rk = Math.hypot(x - ST.R.x, z - ST.R.z); h += R_KNOLL.h * Math.exp(-rk * rk / (R_KNOLL.r * R_KNOLL.r));
-  return Math.max(h, 1.2);
+  return Math.max(h, 1.2 * HS);
 }
 // 0 on the gentle pasture shores, 1 on the forested ravine walls
 function steepness(x, z) {
-  const pasture = sstep(430 * WS, 560 * WS, x) * sstep(40 * WS, 200 * WS, z);   // south-east of the basin
-  const east = sstep(620 * WS, 780 * WS, x) * (1 - sstep(-320 * WS, -160 * WS, z));   // the eastern shore
+  const dm = Math.hypot(x - MARKET.x, z - MARKET.z), dv = Math.hypot(x - ST.V.x, z - ST.V.z), near = 1 - sstep(180, 320, Math.min(dm, dv));   // gentle banks only near the market and the valley station
+  const pasture = sstep(MARKET.x - 30, MARKET.x + 40, x) * sstep(MARKET.z - 50, MARKET.z + 40, z) * near;
+  const east = sstep(ST.V.x + 10, ST.V.x + 80, x) * (1 - sstep(ST.V.z - 70, ST.V.z - 20, z)) * near;
   return 1 - Math.max(pasture, east);
 }
 function padModify(x, z, h) {
@@ -628,15 +636,15 @@ function padModify(x, z, h) {
 const smin = (a, b, k) => -smax(-a, -b, k);
 function terrainH(x, z, noPads = false) {
   const d = shoreD(x, z);
-  if (d <= 0) { const depth = lerp(9, 22, sstep(-30, -170, d)); return -depth * (1 - Math.exp(d / 30)); }
+  if (d <= 0) { const depth = lerp(9, 22, sstep(-30, -170, d)) * HS; return -depth * (1 - Math.exp(d / 30)); }
   const st = steepness(x, z), hill = hillsH(x, z);
-  const shore = lerp(1.2, 4.5, st);
+  const shore = lerp(1.2, 4.5, st) * HS;
   // the land rises from the waterline at a wall slope until it meets the regional relief:
   // gentle pasture banks, 35° forested ravine walls, and the spur's steep rock
   const dS = Math.hypot(x - ST.S.x, z - ST.S.z), slope = (lerp(0.22, 0.7, st) + 1.4 * Math.exp(-dS * dS / (95 * 95))) * (1 + 0.9 * sstep(120, 320, d));
-  let h = smin(hill, shore + slope * d, 10);
+  let h = smin(hill, shore + slope * d, 10 * HS);
   h += 0.3 * (vnoise(x * 0.04 + 1.3, 0.5, z * 0.04 + 7.7) - 0.5) * 2 * sstep(1.0, 9, d);
-  h = Math.max(h, 0.35 + 0.12 * d);
+  h = Math.max(h, 0.25 + 0.12 * d);
   if (!noPads) h = padModify(x, z, h);
   return h;
 }
@@ -645,30 +653,32 @@ function terrainSlope(x, z, e = 2) { const hx = terrainH(x + e, z) - terrainH(x 
 // ------------------------------------------------------------- surface zones
 // 0 = open pasture (no trees), 1 = closed cloud forest
 function forestW(x, z, h, slope) {
-  const pasture = sstep(440 * WS, 560 * WS, x) * sstep(60 * WS, 230 * WS, z);
-  const east = sstep(640 * WS, 800 * WS, x) * (1 - sstep(-300 * WS, -120 * WS, z));
-  let f = (1 - Math.max(pasture, east)) * sstep(2.5, 7, h);
-  f *= 1 - 0.85 * sstep(420, 520, h);                                            // above the tree line only moss and rock
-  f *= 1 - sstep(0.95, 1.5, slope);                                              // bare cliffs
-  const nd = Math.hypot(x - NOTCH.x, z - NOTCH.z); f *= sstep(18, 42, nd);        // the notch is kept open
-  for (const k of ['V', 'S', 'R']) { const s = ST[k]; f *= sstep(s.r + 6, s.r + 30, Math.hypot(x - s.x, z - s.z)); }
-  { const d = Math.hypot(x - MARKET.x, z - MARKET.z); f *= sstep(MARKET.r + 10, MARKET.r + 40, d); }
-  f *= sstep(0.35, 0.6, fbm2(x * 0.0045 / WS + 7.7, z * 0.0045 / WS + 2.2, 3) + 0.25 * sstep(0, 40, h));
+  // open pasture only around the market and the valley station's eastern shore; forest everywhere else, out to the horizon
+  const dM = Math.hypot(x - MARKET.x, z - MARKET.z), dV = Math.hypot(x - ST.V.x, z - ST.V.z);
+  const pasture = sstep(MARKET.x - 30, MARKET.x + 40, x) * sstep(MARKET.z - 50, MARKET.z + 40, z) * (1 - sstep(170, 300, dM));
+  const east = sstep(ST.V.x + 20, ST.V.x + 90, x) * (1 - sstep(ST.V.z - 70, ST.V.z - 20, z)) * (1 - sstep(120, 260, dV));
+  let f = (1 - Math.max(pasture, east)) * sstep(1.5, 4, h);
+  f *= 1 - 0.9 * sstep(430, 560, h);                                                // above the tree line only moss and rock
+  f *= 1 - sstep(1.25, 1.8, slope);                                                // bare cliffs
+  const nd = Math.hypot(x - NOTCH.x, z - NOTCH.z); f *= sstep(12, 28, nd);          // the notch is kept open
+  for (const k of ['V', 'S', 'R']) { const s = ST[k]; f *= sstep(s.r + 8, s.r + 40, Math.hypot(x - s.x, z - s.z)); }
+  { const d = Math.hypot(x - MARKET.x, z - MARKET.z); f *= sstep(MARKET.r + 10, MARKET.r + 30, d); }
+  f *= sstep(0.15, 0.4, fbm2(x * 0.0045 / WS + 7.7, z * 0.0045 / WS + 2.2, 3) * 0.7 + 0.35);
   return clamp(f, 0, 1);
 }
 // grass warmth: 1 = warm pasture grass, 0 = cool shadowed moss
 function grassWarm(x, z, h) {
   const dm = Math.hypot(x - MARKET.x, z - MARKET.z);
-  let w = 1 - sstep(120 * WS, 520 * WS, dm);
-  w = Math.max(w, sstep(500 * WS, 760 * WS, x) * sstep(150 * WS, 320 * WS, z));
-  w *= 1 - sstep(120, 330, h);
+  let w = 1 - sstep(60, 200, dm);
+  w = Math.max(w, sstep(60, 160, x) * sstep(20, 70, z) * (1 - sstep(180, 320, dm)));
+  w *= 1 - sstep(120 * HS, 330 * HS, h);
   return clamp(w, 0, 1);
 }
 // wind exposure: 0 in the sheltered ravine bottom, 1 on the exposed crest
-const exposure = (x, z, h) => clamp(sstep(30, 320, h), 0, 1);
+const exposure = (x, z, h) => clamp(sstep(30 * HS, 320 * HS, h), 0, 1);
 
 // ===========================================================================
-//  PATHS — everything that moves follows a closed curve fitted to the 96 s
+//  PATHS — everything that moves follows a closed curve fitted to the 60 s
 //  master loop. The wind episode; the cinematic take (closed Catmull-Rom,
 //  arc-length table with a periodic speed profile, keyed lens and gaze); the
 //  haul-rope circuit (station bullwheels + lattice towers, parabolic sag,
@@ -712,60 +722,54 @@ function curveKappa(curve, s, len, window = 16) {
 }
 
 // ------------------------------------------------------------------ the take
-// [x, z, 'a' absolute height | 'g' above ground, height]
+// [x, z, 'a' absolute height | 'g' above ground, height]. Points are in design units (× WS), heights in metres.
+// A short closed take (~1.6 km): leave the valley station along the span to the spur, low over the water, out to the
+// ravine mouth where the cable climbs away into the cloud bank, turn over the ravine's south shore and come back
+// over the pasture hillside beside the market to the platform. The ridge and spur stations stay in view, not under the lens.
+const SV = ST.V, SS = ST.S, SR = ST.R;
 const FLIGHT_PTS = [
   [768.7, 374.8, 'a', 24.3],   // the platform view: on the concourse behind the bullwheel, along the span to the spur
   [738.9, 347.5, 'a', 30.5],   // lifting off past the bullwheel, above the turning cabins
-  [683, 302, 'a', 22.0],
-  [590, 224.7, 'a', 16.0],
-  [430, 128, 'a', 12.0],
-  [200, 40, 'a', 10.0],
-  [-20, -120, 'a', 10.5],
-  [-60, -200, 'a', 12.0],  // the framing beat: a cabin out of the cloud, its reflection below
-  [-110, -250, 'a', 15.0],
-  [-160, -225, 'a', 40],
-  [-225, -120, 'a', 95],
-  [-290, 50, 'a', 150],    // passing under the climbing cable
-  [-450, 250, 'a', 222],   // the notch, 60 m west of the cable
-  [-420, 680, 'a', 388],   // approaching the ridge station from the north-west
-  [-385, 800, 'a', 394],   // over its west shoulder
-  [-340, 890, 'a', 398],   // behind it
-  [-270, 880, 'a', 396],
-  [-230, 800, 'a', 396],   // east of it, over the descending cable
-  [-360, 640, 'a', 400],   // back west, over the climbing cable
-  [-430, 450, 'a', 370],
-  [-470, 200, 'a', 305],
-  [-495, -50, 'a', 245],
-  [-480, -260, 'a', 205],
-  [-420, -430, 'a', 186],  // beside the spur station
-  [-330, -510, 'a', 180],  // behind it
-  [-240, -470, 'a', 176],
-  [-150, -330, 'a', 170],
-  [200, 0, 'a', 122],
-  [560, 250, 'a', 118],
-  [830, 470, 'a', 92],
-  [812, 430, 'a', 68],
-  [801.7, 397.4, 'a', 36],
-].map(([x, z, m, h]) => [x * WS, z * WS, m, h]);
-const LENS_KEYS = [[0, 46], [0.04, 50], [0.09, 54], [0.12, 46], [0.19, 46], [0.23, 54], [0.30, 58], [0.38, 50], [0.44, 54], [0.50, 56], [0.56, 58], [0.66, 52], [0.70, 46], [0.74, 52], [0.80, 58], [0.88, 56], [0.93, 48], [1, 46]];
-const GAZE_KEYS = [[0, [0, 1, 0]], [0.03, [0, 1, 0]], [0.08, [0, 2, 0]], [0.11, [-4, 22, 5]], [0.15, [-4, 22, 5]], [0.17, [-4, -24, 5]], [0.20, [0, 4, 0]], [0.26, [-20, 6, 10]], [0.33, [10, -2, 0]], [0.38, [25, -10, 0]], [0.42, [0, -16, 0]], [0.46, [-25, -12, -10]], [0.52, [0, -6, 0]], [0.58, [-10, -12, -20]], [0.64, [0, -6, 0]], [0.70, [15, -12, 25]], [0.74, [0, -4, 0]], [0.80, [0, -2, 0]], [0.86, [20, -8, 0]], [0.90, [12, -2, -4]], [0.93, [8, 22, -4]], [0.96, [2, 34, 0]], [0.985, [0, 14, 0]], [1, [0, 1, 0]]];
-const SPEED_KEYS = [[0, 0.45], [0.03, 0.65], [0.07, 1.0], [0.11, 1.0], [0.12, 0.4], [0.19, 0.4], [0.22, 0.85], [0.30, 0.95], [0.37, 0.8], [0.42, 0.6], [0.50, 0.55], [0.54, 0.9], [0.60, 1.05], [0.74, 1.1], [0.90, 1.0], [0.93, 0.6], [0.97, 0.45], [1, 0.45]];
+  [683, 302, 'a', 24.0],
+  [590, 224.7, 'a', 22.0],     // a few metres below the climbing cable, the cabins large in the lens
+  [430, 128, 'a', 30.0],
+  [200, 40, 'a', 36.0],
+  [-20, -120, 'a', 40.0],      // low in the ravine mouth: the cable climbing away toward the cloud bank at the spur
+  [-100, -150, 'a', 44.0],     // the turn, over the ravine's south shore
+  [-80, -50, 'a', 48.0],
+  [-20, 60, 'a', 44.0],
+  [120, 170, 'a', 40.0],
+  [700, 460, 'g', 36.0],       // in over the pasture beside the market, south of the ridge→valley cable
+  [801.7, 397.4, 'g', 12.0],   // down to the platform
+];
+const LENS_KEYS = [[0, 44], [0.04, 46], [0.09, 50], [0.16, 42], [0.30, 40], [0.36, 46], [0.42, 52], [0.50, 48], [0.58, 52], [0.66, 50], [0.76, 52], [0.86, 46], [0.92, 50], [0.96, 44], [1, 44]];
+// gaze keys: [phase, [yaw offset (rad, + = right), pitch offset (rad), weight of the cable focus]] — the camera stays level:
+// it only turns left/right and tilts up/down (never more than ~34°), and keeps the haul rope near the frame centre
+const GAZE_KEYS = [[0, [0, 0.02, 0.8]], [0.03, [0, 0.0, 0.8]], [0.08, [0, 0.04, 0.75]], [0.16, [0.05, 0.08, 0.7]], [0.24, [0, 0, 0.8]], [0.34, [0.1, 0.08, 0.6]], [0.40, [0.25, -0.05, 0.4]], [0.46, [0, 0, 0.6]], [0.54, [-0.2, 0, 0.5]], [0.62, [0, -0.05, 0.6]], [0.70, [0.15, -0.05, 0.5]], [0.80, [0, -0.05, 0.6]], [0.88, [0.2, -0.1, 0.5]], [0.93, [0, 0, 0.6]], [0.96, [0, 0.05, 0.7]], [1, [0, 0.02, 0.8]]];
+const SPEED_KEYS = [[0, 0.7], [0.03, 0.8], [0.07, 1.0], [0.11, 0.95], [0.34, 0.9], [0.40, 0.65], [0.46, 0.9], [0.58, 1.0], [0.80, 1.0], [0.90, 0.95], [0.95, 0.8], [0.98, 0.75], [1, 0.7]];
 const FLIGHT = (() => {
-  const pts = FLIGHT_PTS.map(([x, z, m, h]) => new THREE.Vector3(x, m === 'g' ? terrainH(x, z) + h : h, z));
+  const pts = FLIGHT_PTS.map(([x0, z0, m, h, abs]) => { const x = abs ? x0 : x0 * WS, z = abs ? z0 : z0 * WS; return new THREE.Vector3(x, m === 'g' ? Math.max(terrainH(x, z), WATER_Y) + h : h, z); });
   const curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal', 0.5); curve.arcLengthDivisions = 12000;
   const len = curve.getLength(), tab = speedTable(len, 4096, SPEED_KEYS);
   const pathXZ = []; for (let i = 0; i < 1200; i++) pathXZ.push(curve.getPointAt(i / 1200));
-  const lowXZ = pathXZ.filter(p => p.y - Math.max(terrainH(p.x, p.z), 0) < 42).map(p => ({ x: p.x, z: p.z }));
+  const lowXZ = pathXZ.filter(p => p.y - Math.max(terrainH(p.x, p.z), 0) < 42 * HS).map(p => ({ x: p.x, z: p.z }));
   const lowNear = (x, z, r) => { for (let i = 0; i < lowXZ.length; i++) { const dx = lowXZ[i].x - x, dz = lowXZ[i].z - z; if (dx * dx + dz * dz < r * r) return true; } return false; };
-  const _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _gaze = new THREE.Vector3();
+  const _gaze = new THREE.Vector3();
   function sample(ph, out = {}) {
     const s = phaseToS(tab, ph), p = curve.getPointAt(s), tg = curve.getTangentAt(s).normalize();
-    const kappa = curveKappa(curve, s, len, 16), speed = tab.base * keyScalar(SPEED_KEYS, s);
-    const roll = -clamp(speed * speed * kappa / 9.81, -0.7, 0.7) * 0.5 * sstep(0.0, 0.05, ph) * (1 - sstep(0.95, 1.0, ph));   // level on the platform at the seam
+    const speed = tab.base * keyScalar(SPEED_KEYS, s);
     keyVec3(GAZE_KEYS, s, _gaze);
-    out.p = p; out.tg = tg; out.roll = roll; out.fov = keyScalar(LENS_KEYS, s); out.gaze = _gaze; out.speed = speed; out.s = s; out.kappa = kappa; return out;
+    out.p = p; out.tg = tg; out.roll = 0; out.fov = keyScalar(LENS_KEYS, s); out.gaze = _gaze; out.speed = speed; out.s = s; return out;
   }
-  return { curve, len, pts, sample, pathXZ, lowXZ, lowNear, speedBase: tab.base, tab };
+  // the point of the haul rope nearest to a probe in front of the camera: the cable stays the subject of the shot
+  const _probe = new THREE.Vector3();
+  function ropeFocus(P, heading, speed, out) {
+    _probe.set(P.x + Math.sin(heading) * (40 + speed * 1.6), P.y + 6, P.z + Math.cos(heading) * (40 + speed * 1.6));
+    let dm = 1e9, best = null; const rp = ROPE.pts;
+    for (let i = 0; i < rp.length; i += 2) { const q = rp[i], dd = (q.x - _probe.x) ** 2 + (q.z - _probe.z) ** 2 + 0.3 * (q.y - _probe.y) ** 2; if (dd < dm) { dm = dd; best = q; } }
+    return out.copy(best);
+  }
+  return { curve, len, pts, sample, pathXZ, lowXZ, lowNear, speedBase: tab.base, tab, ropeFocus };
 })();
 
 // ------------------------------------------------------------ the haul rope
@@ -774,9 +778,9 @@ const TOWERS = [
   { x: 430, z: 148, top: 44 }, { x: 110, z: -80, top: 52 }, { x: -120, z: -200, top: 100 },         // valley → spur
   { x: -375, z: 100, top: 190 }, { x: -365, z: 330, top: 240 }, { x: -359, z: 560, top: 300 },     // spur → ridge
   { x: -110, z: 719, top: 300 }, { x: 130, z: 618, top: 215 }, { x: 370, z: 517, top: 135 }, { x: 577, z: 429, top: 68 },   // ridge → valley
-].map(t => ({ x: t.x * WS, z: t.z * WS, top: t.top }));
+].map(t => ({ x: t.x * WS, z: t.z * WS, top: t.top * HS }));
 const WHEEL_R = 3.2, WHEEL_UP = 14, DECK_UP = 8.6, HANGER = 2.6, CABIN_H = 2.5, CABIN_W = 2.6, CABIN_D = 3.6;   // bullwheel 14 m above the pad, boarding deck 8.6 m up
-const CABIN_N = 96, CABIN_K = 15;                 // 96 cabins, 15 spacings pass per loop → the set repeats every 96 s (3-colour pattern divides 15)
+const CABIN_N = 96, CABIN_K = 9;                  // 96 cabins ~33 m apart, 9 spacings pass per loop → the set repeats every loop (3-colour pattern divides 9)
 const ROPE = (() => {
   const st = [ST.V, ST.S, ST.R], tw = [TOWERS.slice(0, 3), TOWERS.slice(3, 6), TOWERS.slice(6, 10)], prevIdx = [9, 2, 5];
   const wheel = st.map(s => new THREE.Vector3(s.x, s.padY + WHEEL_UP, s.z));
@@ -882,7 +886,7 @@ const ROPE = (() => {
 })();
 
 // ---------------------------------------------------------------- the ferry
-const BOAT_PTS = [[688, 318], [645, 245], [590, 140], [545, 60], [560, 0], [588, -24], [545, -10], [520, 60], [480, 120], [520, 200], [600, 270], [672, 305]].map(p => [p[0] * WS, p[1] * WS]);
+const BOAT_PTS = [[688, 318], [645, 245], [590, 140], [545, 60], [560, 0], [588, -24], [545, -10], [520, 60], [480, 120], [520, 200], [600, 270], [672, 305]].map(p => [(583 + (p[0] - 583) * 0.62) * WS, (140 + (p[1] - 140) * 0.62) * WS]);   // one lap of the basin per loop
 const BOAT = (() => {
   const curve = new THREE.CatmullRomCurve3(BOAT_PTS.map(p => new THREE.Vector3(p[0], 0, p[1])), true, 'centripetal', 0.5); curve.arcLengthDivisions = 2000;
   const len = curve.getLength(), speed = len / LOOP;                   // one lap per loop
@@ -897,8 +901,8 @@ const BOAT = (() => {
 // closed concourse circuits around the market square's fountain, outside the boarding threshold;
 // laps per loop; the stride is fitted so whole cycles fit
 const WALKERS = [
-  { name: 'porter', ring: { r: 11.2, n: 8, phase: 0.2 }, laps: 1, strideNominal: 0.68, carry: 'basket' },
-  { name: 'vendor', ring: { r: 6.1, n: 6, phase: 0.6 }, laps: 2, strideNominal: 0.6, carry: 'none' },
+  { name: 'porter', ring: { r: 8.0, n: 8, phase: 0.2 }, laps: 1, strideNominal: 0.68, carry: 'basket' },
+  { name: 'vendor', ring: { r: 5.3, n: 6, phase: 0.6 }, laps: 1, strideNominal: 0.6, carry: 'none' },
 ];
 function buildWalker(w) {
   const pts = []; for (let i = 0; i < w.ring.n; i++) { const a = w.ring.phase + TAU * i / w.ring.n, r = w.ring.r * (1 + 0.08 * Math.sin(i * 2.3 + 1)); pts.push([MARKET.x + Math.cos(a) * r, MARKET.z + Math.sin(a) * r]); }
@@ -915,8 +919,8 @@ const WALK = WALKERS.map(buildWalker);
 
 // --------------------------------------------------------------- the raptors
 const BIRDS = (() => {
-  const cx = -400 * WS, cz = -540 * WS, R = 92 * WS, laps = 2, speed = TAU * R * laps / LOOP;
-  const list = [{ r: R, h: 192, ph: 0, sc: 1.0 }, { r: R + 8, h: 203, ph: 0.33, sc: 0.94 }, { r: R - 8, h: 215, ph: 0.66, sc: 1.06 }];
+  const cx = ST.S.x, cz = ST.S.z, R = 92, laps = 1, speed = TAU * R * laps / LOOP;
+  const list = [{ r: R, h: ST.S.padY + 42, ph: 0, sc: 1.0 }, { r: R + 8, h: ST.S.padY + 53, ph: 0.33, sc: 0.94 }, { r: R - 8, h: ST.S.padY + 65, ph: 0.66, sc: 1.06 }];
   function sample(b, t, out = {}) { const a = TAU * (t / LOOP * laps + b.ph), p = out.p || (out.p = new THREE.Vector3()); p.set(cx + Math.cos(a) * b.r, b.h + 3 * Math.sin(wfreq(8) * t + b.ph * 7), cz + Math.sin(a) * b.r); out.p = p; out.heading = a + Math.PI; out.a = a; return out; }
   function flapEnv(b, t) { const c = Math.sin(wfreq(6) * t + b.ph * 9); return sstep(0.55, 0.9, c); }       // bursts of flapping
   const flapFreq = 1.5;                                                                                    // 144 beats per loop
@@ -946,9 +950,9 @@ const SHARED_U = {
   uSunDir: { value: SUN_DIR }, tNoise: { value: TX.noise }, uCloudDrift: { value: new THREE.Vector2() }, uWaterY: { value: WATER_Y },
 };
 
-const TERR_MIN = new THREE.Vector2(-1700, -1000), TERR_SIZE = new THREE.Vector2(2800, 2000);   // the water's terrain texture window
+const TERR_MIN = new THREE.Vector2(-4800, -1500), TERR_SIZE = new THREE.Vector2(6000, 3000);   // the water's terrain texture window, covering the river to the horizon
 const terrTex = (() => {
-  const W = 1024, H = 732, data = new Uint16Array(W * H);
+  const W = 1536, H = 768, data = new Uint16Array(W * H);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) data[y * W + x] = THREE.DataUtils.toHalfFloat(terrainH(TERR_MIN.x + (x + 0.5) / W * TERR_SIZE.x, TERR_MIN.y + (y + 0.5) / H * TERR_SIZE.y));
   const t = new THREE.DataTexture(data, W, H, THREE.RedFormat, THREE.HalfFloatType);
   t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.needsUpdate = true; return t;
@@ -957,17 +961,17 @@ const terrTex = (() => {
 const terrainMat = new THREE.MeshStandardMaterial({ roughness: 0.95, metalness: 0, normalMap: TX.moss.normalMap, normalScale: new THREE.Vector2(1, 1) });
 terrainMat.onBeforeCompile = (sh) => {
   fogUniforms(sh);
-  Object.assign(sh.uniforms, { tMoss: { value: TX.moss.map }, tPasture: { value: TX.pasture.map }, tRock: { value: TX.rock.map }, tMossN: { value: TX.moss.normalMap }, tPastureN: { value: TX.pasture.normalMap }, tRockN: { value: TX.rock.normalMap } }, SHARED_U);
+  Object.assign(sh.uniforms, { tMoss: { value: TX.moss.map }, tPasture: { value: TX.pasture.map }, tRock: { value: TX.rock.map }, tMossN: { value: TX.moss.normalMap }, tPastureN: { value: TX.pasture.normalMap }, tRockN: { value: TX.rock.normalMap }, tCanopy: { value: TX.canopy.map }, tCanopyN: { value: TX.canopy.normalMap } }, SHARED_U);
   sh.vertexShader = sh.vertexShader
     .replace('#include <common>', `#include <common>
-      attribute vec4 aSplat; attribute float aAO; varying vec4 vSplat; varying float vAO; varying vec3 vWPos; varying vec3 vFogW;`)
+      attribute vec4 aSplat; attribute float aAO; attribute float aForest; varying vec4 vSplat; varying float vAO; varying float vForest; varying vec3 vWPos; varying vec3 vFogW;`)
     .replace('#include <project_vertex>', `#include <project_vertex>
-      vSplat = aSplat; vAO = aAO; vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+      vSplat = aSplat; vAO = aAO; vForest = aForest; vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
       ${FOG_VERT}`);
   sh.fragmentShader = sh.fragmentShader
     .replace('#include <common>', `#include <common>
-      uniform sampler2D tMoss, tPasture, tRock, tMossN, tPastureN, tRockN; uniform float uWaterY;
-      varying vec4 vSplat; varying float vAO; varying vec3 vWPos;
+      uniform sampler2D tMoss, tPasture, tRock, tMossN, tPastureN, tRockN, tCanopy, tCanopyN; uniform float uWaterY;
+      varying vec4 vSplat; varying float vAO; varying float vForest; varying vec3 vWPos;
       ${SHADOW_GLSL}`)
     .replace('#include <map_fragment>', `
       vec2 puv = vWPos.xz;
@@ -975,6 +979,9 @@ terrainMat.onBeforeCompile = (sh) => {
       vec3 cR = texture2D(tRock, vec2(puv.x * 0.06 + puv.y * 0.02, vWPos.y * 0.09)).rgb;
       vec4 s = vSplat / max(dot(vSplat, vec4(1.0)), 1e-4);
       vec3 col = cM * s.x + cP * s.y + cR * s.w + cM * 0.55 * s.z;
+      // closed forest: the ground reads as canopy from a distance (the crowns close over it), mossy litter up close
+      vec3 cCan = texture2D(tCanopy, puv * 0.07).rgb * (0.62 + 0.55 * texture2D(tNoise, puv * 0.013 + 0.5).r);
+      col = mix(col, cCan, vForest * 0.85);
       float big = texture2D(tNoise, puv * 0.0022).a;
       col *= mix(vec3(0.80, 0.92, 0.84), vec3(1.12, 1.04, 0.86), big * s.y + 0.3);     // cool moss ↔ warm patches
       col *= mix(vec3(1.0), vec3(0.80, 0.84, 0.74) + vec3(0.46, 0.40, 0.26) * texture2D(tNoise, puv * 0.012 + 0.3).g, s.y);   // meadow patches, ~80 m
@@ -982,18 +989,20 @@ terrainMat.onBeforeCompile = (sh) => {
       col *= 0.90 + 0.20 * texture2D(tNoise, puv * 0.75).b;
       // rock faces: broad strata, broken patches, cooler and darker high on the ridge
       float strata = 0.5 + 0.5 * sin(vWPos.y * 0.26 + texture2D(tNoise, puv * 0.01).r * 6.0);
-      col *= mix(vec3(1.0), vec3(0.80, 0.78, 0.76) + vec3(0.32, 0.30, 0.26) * strata, s.w * 0.7);
-      col *= mix(vec3(1.0), vec3(0.72, 0.74, 0.72) + vec3(0.56, 0.54, 0.48) * texture2D(tNoise, puv * 0.03).g, s.w * 0.65);
-      col *= mix(vec3(1.0), vec3(0.74, 0.80, 0.76), s.w * smoothstep(180.0, 380.0, vWPos.y) * 0.55);
+      float rf = s.w * (1.0 - vForest) * 0.9;
+      col *= mix(vec3(1.0), vec3(0.86, 0.85, 0.83) + vec3(0.26, 0.24, 0.21) * strata, rf * 0.5);
+      col *= mix(vec3(1.0), vec3(0.80, 0.81, 0.80) + vec3(0.44, 0.42, 0.38) * texture2D(tNoise, puv * 0.03).g, rf * 0.45);
+      col *= mix(vec3(1.0), vec3(0.74, 0.80, 0.76), rf * smoothstep(180.0 * 0.55, 380.0 * 0.55, vWPos.y) * 0.55);
       diffuseColor.rgb *= col * vAO;
       float wet = 1.0 - smoothstep(0.0, 0.5, vWPos.y - uWaterY);
-      diffuseColor.rgb *= mix(1.0, 0.5, wet * (s.z + 0.3));`)
+      diffuseColor.rgb *= mix(vec3(1.0), vec3(0.34, 0.38, 0.33), wet * (s.z * 0.6 + 0.7));   // dark, soaked bed under the water`)
     .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
       roughnessFactor *= 1.0 - 0.6 * (1.0 - smoothstep(0.0, 0.3, vWPos.y - uWaterY));`)
     .replace('#include <normal_fragment_maps>', `
       vec3 nM = texture2D(tMossN, puv * 0.11).xyz * 2.0 - 1.0, nP = texture2D(tPastureN, puv * 0.09 + 0.3).xyz * 2.0 - 1.0;
       vec3 nR = texture2D(tRockN, vec2(puv.x * 0.06 + puv.y * 0.02, vWPos.y * 0.09)).xyz * 2.0 - 1.0;
-      vec3 dn = normalize(nM * s.x + nP * s.y + nM * s.z * 0.5 + nR * s.w * 1.8 + vec3(0.0, 0.0, 0.35));
+      vec3 nCan = texture2D(tCanopyN, puv * 0.07).xyz * 2.0 - 1.0;
+      vec3 dn = normalize(nM * s.x + nP * s.y + nM * s.z * 0.5 + nR * s.w * 1.8 + nCan * vForest * 2.2 + vec3(0.0, 0.0, 0.35));
       normal = normalize(tbn * dn);
       nonPerturbedNormal = normal;`)
     .replace('#include <opaque_fragment>', `
@@ -1015,22 +1024,23 @@ let terrainMesh;
 const TERR = { NX: 560, NZ: 420, L: 4200, inX: 1000, inZ: 800, qin: 0.7 };
 function buildTerrain() {
   const { NX, NZ, L, inX, inZ, qin } = TERR, nv = (NX + 1) * (NZ + 1);
-  const pos = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), spl = new Float32Array(nv * 4), ao = new Float32Array(nv);
+  const pos = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), spl = new Float32Array(nv * 4), ao = new Float32Array(nv), fro = new Float32Array(nv);
   let k = 0;
   for (let j = 0; j <= NZ; j++) { const z = axisMap(j / NZ, inZ, L, qin); for (let i = 0; i <= NX; i++, k++) { const x = axisMap(i / NX, inX, L, qin); pos[k * 3] = x; pos[k * 3 + 1] = terrainH(x, z); pos[k * 3 + 2] = z; uv[k * 2] = x * 0.1; uv[k * 2 + 1] = z * 0.1; } }
   const idx = new Uint32Array(NX * NZ * 6); let q = 0;
   for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const a = j * (NX + 1) + i, b = a + 1, c = a + NX + 1, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-  g.setAttribute('aSplat', new THREE.BufferAttribute(spl, 4)); g.setAttribute('aAO', new THREE.BufferAttribute(ao, 1));
+  g.setAttribute('aSplat', new THREE.BufferAttribute(spl, 4)); g.setAttribute('aAO', new THREE.BufferAttribute(ao, 1)); g.setAttribute('aForest', new THREE.BufferAttribute(fro, 1));
   g.setIndex(new THREE.BufferAttribute(idx, 1)); g.computeVertexNormals();
   const n = g.attributes.normal;
   for (let v = 0; v < nv; v++) {
     const x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2], ny = n.getY(v), slope = Math.sqrt(Math.max(0, 1 - ny * ny)) / Math.max(ny, 0.05);
-    const d = shoreD(x, z), warm = grassWarm(x, z, y);
-    const rock = clamp(sstep(0.7, 1.25, slope) + sstep(360, 440, y) * 0.6 * (1 - warm), 0, 1);
+    const d = shoreD(x, z), warm = grassWarm(x, z, y), fw = d > 0 ? forestW(x, z, y, slope) : 0;
+    fro[v] = fw;
+    let rock = clamp(sstep(0.7, 1.25, slope) + sstep(360 * HS, 440 * HS, y) * 0.6 * (1 - warm), 0, 1); rock *= 1 - 0.75 * fw;
     const earth = (1 - sstep(1.5, 5, Math.abs(y - WATER_Y - 0.9))) * 0.8 + 0.5 * (1 - sstep(MARKET.r * 1.2, MARKET.r * 2.2, Math.hypot(x - MARKET.x, z - MARKET.z)));
-    const s = [clamp((1 - warm) * (1 - rock), 0, 1), clamp(warm * (1 - rock), 0, 1), clamp(earth * (1 - rock) * 0.9, 0, 1), rock];
+    const s = [clamp((1 - warm) * (1 - rock), 0, 1), clamp(warm * (1 - rock) * (1 - fw), 0, 1), clamp(earth * (1 - rock) * 0.9, 0, 1), rock];
     const sum = s[0] + s[1] + s[2] + s[3]; for (let c = 0; c < 4; c++) spl[v * 4 + c] = s[c] / sum;
     ao[v] = 1 - 0.25 * sstep(0.6, 1.8, slope) - 0.12 * s[2] * (1 - sstep(0.3, 1.2, Math.abs(y - WATER_Y)));
   }
@@ -1066,7 +1076,7 @@ function buildRocks() {
   while (spots.length < 260 && tries++ < 60000) {
     const pick = rnd(); let x, z;
     if (pick < 0.45) { x = ST.S.x + rr(-120, 120); z = ST.S.z + rr(-260, 120); } else if (pick < 0.75) { x = ST.R.x + rr(-90, 90); z = ST.R.z + rr(-90, 90); } else { x = NOTCH.x + rr(-120, 120); z = NOTCH.z + rr(-70, 70); }
-    if (shoreD(x, z) < 2) continue; const sl = terrainSlope(x, z, 3); if (sl < 0.45) continue;
+    if (shoreD(x, z) < 2) continue; let sl = terrainSlope(x, z, 3); if (sl < 0.45) continue;
     for (const k of ['S', 'R']) if (Math.hypot(x - ST[k].x, z - ST[k].z) < ST[k].r + 2) { sl = 0; break; }
     if (sl === 0) continue;
     add(x, z, rr(1.5, 6), rr(0.35, 0.7));
@@ -1105,7 +1115,7 @@ const WAVES = [[48, -0.35, 0.13, 8], [30, 0.2, 0.08, 12], [18, 0.55, 0.05, 16]].
   return { k, cx: Math.cos(th), sz: Math.sin(th), A, w: wfreq(n) };
 });
 const MAX_ETA = WAVES.reduce((s, w) => s + w.A, 0);           // 0.26 m bound
-const BAND = { x0: -1900, x1: 2300, w: 760 };                   // the gust front travels downwind once per loop
+const BAND = { x0: -1900, x1: 2300, w: 760 };                  // the gust front travels downwind once per loop
 const bandPos = t => lerp(BAND.x0, BAND.x1, wrapPhase(t));
 
 const texMat = new THREE.Matrix4(), clipPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -1122,7 +1132,7 @@ const waterU = {
   uDebug: { value: 0 },
 };
 let waterMesh;
-const WATER = { NX: 300, NZ: 220, L: 3600, inX: 1000, inZ: 760, qin: 0.7 };
+const WATER = { NX: 300, NZ: 220, L: 5200, inX: 1000, inZ: 760, qin: 0.7 };
 function buildWater() {
   const { NX, NZ, L, inX, inZ, qin } = WATER, nv = (NX + 1) * (NZ + 1);
   const pos = new Float32Array(nv * 3), uv = new Float32Array(nv * 2);
@@ -1189,33 +1199,34 @@ function buildWater() {
         float wake = ferryWake(vWPos.xz, depth);
         float over = texture2D(tOver, (vWPos.xz - uOverMin) / uOverSize).r;`)
       .replace('#include <normal_fragment_maps>', `
-        vec2 uv1 = vWPos.xz * 0.07 + vec2(uTime * 2.0 / 96.0, 0.0);
-        vec2 uv2 = vWPos.xz * 0.13 - vec2(uTime / 96.0, uTime / 96.0);
+        vec2 uv1 = vWPos.xz * 0.07 + vec2(uTime * 2.0 / ${LOOP}.0, 0.0);
+        vec2 uv2 = vWPos.xz * 0.13 - vec2(uTime / ${LOOP}.0, uTime / ${LOOP}.0);
         vec3 rn = texture2D(normalMap, uv1).xyz * 2.0 - 1.0 + (texture2D(normalMap, uv2).xyz * 2.0 - 1.0) * 0.6;
         float chop = 0.10 + 0.6 * vBand;
         vec2 slope = rn.xy * chop * (0.35 + 0.65 * smoothstep(0.0, 0.3, depth));
-        vec3 rn3 = texture2D(normalMap, vWPos.xz * 0.021 + vec2(uTime / 96.0 * 0.6, -uTime / 96.0 * 0.4)).xyz * 2.0 - 1.0;   // broad undulations, ~50 m
+        vec3 rn3 = texture2D(normalMap, vWPos.xz * 0.021 + vec2(uTime / ${LOOP}.0, -uTime / ${LOOP}.0)).xyz * 2.0 - 1.0;   // broad undulations, ~50 m
         slope += rn3.xy * (0.12 + 0.5 * vBand);
         vec2 wk = vec2(texture2D(tNoise, vWPos.xz * 0.9 + uTime * 0.03).g, texture2D(tNoise, vWPos.xz * 0.9 - uTime * 0.03).b) - 0.5;
         slope += wk * 0.9 * clamp(wake, 0.0, 1.0);
-        vec3 dn = normalize(vec3(-(vSlope.x + slope.x) * 1.2, 1.0, -(vSlope.y + slope.y) * 1.2));
+        vec3 dn = normalize(vec3(-(vSlope.x + slope.x) * 1.2, -(vSlope.y + slope.y) * 1.2, 1.0));   // tangent-space: z is up
         normal = normalize(tbn * dn);
         nonPerturbedNormal = normal;`)
       .replace('#include <opaque_fragment>', `
-        float fn = texture2D(tNoise, vec2(vWPos.x * 0.06 + uTime * 3.0 / 96.0, vWPos.z * 0.11)).r;
-        float fn2 = texture2D(tNoise, vec2(vWPos.x * 0.012 + uTime / 96.0, vWPos.z * 0.09)).g;
-        float lap = sin(depth * 1.047 - uTime * 6.2831853 / 16.0);                     // lapping lines 6 m apart, 6 per loop
+        float fn = texture2D(tNoise, vec2(vWPos.x * 0.06 + uTime * 3.0 / ${LOOP}.0, vWPos.z * 0.11)).r;
+        float fn2 = texture2D(tNoise, vec2(vWPos.x * 0.012 + uTime / ${LOOP}.0, vWPos.z * 0.09)).g;
+        float lap = sin(depth * 1.047 - uTime * ${wfreq(6).toFixed(6)});                     // lapping lines 6 m apart, 6 per loop
         float shoreFoam = smoothstep(0.55, 0.06, depth) * smoothstep(-0.1, 0.85, lap) * (0.55 + 0.45 * fn);
         float caps = smoothstep(0.68, 0.97, vCrest) * smoothstep(0.45, 0.9, vBand) * smoothstep(0.35, 0.7, fn) * 0.95;
         float wakes = smoothstep(0.35, 0.9, wake) * (0.5 + 0.5 * smoothstep(0.4, 0.8, fn2)) * 0.9;
         float foam = clamp(shoreFoam + caps + wakes, 0.0, 1.0);
         float cSh = cloudShadow(vWPos);
-        vec2 ruv = vRefl.xy / max(vRefl.w, 1e-4) + normal.xz * uDistort * (1.0 + 2.0 * vBand);
+        float dist = distance(vWPos, cameraPosition);
+        vec2 ruv = vRefl.xy / max(vRefl.w, 1e-4) + normal.xz * uDistort * (1.0 + 2.0 * vBand) * smoothstep(25.0, 220.0, dist);   // near objects keep their reflections attached
         ruv = clamp(ruv, 0.002, 0.998);
         vec3 refl = texture2D(tReflect, ruv).rgb;
         vec3 V = normalize(vViewPosition);
-        float fres = pow(1.0 - clamp(dot(V, normalize(nonPerturbedNormal + normal) * 0.5), 0.0, 1.0), 4.0);
-        float rf = (0.03 + 0.92 * fres) * smoothstep(0.0, 0.06, depth) * (1.0 - 0.92 * over);
+        float fres = pow(1.0 - clamp(dot(V, normalize(normalize(nonPerturbedNormal) + normalize(normal))), 0.0, 1.0), 5.0);
+        float rf = (0.02 + 0.98 * fres) * smoothstep(0.0, 0.06, depth) * (1.0 - 0.92 * over);
         vec3 body = reflectedLight.directDiffuse * cSh + reflectedLight.indirectDiffuse * (1.0 - 0.6 * over) + diffuseColor.rgb * 0.06 + reflectedLight.directSpecular * cSh * 0.6 + reflectedLight.indirectSpecular;
         vec3 col = mix(body, refl, rf);
         col = mix(col, vec3(0.93, 0.95, 0.93) * (0.45 + 0.55 * cSh), foam * 0.85);
@@ -1386,19 +1397,22 @@ function buildStation(k, legs, style) {
   } else if (style.roof === 'cone') {
     const cone = new THREE.ConeGeometry(deckR + 3, 4.8, 32, 1, true); cone.translate(0, DECK + roofH + 2.4, 0); B.add('roof', cone);
     const ring = new THREE.TorusGeometry(deckR + 3, 0.3, 8, 48); ring.rotateX(Math.PI / 2); ring.translate(0, DECK + roofH, 0); B.add('steel', ring);
-  } else {   // gable: ridge along x, slopes toward ±z
-    const halfW = deckR + 3, len = deckR * 2 + 6, pitch = 0.55, rise = halfW * pitch, slope = Math.hypot(halfW, rise), angR = Math.atan2(rise, halfW);
-    for (const sd of [-1, 1]) B.add('roof', place(box(len, 0.25, slope + 0.8), 0, DECK + roofH + rise / 2, sd * halfW / 2, sd * angR, 0, 0));
+  } else {   // gable: ridge along x, slopes toward ±z, columns standing on the deck inside its rim
+    const halfW = deckR - 0.5, len = deckR * 2 - 2, pitch = 0.55, rise = halfW * pitch, slope = Math.hypot(halfW, rise), angR = Math.atan2(rise, halfW);
+    for (const sd of [-1, 1]) B.add('roof', place(box(len, 0.25, slope + 0.6), 0, DECK + roofH + rise / 2, sd * halfW / 2, sd * angR, 0, 0));
     for (const sd of [-1, 1]) B.add('wood', tri([sd * len / 2, DECK + roofH, -halfW], [sd * len / 2, DECK + roofH, halfW], [sd * len / 2, DECK + roofH + rise, 0]));
     for (let i = -2; i <= 2; i++) B.add('wood', bar(i * len / 5, DECK + roofH, -halfW, i * len / 5, DECK + roofH + rise, 0, 0.18, 6));
     B.add('wood', bar(-len / 2, DECK + roofH + rise, 0, len / 2, DECK + roofH + rise, 0, 0.25, 6));
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) B.add('wood', cyl(0.3, 0.34, roofH, 10).translate(sx * (len / 2 - 1.5), DECK + roofH / 2, sz * (halfW - 1.5)));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) B.add('wood', cyl(0.3, 0.34, roofH, 10).translate(sx * (len / 2 - 2.5), DECK + roofH / 2, sz * (halfW - 4.5)));
   }
-  // the bullwheel: ring, spokes, hub, shaft to the deck and bearing frame
-  B.add('red', place(new THREE.TorusGeometry(WHEEL_R, 0.22, 10, 48), 0, WHEEL, 0, Math.PI / 2));
-  B.add('red', place(new THREE.TorusGeometry(WHEEL_R - 0.5, 0.12, 8, 48), 0, WHEEL, 0, Math.PI / 2));
-  for (let i = 0; i < 8; i++) { const a = TAU * i / 8; B.add('darkSteel', bar(Math.cos(a) * 0.6, WHEEL, Math.sin(a) * 0.6, Math.cos(a) * (WHEEL_R - 0.1), WHEEL, Math.sin(a) * (WHEEL_R - 0.1), 0.12, 6)); }
-  B.add('darkSteel', cyl(0.7, 0.7, 1.0, 16).translate(0, WHEEL, 0));
+  // the bullwheel: a separate turning group (ring, spokes, hub), with the shaft and bearing frame static
+  const wheelG = new THREE.Group(); wheelG.position.y = WHEEL; g.add(wheelG); const WB = new Builder();
+  WB.add('red', place(new THREE.TorusGeometry(WHEEL_R, 0.22, 10, 48), 0, 0, 0, Math.PI / 2));
+  WB.add('red', place(new THREE.TorusGeometry(WHEEL_R - 0.5, 0.12, 8, 48), 0, 0, 0, Math.PI / 2));
+  for (let i = 0; i < 8; i++) { const a = TAU * i / 8; WB.add('darkSteel', bar(Math.cos(a) * 0.6, 0, Math.sin(a) * 0.6, Math.cos(a) * (WHEEL_R - 0.1), 0, Math.sin(a) * (WHEEL_R - 0.1), 0.12, 6)); }
+  WB.add('darkSteel', cyl(0.7, 0.7, 1.0, 16));
+  WB.add('white', box(0.5, 0.08, 0.5).translate(0, 0.14, WHEEL_R - 0.3));          // a marked spoke, so the turn reads
+  WB.build(wheelG, MAT, true);
   B.add('steel', cyl(0.3, 0.3, WHEEL - DECK - 0.5, 10).translate(0, (WHEEL + DECK) / 2, 0));
   B.add('darkSteel', place(box(1.6, 1.4, 1.6), 0, DECK + 0.7, 0));
   for (const sd of [-1, 1]) B.add('steel', bar(sd * 3.0, DECK, 3.0, sd * 0.5, WHEEL + 1.6, 0.5, 0.16, 6));
@@ -1419,13 +1433,22 @@ function buildStation(k, legs, style) {
     const geo = figureGeo({ coat: coats[i % coats.length], pants: [0x2a2a2e, 0x3a3f52, 0x4a4036][i % 3], bag: i % 4 === 0 ? 0x5a3b2a : (i % 4 === 1 ? 0x2f4f3f : null) });
     const m = new THREE.Mesh(geo, FIG_MAT); m.position.set(q.x, DECK, q.z); m.rotation.y = Math.atan2(-d.x, -d.z) + (i % 3 - 1) * 0.4; m.castShadow = true; g.add(m); figs.push(m);
   }
-  return { group: g, rot, phi, deckR, figs };
+  return { group: g, rot, phi, deckR, figs, wheel: wheelG };
 }
 const STATIONS = {};
 function buildStations() {
   STATIONS.V = buildStation('V', [TOWERS[0], TOWERS[9]], { deckR: 16, armLen: 32, armW: 12, roofH: 11.5, nCol: 10, roof: 'dome', glaze: false, benches: 4, lamps: 6, people: 10, name: 'VALLEY STATION', sub: 'MERCADO · 1 134 m', concourse: [2, 40, -14, 32], roofMat: new THREE.MeshStandardMaterial({ color: 0x8a857e, roughness: 0.45, metalness: 0.35, side: THREE.DoubleSide, emissive: 0x3a3430 }) });
   STATIONS.S = buildStation('S', [TOWERS[3], TOWERS[2]], { deckR: 9, armLen: 16, armW: 8, roofH: 5.5, nCol: 6, roof: 'cone', glaze: false, benches: 2, lamps: 3, people: 4, name: 'SPUR STATION', sub: '1 270 m' });
   STATIONS.R = buildStation('R', [TOWERS[5], TOWERS[6]], { deckR: 13, armLen: 24, armW: 10, roofH: 6.5, nCol: 0, roof: 'gable', glaze: false, benches: 3, lamps: 4, people: 5, name: 'RIDGE STATION', sub: '1 486 m', roofMat: new THREE.MeshStandardMaterial({ color: 0x7a3b2e, roughness: 0.8 }) });
+  // the bullwheels turn with the rope: six whole turns per master loop, so the pose repeats at the seam
+  { const runs = []; let cur = null;
+    for (let i = 0; i < ROPE.n; i++) { if (ROPE.spanId[i] < 0) { if (!cur) { cur = []; runs.push(cur); } cur.push(ROPE.pts[i]); } else cur = null; }
+    ['V', 'S', 'R'].forEach((k, i) => { const run = runs[i], st = STATIONS[k], c0 = ROPE.wheel[i];
+      if (!run || run.length < 2) { st.spin = 0; return; }
+      const r1 = run[0], r2 = run[1], cross = (r1.x - c0.x) * (r2.z - c0.z) - (r1.z - c0.z) * (r2.x - c0.x);
+      st.spin = (cross > 0 ? -1 : 1) * 6 * TAU / LOOP;      // rotation about +y decreases the atan2(z, x) angle
+    });
+  }
   return STATIONS;
 }
 
@@ -1440,8 +1463,11 @@ function buildTowers() {
     const dir = a.clone().add(b).normalize(), tang = new THREE.Vector3(dir.z, 0, -dir.x);
     const g = new THREE.Group(); g.position.set(t.x, 0, t.z); world.add(g); const B = new Builder();
     let base = t.base;
-    if (t.base < WATER_Y) {   // caisson in the reservoir
-      B.add('concrete', cyl(4.2, 5.0, WATER_Y + 3.5 - t.base, 16).translate(0, (WATER_Y + 3.5 + t.base) / 2, 0)); base = WATER_Y + 3.5;
+    if (t.base < WATER_Y) {   // caisson standing in the reservoir: a wet band at the waterline and a ring of foam where the water laps it
+      B.add('concrete', cyl(3.4, 4.2, WATER_Y + 3.5 - t.base, 16).translate(0, (WATER_Y + 3.5 + t.base) / 2, 0)); base = WATER_Y + 3.5;
+      B.add('darkSteel', cyl(4.3, 4.3, 1.1, 16).translate(0, WATER_Y + 0.45, 0));
+      const foam = new THREE.Mesh(new THREE.RingGeometry(4.2, 9.5, 32), new THREE.MeshBasicMaterial({ map: TX.sprite, transparent: true, opacity: 0.8, color: 0xf0f4f2, depthWrite: false }));
+      foam.rotation.x = -Math.PI / 2; foam.position.y = WATER_Y + 0.12; foam.renderOrder = 3; g.add(foam);
     } else B.add('concrete', cyl(3.2, 4.2, 2.2, 12).translate(0, t.base + 0.4, 0)), base = t.base + 1.5;
     const h = t.top - 0.4 - base, wb = clamp(2 + h * 0.045, 2.4, 8.5), wt = 1.5;
     const corner = (f, sx, sz) => [sx * lerp(wb, wt, f), base + h * f, sz * lerp(wb, wt, f)];
@@ -1725,15 +1751,15 @@ function treeHeight(x, z, ground) {
   return h;
 }
 function planForest(nearCount, farCount) {
-  const x0 = -1150, x1 = 1050, z0 = -950, z1 = 1050; let tries = 0; const cands = [];
-  while (cands.length < nearCount + farCount * 2.2 && tries++ < 400000) {
+  const x0 = -2400, x1 = 2100, z0 = -2200, z1 = 2200; let tries = 0; const cands = [];
+  while (cands.length < nearCount + farCount * 2.2 && tries++ < 900000) {
     const x = rr(x0, x1), z = rr(z0, z1), d = shoreD(x, z); if (d < 2.5) continue;
     const g = terrainH(x, z), sl = terrainSlope(x, z, 3);
-    const fw = forestW(x, z, g, sl); if (fw < 0.05 || rnd() > fw * 1.15) continue;
+    const fw = forestW(x, z, g, sl); if (fw < 0.05 || rnd() > fw * 1.7) continue;
     const pd = pathDist(x, z), camLow = FLIGHT.lowNear(x, z, 16);
-    if (pd < 14 && camLow) continue;                                     // keep the low flight clear
-    if (pd < 9) continue;
-    const h = treeHeight(x, z, g); if (h < 3.2) continue;
+    if (pd < 24 && camLow) continue;                                     // keep the low flight clear
+    if (pd < 16) continue;
+    let h = treeHeight(x, z, g); if (pd < 55) h = Math.min(h, 4 + (pd - 16) * 0.42); if (h < 3.2) continue;   // low scrub beside the flight path
     const t = { x, z, y: g - 0.3, h, cr: h * rr(0.30, 0.40), ry: rr(0, TAU), tint: rr(-0.5, 0.5) * (1 - sstep(250, 400, g)), sway: 0.25 + 0.75 * exposure(x, z, g), expo: exposure(x, z, g) };
     // priority = closeness to where the viewer goes: the flight path, the stations and the market
     let pr = pd; for (const k of ['V', 'S', 'R']) pr = Math.min(pr, Math.hypot(x - ST[k].x, z - ST[k].z)); pr = Math.min(pr, Math.hypot(x - MARKET.x, z - MARKET.z));
@@ -1742,7 +1768,7 @@ function planForest(nearCount, farCount) {
   }
   // the nearest candidates become full-detail trees (shadows, textures); the rest become low-poly crowns
   cands.sort((a, b) => a[0] - b[0]);
-  for (let i = 0; i < cands.length; i++) { if (i < nearCount) TREES.push(cands[i][1]); else if (FARTREES.length < farCount && (i % 3 === 0 || cands[i][0] < 700)) FARTREES.push(cands[i][1]); }
+  for (let i = 0; i < cands.length; i++) { if (i < nearCount) TREES.push(cands[i][1]); else if (FARTREES.length < farCount && (i % 2 === 0 || cands[i][0] < 600)) FARTREES.push(cands[i][1]); }
   // canopies over the water: the overhang texture
   for (const [x, z, r, c] of TREE_OVER) addOverhang(x, z, r, c);
   // lone trees and groves dotted over the pasture: the hillside is uncovered, not empty
@@ -1750,7 +1776,7 @@ function planForest(nearCount, farCount) {
   while (tries2++ < 40000 && TREES.length < nearCount + 90) {
     const x = rr(380, 1000), z = rr(60, 800), d = shoreD(x, z); if (d < 6) continue;
     const g = terrainH(x, z); if (grassWarm(x, z, g) < 0.55 || forestW(x, z, g, 0) > 0.25) continue;
-    if (pathDist(x, z) < 16 || FLIGHT.lowNear(x, z, 18) || laneDist(x, z) < 7) continue;
+    if (pathDist(x, z) < 24 || FLIGHT.lowNear(x, z, 18) || laneDist(x, z) < 7) continue;
     let ok = true; for (const k of ['V', 'S', 'R']) if (Math.hypot(x - ST[k].x, z - ST[k].z) < ST[k].r + 24) ok = false;
     if (Math.hypot(x - MARKET.x, z - MARKET.z) < MARKET.r + 22) ok = false;
     if (!ok || rnd() < 0.55) continue;
@@ -1775,7 +1801,7 @@ function buildForest() {
   canopyMesh = instantiate(canopyGeo(), canMat, clist, [['aSway', 'sway'], ['aTint', 'tint']], true, false);
   const farMat = new THREE.MeshStandardMaterial({ map: TX.canopy.map, roughness: 0.95, color: 0xb8c8b0 }); windSway(farMat, 0.9, 1.3, 0.0, 'far');
   const flist = FARTREES.map(t => ({ x: t.x, y: t.y + t.h * 0.46, z: t.z, sx: t.cr, sy: t.cr * 1.15, sz: t.cr, ry: t.ry, sway: t.sway, tint: t.tint }));
-  farMesh = instantiate(new THREE.IcosahedronGeometry(1, 1), farMat, flist, [['aSway', 'sway'], ['aTint', 'tint']], false, true);
+  farMesh = instantiate(new THREE.IcosahedronGeometry(1, 0), farMat, flist, [['aSway', 'sway'], ['aTint', 'tint']], false, true);
   return { trunks: TREES.length, far: FARTREES.length };
 }
 
@@ -1881,7 +1907,7 @@ function cloudMaterial(opacity, litBoost, shaped) {
       ${FOG_PARS}
       void main() {
         vec4 tx = texture2D(tCloud, vUv);
-        float a = tx.a * uOpacity * vFade; if (a < 0.004) discard;
+        float a = tx.a * uOpacity * vFade * smoothstep(25.0, 130.0, distance(vW, cameraPosition)); if (a < 0.004) discard;   // thin out as the camera passes through
         vec3 col = tx.rgb * (0.74 + 0.28 * vUv.y + 0.16 * vUv.x) * uLit;
         gl_FragColor = vec4(mix(col, fogTint(vW), fogAmount(vW) * 0.85), a);
         #include <tonemapping_fragment>
@@ -1903,20 +1929,20 @@ function buildClouds() {
   const items = [];
   // the low bank around the spur: base ~120 m, tops just under the station deck; a gap of clear air east of the cabin's emergence
   const wx = WIND_DIR.x, wz = WIND_DIR.y, lx = -wz, lz = wx;
-  for (let lane = 0; lane < 64; lane++) {
-    const off = rr(-340, 340), hgt = rr(124, 148), w = rr(70, 150), h = rr(26, 48), jitter = rr(-20, 20);
+  for (let lane = 0; lane < 72; lane++) {
+    const off = rr(-340, 340), hgt = ST.S.padY + rr(-26, -2), w = rr(70, 150), h = rr(26, 48), jitter = rr(-20, 14);
     for (let j = -2; j <= 2; j++) {
       const s = j * CLOUD.P + jitter;
       items.push([ST.S.x + lx * off, hgt, ST.S.z + lz * off, w, h, s]);
     }
   }
-  cloudMesh = new THREE.Mesh(cloudGeometry(items), cloudMaterial(0.9, 1.0, true)); cloudMesh.frustumCulled = false; cloudMesh.renderOrder = 6; world.add(cloudMesh);
+  cloudMesh = new THREE.Mesh(cloudGeometry(items), cloudMaterial(0.55, 1.0, true)); cloudMesh.frustumCulled = false; cloudMesh.renderOrder = 6; world.add(cloudMesh);
   const far = [];
   for (let i = 0; i < 26; i++) { const a = rr(0, TAU), r = rr(1900, 2900); far.push([Math.cos(a) * r, rr(320, 520), Math.sin(a) * r, rr(380, 700), rr(90, 160), -1]); }
   const farMesh = new THREE.Mesh(cloudGeometry(far), cloudMaterial(0.85, 1.05)); farMesh.frustumCulled = false; farMesh.renderOrder = 4; world.add(farMesh);
   // mist over the far water, where the reservoir disappears into the ravines
   const mist = [];
-  for (let i = 0; i < 18; i++) mist.push([rr(-1400, -450), rr(8, 26), rr(-650, -150), rr(260, 420), rr(26, 50), -1]);
+  for (let i = 0; i < 22; i++) mist.push([rr(-1400, -450), rr(8, 26), rr(-650, -150), rr(260, 420), rr(26, 50), -1]);
   mistMesh = new THREE.Mesh(cloudGeometry(mist), cloudMaterial(0.22, 0.95)); mistMesh.frustumCulled = false; mistMesh.renderOrder = 5; world.add(mistMesh);
   return { bank: items.length, far: far.length, mist: mist.length };
 }
@@ -2009,7 +2035,7 @@ function updateBirds(t) {
 }
 
 // ===========================================================================
-//  SYSTEM — the 96 s master clock; the cabins on the haul rope; the rope
+//  SYSTEM — the 60 s master clock; the cabins on the haul rope; the rope
 //  mesh with its periodic sway; the ferry; the cinematic take on its closed
 //  path; Manual (camera stays on the safe path, drag looks, wheel / pinch
 //  sets the lens), Pause (holds the master clock), Reset View (restarts the
@@ -2101,6 +2127,7 @@ function applyLoopState(t) {
   skyU.uDrift.value.set(ph * 2.0, 0);
   CLOUD.U.uTime.value = t; CLOUD.U.uDrift.value = ph * CLOUD.P;
   updateCabins(t); updateWalkers(t); updateBirds(t); updateBoat(t);
+  for (const k of ['V', 'S', 'R']) STATIONS[k].wheel.rotation.y = STATIONS[k].spin * t;   // the bullwheels turn with the rope
 }
 function setCinematic(on) {
   cinematic = on; btnCine.classList.toggle('on', on); btnCine.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -2110,19 +2137,26 @@ function setPaused(on) { PAUSED = on; btnPause.classList.toggle('on', on); btnPa
 function resetView() { simTime = 0; setPaused(false); setCinematic(true); view.yaw = view.pitch = view.yawT = view.pitchT = 0; view.lens = view.lensT = 1; bump(); }
 function bump() { lastAct = performance.now(); ui.classList.remove('idle'); }
 
+const _focus = new THREE.Vector3(), _look = new THREE.Vector3(), _camE = new THREE.Euler();
+const lerpAngle = (a, b, t) => { let d = b - a; while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU; return a + d * t; };
 function updateCamera(dt) {
   const ph = wrapPhase(simTime), F = FLIGHT.sample(ph, FR);
   const k = 1 - Math.exp(-dt * (cinematic ? 1.4 : 9)), kl = 1 - Math.exp(-dt * 6);
   view.yaw += (view.yawT - view.yaw) * k; view.pitch += (view.pitchT - view.pitch) * k; view.lens += (view.lensT - view.lens) * kl;
-  _cfwd.copy(F.tg).normalize();
-  _cup.set(0, 1, 0).applyAxisAngle(_cfwd, F.roll);
-  _ctgt.copy(F.p).addScaledVector(_cfwd, 60).add(F.gaze);
-  camera.position.copy(F.p); camera.up.copy(_cup); camera.lookAt(_ctgt);
-  if (Math.abs(view.yaw) > 1e-6) camera.rotateY(view.yaw);
-  if (Math.abs(view.pitch) > 1e-6) camera.rotateX(view.pitch);
+  // level camera: the heading follows the path, the pitch follows the path's slope within limits, plus the keyed gaze,
+  // blended toward the haul rope so the cable and its cabins stay in frame; no roll, and never steeper than ~34°
+  const heading = Math.atan2(F.tg.x, F.tg.z);
+  const slopePitch = Math.asin(clamp(F.tg.y / Math.hypot(F.tg.x, F.tg.y, F.tg.z), -1, 1));
+  let yaw = Math.atan2(-F.tg.x, -F.tg.z) - F.gaze.x, pitch = clamp(slopePitch, -0.45, 0.45) + F.gaze.y;   // positive gaze yaw = turn right
+  FLIGHT.ropeFocus(F.p, heading, F.speed, _focus);
+  _look.subVectors(_focus, F.p); const fl = _look.length() || 1;
+  const w = F.gaze.z; yaw = lerpAngle(yaw, Math.atan2(-_look.x, -_look.z), w); pitch = lerp(pitch, Math.asin(clamp(_look.y / fl, -1, 1)), w);
+  pitch = clamp(pitch, -0.6, 0.6);
+  yaw += view.yaw; pitch = clamp(pitch + view.pitch, -0.75, 0.75);
+  camera.position.copy(F.p); _camE.set(pitch, yaw, 0, 'YXZ'); camera.quaternion.setFromEuler(_camE);
   camera.fov = F.fov * view.lens; camera.aspect = window.innerWidth / Math.max(1, window.innerHeight);
   camera.updateProjectionMatrix(); camera.updateMatrixWorld(true);
-  waterU.uDistort.value = 0.022 * (52 / camera.fov);
+  waterU.uDistort.value = 0.012 * (52 / camera.fov);
   skyMesh.position.copy(camera.position);
   // the shadow frustum follows a point ahead of the camera
   camera.getWorldDirection(_cfwd);
@@ -2179,19 +2213,20 @@ function updatePanel(F) {
 // ===========================================================================
 //  BUILD EVERYTHING
 // ===========================================================================
-const T0 = performance.now();
-buildTerrain(); buildRocks();
-buildStations(); buildTowers(); buildJetty(); buildLanes(); buildMarket();
-planForest(3000, 4200); buildForest(); finalizeOverhang(); waterU.tOver.value = overTex;
-planFerns(2200); buildFerns();
-planGrass(26000); buildGrass();
-buildWater();
-buildBoat(); buildRope();
-buildFlagpole(ST.R.x + 30 * Math.cos(2.2), ST.R.z + 30 * Math.sin(2.2), ST.R.padY + DECK_UP, 7, 1.0);
-buildFlagpole(ST.R.x + 34 * Math.cos(2.6), ST.R.z + 34 * Math.sin(2.6), ST.R.padY + DECK_UP, 7, 1.0);
-buildFlagpole(ST.R.x + 36 * Math.cos(3.0), ST.R.z + 36 * Math.sin(3.0), ST.R.padY + DECK_UP, 7, 1.0);
-buildFlagpole(ST.V.x + 24, ST.V.z + 20, ST.V.padY, 8, 0.45); buildFlagpole(ST.V.x + 30, ST.V.z + 12, ST.V.padY, 8, 0.45);
-buildFlagpole(ST.S.x - 14, ST.S.z - 4, ST.S.padY, 6, 0.7);
+const T0 = performance.now(); const STAGES = []; const stage = n => STAGES.push(n + ' ' + Math.round(performance.now() - T0) + 'ms');
+buildTerrain(); stage('terrain'); buildRocks(); stage('rocks');
+buildStations(); buildTowers(); buildJetty(); buildLanes(); buildMarket(); stage('structures');
+planForest(4500, 60000); stage('forest plan'); buildForest(); stage('forest build'); finalizeOverhang(); waterU.tOver.value = overTex;
+planFerns(2200); buildFerns(); stage('ferns');
+planGrass(26000); buildGrass(); stage('grass');
+buildWater(); stage('water');
+buildBoat(); buildRope(); stage('boat+rope');
+// flags stand on the stations' decks near their rims, or on the ground beside the spur station
+{ const Rf = STATIONS.R, cr = Math.cos(Rf.rot), sr = Math.sin(Rf.rot), W2R = (lx, lz) => [ST.R.x + lx * cr + lz * sr, ST.R.z - lx * sr + lz * cr];
+  for (const [lx, lz] of [[17, 6], [19, -3], [17, -9]]) { const [fx, fz] = W2R(lx, lz); buildFlagpole(fx, fz, terrainH(fx, fz) - 0.3, 7, 1.0); } }
+{ const Vf = STATIONS.V, cv = Math.cos(Vf.rot), sv = Math.sin(Vf.rot), W2V = (lx, lz) => [ST.V.x + lx * cv + lz * sv, ST.V.z - lx * sv + lz * cv];
+  for (const [lx, lz] of [[33, 25], [36, 13]]) { const [fx, fz] = W2V(lx, lz); buildFlagpole(fx, fz, ST.V.padY + DECK_UP, 8, 0.45); } }
+buildFlagpole(ST.S.x - 12, ST.S.z - 5, terrainH(ST.S.x - 12, ST.S.z - 5) - 0.2, 6, 0.7);
 for (const f of FLAGS) f.rotation.y = Math.atan2(WIND_DIR.x, WIND_DIR.y) + Math.PI / 2;
 buildCabins(); buildWalkers(); buildBirds(); buildClouds();
 const BUILD_MS = Math.round(performance.now() - T0);
@@ -2282,7 +2317,7 @@ const Audio = (() => {
 //  VERIFICATION API
 // ===========================================================================
 function snapshotState() {
-  return { cabins: Array.from(CABIN.mats), walkers: WALKER_ACTORS.map(a => { const w = a.walker; return [w.group.position.x, w.group.position.y, w.group.position.z, w.group.rotation.y, w.legs[0].hip.rotation.x, w.legs[1].knee.rotation.x, w.arms[0].sh.rotation.x, w.head.rotation.y]; }), birds: BIRD_ACTORS.map(a => [a.bird.group.position.x, a.bird.group.position.y, a.bird.group.position.z, a.bird.group.rotation.y, a.bird.wings[0].root.rotation.z, a.bird.wings[1].outer.rotation.z]), boat: boatGroup.matrixWorld.elements.slice(), wind, water: [waterU.uTime.value, waterU.uWind.value, waterU.uBandPos.value], cloud: CLOUD.U.uDrift.value, flags: FLAG_U.uWind.value };
+  return { cabins: Array.from(CABIN.mats), wheels: ['V', 'S', 'R'].map(k => STATIONS[k].wheel.rotation.y), walkers: WALKER_ACTORS.map(a => { const w = a.walker; return [w.group.position.x, w.group.position.y, w.group.position.z, w.group.rotation.y, w.legs[0].hip.rotation.x, w.legs[1].knee.rotation.x, w.arms[0].sh.rotation.x, w.head.rotation.y]; }), birds: BIRD_ACTORS.map(a => [a.bird.group.position.x, a.bird.group.position.y, a.bird.group.position.z, a.bird.group.rotation.y, a.bird.wings[0].root.rotation.z, a.bird.wings[1].outer.rotation.z]), boat: boatGroup.matrixWorld.elements.slice(), wind, water: [waterU.uTime.value, waterU.uWind.value, waterU.uBandPos.value], cloud: CLOUD.U.uDrift.value, flags: FLAG_U.uWind.value };
 }
 function seamCheck(p = 0.37) {
   const keep = simTime; simTime = p * LOOP; applyLoopState(simTime); boatGroup.updateMatrixWorld(true); const a = snapshotState();
@@ -2294,7 +2329,8 @@ function seamCheck(p = 0.37) {
   const nested = (x, y) => Math.max(...x.map((r, i) => arrDiff(r, y[i])));
   const modDiff = (x, y, m) => { const d = Math.abs((((x - y) % m) + m) % m); return Math.min(d, m - d); };
   const birdsDiff = Math.max(...a.birds.map((r, i) => { const q = b.birds[i]; return Math.max(Math.abs(r[0] - q[0]), Math.abs(r[1] - q[1]), Math.abs(r[2] - q[2]), modDiff(r[3], q[3], TAU), Math.abs(r[4] - q[4]), Math.abs(r[5] - q[5])); }));
-  return { phase: p, cabins: arrDiff(rolled, b.cabins), walkers: nested(a.walkers, b.walkers), birds: birdsDiff, boat: arrDiff(a.boat, b.boat), wind: Math.abs(a.wind - b.wind), waterTime: modDiff(a.water[0], b.water[0], LOOP), waterWind: Math.abs(a.water[1] - b.water[1]), waterBand: modDiff(a.water[2], b.water[2], BAND.x1 - BAND.x0), cloudDrift: modDiff(a.cloud, b.cloud, CLOUD.P) };
+  const wheelsDiff = Math.max(...a.wheels.map((v, i) => modDiff(v, b.wheels[i], TAU)));
+  return { phase: p, cabins: arrDiff(rolled, b.cabins), wheels: wheelsDiff, walkers: nested(a.walkers, b.walkers), birds: birdsDiff, boat: arrDiff(a.boat, b.boat), wind: Math.abs(a.wind - b.wind), waterTime: modDiff(a.water[0], b.water[0], LOOP), waterWind: Math.abs(a.water[1] - b.water[1]), waterBand: modDiff(a.water[2], b.water[2], BAND.x1 - BAND.x0), cloudDrift: modDiff(a.cloud, b.cloud, CLOUD.P) };
 }
 // the swept volume of every hung cabin over the loop against terrain, trees and towers
 function cabinClearance(samples = 40) {
@@ -2315,7 +2351,7 @@ function cabinClearance(samples = 40) {
 }
 // the camera's near-plane volume (at the widest lens) swept along the take against everything solid
 function cameraClearance(N = 3000) {
-  let mTerr = 1e9, aT = 0, mTree = 1e9, aTr = 0, mCab = 1e9, aC = 0, mRope = 1e9, aR = 0, mBld = 1e9, aB = 0, mAct = 1e9, aA = 0, mTower = 1e9, aTw = 0;
+  let mTerr = 1e9, aT = 0, mTree = 1e9, aTr = 0, mCab = 1e9, aC = 0, mRope = 1e9, aR = 0, mBld = 1e9, aB = 0, mAct = 1e9, aA = 0, mTower = 1e9, aTw = 0, worstSolid = null, worstTower = null, worstCabin = null;
   const F = {}, o = {}, v = new THREE.Vector3();
   const fovMax = 60 * 1.8 * DEG, rNear = camera.near * Math.tan(fovMax / 2) * 1.1;   // near-plane half-height at the widest lens, with margin
   const solids = [];   // vertical cylinders [cx, cz, r, y0, y1]: deck slabs, roofs, posts, tower heads
@@ -2335,15 +2371,15 @@ function cameraClearance(N = 3000) {
     let g = WATER_Y - MAX_ETA; for (const [dx, dz] of [[0, 0], [rNear, 0], [-rNear, 0], [0, rNear], [0, -rNear]]) { const x = P.x + dx, z = P.z + dz; if (shoreD(x, z) > 0) g = Math.max(g, terrainH(x, z)); }
     const cT = P.y - g - rNear; if (cT < mTerr) { mTerr = cT; aT = ph; }
     for (let j = 0; j < TREES.length; j++) { const tr = TREES[j]; const dx = tr.x - P.x, dz = tr.z - P.z; if (Math.abs(dx) > 14 || Math.abs(dz) > 14) continue; const dTrunk = Math.max(0, Math.hypot(dx, dz) - tr.h * 0.03) + Math.max(tr.y - P.y, P.y - (tr.y + tr.h), 0); const dCan = Math.hypot(dx, tr.y + tr.h * 0.62 - P.y, dz) - tr.cr * 0.95; const d = Math.min(dTrunk, dCan) - rNear; if (d < mTree) { mTree = d; aTr = ph; } }
-    for (let i = 0; i < CABIN_N; i++) { ROPE.cabin(i, t, o); const d = Math.hypot(o.p.x - P.x, o.p.y - HANGER - CABIN_H / 2 - P.y, o.p.z - P.z) - 2.3 - rNear; if (d < mCab) { mCab = d; aC = ph; } }
+    for (let i = 0; i < CABIN_N; i++) { ROPE.cabin(i, t, o); const d = Math.hypot(o.p.x - P.x, o.p.y - HANGER - CABIN_H / 2 - P.y, o.p.z - P.z) - 2.3 - rNear; if (d < mCab) { mCab = d; aC = ph; worstCabin = [i, +o.p.x.toFixed(1), +o.p.y.toFixed(1), +o.p.z.toFixed(1), +P.y.toFixed(1)]; } }
     for (let s = 0; s < ROPE.len; s += 5) { ROPE.locate(s, t, o); const d = Math.hypot(o.p.x - P.x, o.p.y - P.y, o.p.z - P.z) - 0.1 - rNear; if (d < mRope) { mRope = d; aR = ph; } }
-    for (const [sx, sz, r, y0, y1] of solids) { if (r === 0) continue; const dh = Math.hypot(sx - P.x, sz - P.z) - r, dy = Math.max(y0 - P.y, P.y - y1, 0); const d = Math.hypot(Math.max(dh, 0), dy) - rNear; if (d < mBld) { mBld = d; aB = ph; } }
-    for (const tw of TOWERS) { const h = tw.top - 0.4 - tw.base, halfW = clamp(2 + h * 0.045, 2.4, 8.5) * (tw.top - P.y) / h + 1.5 * (1 - (tw.top - P.y) / h); const dy = Math.max(tw.base - P.y, P.y - (tw.top + 3.5), 0); const d = Math.hypot(Math.max(Math.hypot(tw.x - P.x, tw.z - P.z) - Math.max(halfW, 1.5), 0), dy) - rNear; if (d < mTower) { mTower = d; aTw = ph; } }
+    for (const [sx, sz, r, y0, y1] of solids) { if (r === 0) continue; const dh = Math.hypot(sx - P.x, sz - P.z) - r, dy = Math.max(y0 - P.y, P.y - y1, 0); const d = Math.hypot(Math.max(dh, 0), dy) - rNear; if (d < mBld) { mBld = d; aB = ph; worstSolid = [sx, sz, r, y0, y1, +P.y.toFixed(1)]; } }
+    for (const tw of TOWERS) { const h = tw.top - 0.4 - tw.base, halfW = clamp(2 + h * 0.045, 2.4, 8.5) * (tw.top - P.y) / h + 1.5 * (1 - (tw.top - P.y) / h); const dy = Math.max(tw.base - P.y, P.y - (tw.top + 3.5), 0); const d = Math.hypot(Math.max(Math.hypot(tw.x - P.x, tw.z - P.z) - Math.max(halfW, 1.5), 0), dy) - rNear; if (d < mTower) { mTower = d; aTw = ph; worstTower = [tw.x, tw.z, tw.top, +P.y.toFixed(1), +halfW.toFixed(1), +dy.toFixed(1)]; } }
     for (const a of WALKER_ACTORS) { a.route.sample(t, o); const d = Math.hypot(o.p.x - P.x, terrainH(o.p.x, o.p.z) + 0.9 - P.y, o.p.z - P.z) - 0.5 - rNear; if (d < mAct) { mAct = d; aA = ph; } }
     for (const a of BIRD_ACTORS) { const s = BIRDS.sample(a.b, t, {}); const d = Math.hypot(s.p.x - P.x, s.p.y - P.y, s.p.z - P.z) - 0.9 - rNear; if (d < mAct) { mAct = d; aA = ph; } }
     { BOAT.sample(t, o); const d = Math.hypot(o.p.x - P.x, 0.8 - P.y, o.p.z - P.z) - 4 - rNear; if (d < mAct) { mAct = d; aA = ph; } }
   }
-  return { nearRadiusAtWidestLens: +rNear.toFixed(2), minTerrainWater: +mTerr.toFixed(2), atPhase: +aT.toFixed(3), minTrees: +mTree.toFixed(2), treeAt: +aTr.toFixed(3), minCabins: +mCab.toFixed(2), cabinAt: +aC.toFixed(3), minRope: +mRope.toFixed(2), ropeAt: +aR.toFixed(3), minStations: +mBld.toFixed(2), stationAt: +aB.toFixed(3), minTowers: +mTower.toFixed(2), towerAt: +aTw.toFixed(3), minActors: +mAct.toFixed(2), actorAt: +aA.toFixed(3) };
+  return { nearRadiusAtWidestLens: +rNear.toFixed(2), minTerrainWater: +mTerr.toFixed(2), atPhase: +aT.toFixed(3), minTrees: +mTree.toFixed(2), treeAt: +aTr.toFixed(3), minCabins: +mCab.toFixed(2), cabinAt: +aC.toFixed(3), minRope: +mRope.toFixed(2), ropeAt: +aR.toFixed(3), minStations: +mBld.toFixed(2), stationAt: +aB.toFixed(3), minTowers: +mTower.toFixed(2), towerAt: +aTw.toFixed(3), minActors: +mAct.toFixed(2), actorAt: +aA.toFixed(3), worstSolid, worstTower, worstCabin };
 }
 // each walker's full swept volume (body + carried gear) between waypoints, including the last-to-first segment
 function walkerClearance(N = 480) {
@@ -2415,6 +2451,7 @@ window.__cable = {
       trees: TREES.length + FARTREES.length, ferns: FERNS.length, grass: GRASS.length, cabins: CABIN_N, ropeLength: +ROPE.len.toFixed(0), cabinSpeed: +ROPE.V0.toFixed(2), view: { ...view } };
   },
 };
+console.log('[cable] stages: ' + STAGES.join(' | '));
 console.log('[cable] scene built in ' + BUILD_MS + ' ms: ' + JSON.stringify(window.__cable.stats()));
 frameLoop();
 
