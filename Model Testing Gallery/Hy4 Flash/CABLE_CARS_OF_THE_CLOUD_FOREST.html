@@ -211,7 +211,7 @@ const skyMat = new THREE.ShaderMaterial({
   }`
 });
 const sky = new THREE.Mesh(new THREE.SphereGeometry(4500,48,28), skyMat);
-sky.frustumCulled=false; scene.add(sky); CF.skyMat=skyMat;
+sky.frustumCulled=false; scene.add(sky); CF.skyMat=skyMat; CF.sky=sky;
 
 /* ---------- lights ---------- */
 const sun = new THREE.DirectionalLight(0xffd9a4, 1.55);
@@ -536,21 +536,23 @@ function distToFlightXZ(x,z){
 }
 const trees=[];
 let tries=0;
-while(trees.length<15500 && tries<190000){
+while(trees.length<139500 && tries<2200000){
   tries++;
-  const local=rnd()<.62;
-  const x=local? (rnd()*2-1)*1150+30 : (rnd()*2-1)*2320;
-  const z=local? (rnd()*2-1)*1150+200 : (rnd()*2-1)*2320;
-  const r=Math.hypot(x,z); if(r>2400)continue;
+  const local=rnd()<.12;
+  const x=local? (rnd()*2-1)*1150+30 : (rnd()*2-1)*2590;
+  const z=local? (rnd()*2-1)*1150+200 : (rnd()*2-1)*2590;
+  const r=Math.hypot(x,z);
   const h=H(x,z), sl=CF.slopeAt(x,z);
-  if(h<2.2||h>415||sl>1.35)continue;
+  if(h<1.8||h>425||sl>1.7)continue;
   let bad=false;
   for(const s of [A,B,C]) if(Math.hypot(x-s.x,z-s.z)<s.r*1.35){bad=true;break;}
   if(bad)continue;
   if(Math.hypot(x-20,z+20)<70)continue;
   if(distToCableXZ(x,z)<24)continue;
   if(distToFlightXZ(x,z)<19)continue;
-  trees.push({x:x,z:z,h:h,near:r<1150,broad:rnd()<.30,sc:.58+rnd()*.72,rot:rnd()*6.283});
+  const far=r>1500;
+  trees.push({x:x,z:z,h:h,near:r<1150,broad:rnd()<.30,
+    sc:far?(.82+rnd()*.72):(.52+rnd()*.62),rot:rnd()*6.283});
 }
 const dummy=new THREE.Object3D(), tint=new THREE.Color();
 function makeForest(list,geo,mat,broad){
@@ -576,9 +578,9 @@ function makeForest(list,geo,mat,broad){
 const nearCon=trees.filter(t=>t.near&&!t.broad), farCon=trees.filter(t=>!t.near&&!t.broad);
 const nearBro=trees.filter(t=>t.near&&t.broad), farBro=trees.filter(t=>!t.near&&t.broad);
 makeForest(nearCon,coniferGeo(),CF.mat(0xffffff,.95,0,{flatShading:true}),false);
-makeForest(farCon,new THREE.ConeGeometry(4.6,17,6).translate(0,11,0),CF.mat(0xffffff,.95,0,{flatShading:true}),false);
+makeForest(farCon,new THREE.ConeGeometry(4.6,17,3).translate(0,11,0),CF.mat(0xffffff,.95,0,{flatShading:true}),false);
 makeForest(nearBro,broadGeo(),CF.mat(0xffffff,.95,0,{flatShading:true}),true);
-makeForest(farBro,new THREE.IcosahedronGeometry(5,0).translate(0,11,0),CF.mat(0xffffff,.95,0,{flatShading:true}),true);
+makeForest(farBro,new THREE.OctahedronGeometry(5,0).translate(0,11,0),CF.mat(0xffffff,.95,0,{flatShading:true}),true);
 CF.trees=trees;
 
 /* ---------- tree ferns at the water's edge (sheltered sway) ---------- */
@@ -960,17 +962,17 @@ let returnBlend=0;
 
 /* ---------- authored closed flight path ---------- */
 const P=[
-  V(  30, 72, 115), V(  75, 22, 300), V(  90, 14, 480),
-  V( -40, 14, 640), V( 150, 95, 830), V( 390,235, 650),
-  V( 535,275, 430), V( 230,290, 360), V(-250,255, 640),
-  V(-500,240, 690), V(-520,185, 430), V(-280,110, 200),
-  V( -90, 85,  95)
+  V(  30, 90, 115), V(  75,130, 300), V(  90,155, 480),
+  V( -40,155, 640), V( 150,170, 830), V( 390,260, 650),
+  V( 535,310, 430), V( 230,330, 360), V(-250,280, 640),
+  V(-500,270, 690), V(-520,220, 430), V(-280,135, 200),
+  V( -90,100,  95)
 ];
 const K=[
-  V(  0, 82,   0), V( 260,110, 290), V( 120, 25, 700),
-  V( 250,160, 650), V(400,190, 600), V( 520,240, 380),
-  V( 350,190, 240), V(-300,180, 520), V(-600,175, 520),
-  V(-420,120, 300), V(-120, 85,  90), V(  50, 58,  25),
+  V(  0, 82,   0), V( 120,110,  90), V( 300,155, 330),
+  V( 480,210, 440), V( 520,240, 380), V( 350,190, 240),
+  V(-300,180, 520), V(-600,175, 520), V(-420,120, 300),
+  V(-200,105, 170), V(-120, 85,  90), V(  50, 58,  25),
   V(   0, 82,   0)
 ];
 const posCurve=new THREE.CatmullRomCurve3(P,true,'catmullrom',.5);
@@ -978,12 +980,18 @@ const lookCurve=new THREE.CatmullRomCurve3(K,true,'catmullrom',.5);
 CF.posCurve=posCurve; CF.lookCurve=lookCurve;
 const pathLen=posCurve.getLength();
 
-function lensAt(u){ return 30+8*Math.sin(TAU*u+2.1)+3*Math.sin(TAU*3*u+.4); }
+function lensAt(u){
+  const wide=10*Math.exp(-Math.pow((u-.12)/.085,2));   // wider while skimming the reservoir
+  return 32+6*Math.sin(TAU*u+2.1)+3*Math.sin(TAU*3*u+.4)-wide;
+}
 function fovAt(lens){ return 2*Math.atan(12/lens)*180/Math.PI; }
 function cameraAt(t,useOffsets){
   const u=((t%T)+T)%T/T;
   const p=posCurve.getPoint(u);
   const k=lookCurve.getPoint(u);   // authored look-ahead follows the rope between stations
+  // keep the horizon level: never tilt more than 12° up or down to a target
+  const hd=Math.hypot(k.x-p.x,k.z-p.z)||1, lim=hd*0.2126;
+  k.y=p.y+clamp(k.y-p.y,-lim,lim);
   const f=k.clone().sub(p).normalize();
   const up=V(0,1,0);                    // camera stays level on every segment
   const bank=0;
@@ -1020,6 +1028,7 @@ function frame(){
   CF.updateWater(simTime);
   CF.updateActors(simTime);
   const s=applyCamera(simTime);
+  CF.sky.position.copy(cam.position);       // sky dome always surrounds the camera
   CF.sun.position.copy(CF.sunDir).multiplyScalar(1300).add(V(s.p.x*.18,0,s.p.z*.18));
   CF.sun.target.position.set(s.p.x*.18,30,s.p.z*.18);
   CF.renderer.render(S,cam);

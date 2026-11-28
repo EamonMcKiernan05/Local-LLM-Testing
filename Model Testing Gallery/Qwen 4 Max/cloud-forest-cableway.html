@@ -803,8 +803,8 @@ function updateReflection() {
   water.visible = true;
 }
 function resizeReflection() {
-  const w = Math.min(280, Math.floor(window.innerWidth * renderer.getPixelRatio() * 0.4));
-  const h = Math.min(280, Math.floor(window.innerHeight * renderer.getPixelRatio() * 0.4));
+  const w = Math.min(220, Math.floor(window.innerWidth * renderer.getPixelRatio() * 0.35));
+  const h = Math.min(220, Math.floor(window.innerHeight * renderer.getPixelRatio() * 0.35));
   reflRT.setSize(Math.max(256, w), Math.max(256, h));
 }
 resizeReflection();
@@ -1029,7 +1029,7 @@ function coniferGeo() {
   parts.push(paintGeo(trunk, 0x4a3a28));
   const tiers = [[2.8, 5.4, 4.0], [2.2, 4.8, 7.0], [1.5, 4.2, 10.0], [0.8, 2.6, 12.4]];
   for (const [r, h, y] of tiers) {
-    const cone = new THREE.ConeGeometry(r, h, 5);
+    const cone = new THREE.ConeGeometry(r, h, 4);
     cone.translate(0, y, 0);
     const g = paintGeo(cone, 0x24401f);
     const p = g.attributes.position, c = g.attributes.color;
@@ -1104,7 +1104,7 @@ const treeSpots = { conifer: [], broad: [] };
   let tries = 0;
   // extremely dense cloud forest, right up to the mountain tops;
   // sparse at the water's edge, thickening inland / uphill
-  while (tries++ < 150000 && treeSpots.conifer.length + treeSpots.broad.length < 7500) {
+  while (tries++ < 240000 && treeSpots.conifer.length + treeSpots.broad.length < 10500) {
     const x = rr(-640, 640), z = rr(-760, 540);
     const h = groundH(x, z);
     if (h < 0.8 || h > 210) continue;
@@ -1163,7 +1163,7 @@ plantTrees(treeSpots.broad, broadleafGeo(), treeMatBroad);
 {
   const spots = [];
   let tries = 0;
-  while (tries++ < 22000 && spots.length < 3600) {
+  while (tries++ < 30000 && spots.length < 4800) {
     const a = rr(0, TAU), r = rr(560, 2100);
     const x = Math.cos(a) * r, z = Math.sin(a) * r - 100;
     const h = groundH(x, z);
@@ -1334,28 +1334,16 @@ texShrub.wrapS = texShrub.wrapT = THREE.ClampToEdgeWrapping;
 {
   const spots = [];
   let tries = 0;
-  while (tries++ < 9000 && spots.length < 1500) {
-    const x = rr(-300, 300), z = rr(-320, 260);
+  while (tries++ < 32000 && spots.length < 4500) {
+    const x = rr(-560, 560), z = rr(-560, 460);
     const h = groundH(x, z);
-    if (h < 0.6 || h > 95) continue;
-    // bias toward the flight corridor and the water's edge
-    let nearPath = false;
-    for (let i = 0; i < flightSamples.length; i += 3) {
-      const p = flightSamples[i];
-      if ((p.x - x) * (p.x - x) + (p.z - z) * (p.z - z) < 70 * 70) { nearPath = true; break; }
-    }
-    let nearWater = false;
-    for (let k = 0; k < 5; k++) {
-      const a = rr(0, TAU), d = rr(3, 14);
-      if (groundH(x + Math.cos(a) * d, z + Math.sin(a) * d) < -0.3) { nearWater = true; break; }
-    }
-    if (!nearPath && !nearWater && rng() < 0.7) continue;
+    if (h < 0.6 || h > 130) continue;
     if (nearStation(x, z, 3) || inConcourse(x, z)) continue;
-    spots.push({ x, z, h, scale: rr(0.7, 2.0), rot: rr(0, TAU) });
+    spots.push({ x, z, h, scale: rr(0.7, 2.2), rot: rr(0, TAU) });
   }
   const cards = [];
-  for (let k = 0; k < 3; k++) {
-    const p = new THREE.PlaneGeometry(1.5, 1.1); p.translate(0, 0.5, 0); p.rotateY(k * Math.PI / 3);
+  for (let k = 0; k < 2; k++) {
+    const p = new THREE.PlaneGeometry(1.6, 1.2); p.translate(0, 0.55, 0); p.rotateY(k * Math.PI / 2);
     cards.push(p);
   }
   const geo = mergeGeoms(cards);
@@ -1399,16 +1387,16 @@ texLongGrass.wrapS = texLongGrass.wrapT = THREE.ClampToEdgeWrapping;
 {
   const spots = [];
   let tries = 0;
-  while (tries++ < 40000 && spots.length < 9000) {
-    const x = rr(-560, 560), z = rr(-560, 460);
+  while (tries++ < 70000 && spots.length < 15000) {
+    const x = rr(-600, 600), z = rr(-620, 500);
     const h = groundH(x, z);
-    if (h < 0.5 || h > 120) continue;
+    if (h < 0.5 || h > 150) continue;
     if (inConcourse(x, z) && Math.abs(x) < 27 && z < 188) continue;
-    spots.push({ x, z, h, scale: rr(0.8, 2.2), rot: rr(0, TAU) });
+    spots.push({ x, z, h, scale: rr(0.8, 2.4), rot: rr(0, TAU) });
   }
   const cards = [];
-  for (let k = 0; k < 3; k++) {
-    const p = new THREE.PlaneGeometry(1.3, 1.5); p.translate(0, 0.72, 0); p.rotateY(k * Math.PI / 3);
+  for (let k = 0; k < 2; k++) {
+    const p = new THREE.PlaneGeometry(1.4, 1.6); p.translate(0, 0.78, 0); p.rotateY(k * Math.PI / 2);
     cards.push(p);
   }
   const geo = mergeGeoms(cards);
@@ -1685,64 +1673,10 @@ const stationA = makeStation('A', 22, 12);
 const stationB = makeStation('B', 20, 12);
 const stationC = makeStation('C', 15, 9);
 
-// ---- market concourse (south of station A) ----
+// ---- market clearing (south of station A) ----
+// The artificial platform and its floating stalls were removed; the porter and
+// vendor now walk a natural grass terrace. No stall solids remain.
 const marketSolids = [];
-{
-  const grp = new THREE.Group();
-  grp.position.set(0, ST.A.pad, 0);
-  scene.add(grp);
-  // (no artificial slab — the market sits on a natural grass clearing)
-  // crates + sacks clustered beside stalls (clear of the walking circuits)
-  const stallPos0 = [[-22, 158], [-11, 172], [12, 170], [23, 157], [0, 184]];
-  for (const [sx, sz] of stallPos0) {
-    for (let k = 0; k < 3; k++) {
-      const cx = sx + rr(-2.6, 2.6), cz = sz + rr(-1.8, 1.8);
-      const crate = new THREE.Mesh(new THREE.BoxGeometry(rr(0.45, 0.7), rr(0.35, 0.6), rr(0.45, 0.7)), matWoodDark);
-      crate.position.set(cx, 0.35, cz - ST.A.z);
-      crate.rotation.y = rr(0, TAU);
-      crate.castShadow = true; crate.receiveShadow = true;
-      grp.add(crate);
-    }
-  }
-  // stalls
-  const stallPos = [[-22, 158], [-11, 172], [12, 170], [23, 157], [0, 184]];
-  const canopyMat = new THREE.MeshStandardMaterial({ map: texStripes, roughness: 0.85, side: THREE.DoubleSide });
-  for (const [sx, sz] of stallPos) {
-    const stall = new THREE.Group();
-    stall.position.set(sx, 0, sz - ST.A.z);
-    stall.rotation.y = rr(-0.3, 0.3);
-    addBox(stall, 3.4, 1.0, 1.6, 0, 0.6, 0, matWood, { solid: false });
-    for (const px of [-1.6, 1.6]) for (const pz of [-0.7, 0.7])
-      addBox(stall, 0.12, 2.5, 0.12, px, 1.35, pz, matWoodDark);
-    const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 2.4), canopyMat);
-    canopy.position.set(0, 2.65, 0);
-    canopy.rotation.z = 0.09;
-    canopy.castShadow = true;
-    stall.add(canopy);
-    // goods: crates + produce spheres
-    for (let c = 0; c < 3; c++) {
-      addBox(stall, 0.55, 0.4, 0.55, -1.1 + c * 1.0, 1.32, rr(-0.3, 0.3), matWoodDark);
-      const produce = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 0),
-        new THREE.MeshStandardMaterial({ color: [0xd8a030, 0xa83828, 0x6a8a30][c], roughness: 0.7 }));
-      produce.position.set(-1.1 + c * 1.0, 1.62, 0);
-      stall.add(produce);
-    }
-    grp.add(stall);
-    stall.updateMatrixWorld(true);
-    marketSolids.push(new THREE.Box3(
-      new THREE.Vector3(sx - 2.2, ST.A.pad, sz - 1.4),
-      new THREE.Vector3(sx + 2.2, ST.A.pad + 2.8, sz + 1.4)));
-  }
-  // barrels and sacks near the boarding approach
-  for (let i = 0; i < 6; i++) {
-    const bx = rr(-26, 26), bz = rr(146, 188);
-    if (Math.abs(bx) < 5 && bz < 156) continue;
-    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.36, 0.95, 10), matWoodDark);
-    barrel.position.set(bx, 0.62, bz - ST.A.z);
-    barrel.castShadow = true;
-    grp.add(barrel);
-  }
-}
 
 // ---- cabins on the belt ----
 const CABIN_N = 10;
